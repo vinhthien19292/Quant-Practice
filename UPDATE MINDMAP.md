@@ -1,6 +1,8 @@
-# Update Workflow — Quant-Practice Atlas
+# Update Mindmap — Code & Content Sync
 
 **Purpose**: Document the sync pipeline between (a) Claude chat changes, (b) local OneDrive folder, (c) GitHub repo, (d) live GitHub Pages, (e) Tab S PWA. Read this before making any change if you're rusty on the workflow.
+
+**Companion doc**: `UPDATE PROGRESS.md` covers learning progress (mastery marks) sync — a separate dimension from code sync.
 
 ---
 
@@ -109,21 +111,25 @@ Total time: ~2 minutes end-to-end (30 sec push + 1-2 min Pages deploy).
 2. Paste this bootstrap prompt:
 
    ```
-   Read D:\OneDrive\1. Quant\Quant-Practice\PROCESS.md and
-   D:\OneDrive\1. Quant\Quant-Practice\ROADMAP.md to understand
-   the atlas project. My current progress export is attached.
+   Read D:\OneDrive\1. Quant\Quant-Practice\UPDATE MINDMAP.md and
+   D:\OneDrive\1. Quant\Quant-Practice\UPDATE PROGRESS.md to
+   understand the atlas project's code sync and progress sync workflows.
+   Also read ROADMAP.md for curriculum structure.
 
-   Today I need to: [describe task]
+   Today I want to: [describe task]
 
-   Rules:
+   Standing rules (also in the docs):
    - Content in English, chat with me in Vietnamese
    - Rigor: MFE-level with proofs + intuition, not high-school VN style
-   - Concept IDs are stable forever, never rename
-   - Never touch *.notes.md files
+   - Concept IDs stable forever, never rename existing IDs
+   - Never touch *.notes.md files, backup/, Notebooks/, PDF/, Data/, References/
    - Don't modify D:\OneDrive\1. Quant\World Quant - Master of Financial Engineering
+   - After ANY build/edit, remind me to (1) commit+push code via GitHub Desktop,
+     (2) export progress JSON if session was long, (3) update the UPDATE *.md docs
+     if workflow changed
    ```
 
-3. Attach latest progress JSON from `backup/` folder (optional — helps Claude adjust plan)
+3. Attach latest progress JSON from `backup/` folder (optional — helps Claude see actual mastery state)
 
 ---
 
@@ -235,6 +241,24 @@ You have 3 independent backups now:
 3. **Local disk** — your working copy on the PC
 
 Lose any ONE, the others survive. Belt-and-suspenders.
+
+---
+
+## Standing rules for Claude
+
+These rules apply in ANY chat working on this project.
+
+1. **Language**: content in English, chat in Vietnamese
+2. **Rigor level**: MFE-textbook (proofs + intuition + worked examples), not high-school Vietnamese style
+3. **Concept IDs**: NEVER rename existing IDs. Adding new is fine.
+4. **Personal files**: NEVER touch `*.notes.md`, `backup/`, `Notebooks/`, `PDF/`, `Data/`, `References/`
+5. **Other folders**: NEVER modify `D:\OneDrive\1. Quant\World Quant - Master of Financial Engineering`
+6. **Post-build reminder** (MANDATORY): after ANY file edit/creation, remind user to:
+   - Commit + Push via GitHub Desktop (code sync)
+   - Export progress JSON if session was long (progress sync)
+   - Update `UPDATE MINDMAP.md` or `UPDATE PROGRESS.md` if workflow changed
+7. **Token discipline**: batch related changes into single messages, avoid ping-pong for small fixes
+8. **Verify before claim**: don't say "done" without checking the file actually saved
 
 ---
 
