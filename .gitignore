@@ -5,6 +5,18 @@ PDF/
 *.notes.md
 *.log
 
+# Data + reference materials — NEVER commit (copyright + privacy)
+Data/
+References/
+*.pdf
+*.epub
+*.mobi
+*.djvu
+*.csv
+*.xlsx
+*.xls
+*.parquet
+
 # Local Python caches
 __pycache__/
 *.pyc
