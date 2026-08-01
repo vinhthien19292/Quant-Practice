@@ -1,0 +1,21 @@
+# Personal progress & notes — never sync to GitHub
+backup/
+Notebooks/
+PDF/
+*.notes.md
+*.log
+
+# Local Python caches
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# OneDrive/editor temp files
+*.tmp
+~$*
+.vscode/

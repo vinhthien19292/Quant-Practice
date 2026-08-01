@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Limits &amp; Continuity — Calculus/Foundations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  var ASSET_ROOT = '../assets/';
+  var CDN = {
+    mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js',
+    fonts: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap'
+  };
+  window.MathJax = {
+    tex: {inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']]},
+    svg: {fontCache: 'global', scale: 1, minScale: 0.5},
+    chtml: {scale: 1, minScale: 0.5},
+    options: {enableMenu: false}
+  };
+  function loadWithFallback(tagName, attrs, cdnUrl) {
+    var el = document.createElement(tagName);
+    Object.keys(attrs).forEach(function(k) { el.setAttribute(k, attrs[k]); });
+    el.onerror = function() {
+      var fb = document.createElement(tagName);
+      Object.keys(attrs).forEach(function(k) {
+        if (k === 'src' || k === 'href') fb.setAttribute(k, cdnUrl);
+        else fb.setAttribute(k, attrs[k]);
+      });
+      document.head.appendChild(fb);
+    };
+    document.head.appendChild(el);
+  }
+  loadWithFallback('link', {rel: 'stylesheet', href: ASSET_ROOT + 'fonts/fonts.css'}, CDN.fonts);
+  loadWithFallback('script', {src: ASSET_ROOT + 'mathjax/tex-mml-svg.js'}, CDN.mathjax);
+</script>
+<style>
+  :root {
+    --bg: #1a1510; --bg-soft: #221c15; --bg-card: #2a2218;
+    --text: #ede4d3; --text-muted: #a89e8b; --text-dim: #6b6152;
+    --accent: #e5a54e; --accent-soft: #b8823d;
+    --green: #86c084; --purple: #b8a4de; --blue: #8fb5e0; --pink: #e0a4c4;
+    --border: #3a2f22;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.7; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .breadcrumb { font-size: 0.9rem; color: var(--accent); margin-bottom: 1.5rem; }
+  .breadcrumb .sep { color: var(--text-dim); margin: 0 0.4rem; }
+  .breadcrumb .current { color: var(--text-muted); }
+  .meta { font-size: 0.75rem; color: var(--green); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; font-weight: 500; }
+  .meta .dot { color: var(--text-dim); margin: 0 0.5rem; }
+  .meta .status { color: var(--text-dim); }
+  h1.lesson-title { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 3.5rem; line-height: 1.1; margin: 0 0 0.75rem; color: var(--text); }
+  @media (max-width: 640px) { h1.lesson-title { font-size: 2.25rem; } }
+  .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .progress-dots { display: inline-flex; gap: 6px; margin-left: 0.5rem; vertical-align: middle; }
+  .progress-dots .dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text-dim); }
+  .progress-dots .dot.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(229, 165, 78, 0.15); }
+  .progress-dots .dot.done { background: var(--green); border-color: var(--green); }
+  .tabs { display: flex; gap: 0; margin: 2.5rem 0 1.5rem; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 1rem 1.25rem; font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 400; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-btn .count { background: var(--bg-card); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tab-btn.active .count { background: var(--accent); color: var(--bg); }
+  .features { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
+  .features .label { color: var(--text-dim); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; margin-right: 0.5rem; }
+  .feature-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.85rem; color: var(--text-muted); }
+  .outline-box { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
+  .outline-box .outline-title { color: var(--accent); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; font-weight: 500; }
+  .outline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 2rem; }
+  @media (max-width: 640px) { .outline-grid { grid-template-columns: 1fr; } }
+  .outline-item { display: flex; gap: 12px; padding: 6px 10px; border-radius: 6px; color: var(--text); text-decoration: none; align-items: baseline; font-size: 0.95rem; }
+  .outline-item:hover { background: var(--bg-card); text-decoration: none; }
+  .outline-item .num { color: var(--text-dim); font-family: 'Playfair Display', serif; font-size: 1rem; min-width: 14px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  section { margin: 3rem 0; scroll-margin-top: 20px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--text); margin: 2rem 0 1rem; }
+  h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 0.75rem; }
+  p { margin: 0.85rem 0; }
+  .box { padding: 1.2rem 1.4rem; margin: 1.25rem 0; border-radius: 8px; border-left: 3px solid; }
+  .box-thm { background: rgba(184, 164, 222, 0.06); border-color: var(--purple); }
+  .box-def { background: rgba(143, 181, 224, 0.06); border-color: var(--blue); }
+  .box-proof { background: rgba(224, 164, 196, 0.06); border-color: var(--pink); }
+  .box-example { background: rgba(134, 192, 132, 0.06); border-color: var(--green); }
+  .box-warning { background: rgba(229, 165, 78, 0.08); border-color: var(--accent); }
+  .box .box-title { font-family: 'Playfair Display', serif; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; }
+  .box-thm .box-title { color: var(--purple); }
+  .box-def .box-title { color: var(--blue); }
+  .box-proof .box-title { color: var(--pink); }
+  .box-example .box-title { color: var(--green); }
+  .box-warning .box-title { color: var(--accent); }
+  .box-lo { background: rgba(229, 165, 78, 0.06); border-color: var(--accent); }
+  .box-lo .box-title { color: var(--accent); }
+  .lo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 2rem; margin-top: 0.75rem; }
+  @media (max-width: 640px) { .lo-grid { grid-template-columns: 1fr; } }
+  .lo-grid h4 { font-family: 'Playfair Display', serif; font-size: 0.8rem; color: var(--accent); margin: 0 0 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  .lo-grid ul { padding-left: 1.25rem; margin: 0; font-size: 0.88rem; line-height: 1.55; }
+  .lo-grid li { margin: 4px 0; }
+  .step { padding: 8px 14px; margin: 6px 0; background: var(--bg-card); border-radius: 6px; border-left: 2px solid var(--text-dim); }
+  .step .step-num { display: inline-block; width: 22px; height: 22px; background: var(--pink); color: var(--bg); text-align: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; margin-right: 8px; line-height: 22px; }
+  table.st { border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; width: 100%; }
+  table.st th, table.st td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.st th { color: var(--accent); font-weight: 600; letter-spacing: 0.05em; font-size: 0.8rem; text-transform: uppercase; }
+  code { background: var(--bg-card); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.9em; color: var(--accent); }
+  .interactive { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 640px) { .slider-row { grid-template-columns: 1fr; } }
+  .slider-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .slider-value { font-family: 'JetBrains Mono', Consolas, monospace; background: var(--bg-card); padding: 2px 8px; border-radius: 4px; color: var(--accent); font-size: 0.85rem; }
+  .diagram-single { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin: 1.25rem 0; text-align: center; }
+  .diagram-single svg { max-width: 600px; width: 100%; height: auto; }
+  .diagram-single .diag-caption { color: var(--text-muted); font-size: 0.85rem; font-style: italic; margin-top: 8px; }
+  .example-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .example-card h3 { margin-top: 0; }
+  .reveal-btn { background: var(--accent); color: var(--bg); border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
+  .reveal-btn:hover { background: var(--accent-soft); }
+  .solution { display: none; margin-top: 1rem; padding: 1rem 1.25rem; background: rgba(134, 192, 132, 0.06); border-left: 3px solid var(--green); border-radius: 6px; }
+  .example-card.open .solution { display: block; }
+  .quiz-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin: 1rem 0; }
+  .quiz-item .q-num { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .quiz-item .q-question { margin-bottom: 1rem; font-size: 1.05rem; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; }
+  .quiz-opt { background: var(--bg-card); border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px; cursor: pointer; color: var(--text); font-size: 0.95rem; text-align: left; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--green); background: rgba(134, 192, 132, 0.12); }
+  .quiz-opt.wrong { border-color: #d97056; background: rgba(217, 112, 86, 0.12); }
+  .quiz-feedback { display: none; margin-top: 10px; padding: 10px 14px; background: var(--bg-card); border-radius: 6px; font-size: 0.9rem; color: var(--text-muted); }
+  .quiz-item.answered .quiz-feedback { display: block; }
+  .flash-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .flash { background: linear-gradient(135deg, var(--bg-soft) 0%, var(--bg-card) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer; min-height: 160px; display: flex; flex-direction: column; justify-content: center; }
+  .flash:hover { border-color: var(--accent); }
+  .flash .side-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .flash .side-label.back { color: var(--green); }
+  .flash .front-content { display: block; }
+  .flash .back-content { display: none; }
+  .flash.flipped .front-content { display: none; }
+  .flash.flipped .back-content { display: block; }
+  .hw-card { background: var(--bg-soft); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .hw-card .hw-num { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 1.1rem; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .hw-tag { display: inline-block; padding: 3px 10px; background: rgba(229, 165, 78, 0.15); color: var(--accent); border-radius: 10px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 6px; }
+  .recall-item { padding: 1rem; background: var(--bg-soft); border-radius: 8px; margin: 0.75rem 0; border-left: 3px solid var(--purple); }
+  .lesson-footer { display: flex; justify-content: space-between; margin: 4rem 0 2rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-btn { color: var(--text-muted); text-decoration: none; padding: 0.75rem 1.25rem; border: 1px solid var(--border); border-radius: 8px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .muted { color: var(--text-muted); }
+  details.deeper { background: rgba(184, 164, 222, 0.04); border: 1px solid var(--border); border-left: 3px solid var(--purple); border-radius: 8px; margin: 1.25rem 0; padding: 0.75rem 1.25rem; }
+  details.deeper > summary { font-family: 'Playfair Display', serif; font-weight: 600; color: var(--purple); cursor: pointer; padding: 6px 0; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.deeper > summary::-webkit-details-marker { display: none; }
+  details.deeper > summary::before { content: '▶'; color: var(--purple); font-size: 0.75rem; transition: transform 0.15s; display: inline-block; }
+  details.deeper[open] > summary::before { transform: rotate(90deg); }
+  details.deeper > summary:hover { color: var(--accent); }
+  details.deeper[open] { padding-bottom: 1.25rem; }
+  details.deeper .deeper-body { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+  .ref-section { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin: 1rem 0; }
+  .ref-section h3 { margin-top: 0; }
+  .ref-list { list-style: none; padding: 0; margin: 0; }
+  .ref-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list .ref-title { color: var(--accent); font-weight: 500; }
+  .ref-list .ref-detail { color: var(--text-muted); font-size: 0.85rem; margin-top: 3px; }
+  .pseudocode { background: rgba(184, 164, 222, 0.06); border-left: 3px solid var(--purple); padding: 12px 16px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.85rem; line-height: 1.6; margin: 12px 0; border-radius: 4px; color: var(--text); white-space: pre; overflow-x: auto; }
+  .pseudocode-title { font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple); margin-bottom: 6px; font-weight: 700; }
+  .code-py { background: #1e293b; color: #e2e8f0; padding: 12px 16px; border-radius: 6px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.85rem; line-height: 1.5; margin: 12px 0; overflow-x: auto; white-space: pre; }
+  .code-py-title { font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #86efac; margin-bottom: 6px; font-weight: 700; }
+  mjx-container { display: inline-block; line-height: 0; }
+  mjx-container[display="true"] { display: block; text-align: center; margin: 1em 0; line-height: normal; }
+  mjx-container > svg { max-width: 100%; height: auto; display: inline-block; vertical-align: middle; }
+  mjx-container[display="true"] > svg { display: block; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="breadcrumb">
+    <a href="../Quant-Roadmap.html">Atlas</a><span class="sep">›</span>
+    <span class="current">Limits &amp; Continuity</span>
+  </div>
+
+  <div class="meta">CALCULUS <span class="dot">·</span> 120 MIN LECTURE <span class="dot">·</span> ~6H COMPLETE <span class="dot">·</span> <span class="status">v2 · ENRICHED</span></div>
+
+  <h1 class="lesson-title">Limits &amp; Continuity</h1>
+  <div class="subtitle">Foundations: Functions, Limits &amp; Continuity · <span class="muted">2/4</span>
+    <span class="progress-dots"><span class="dot done"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></span>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="lecture">📖 Lecture</button>
+    <button class="tab-btn" data-tab="examples">🔍 Examples <span class="count">5</span></button>
+    <button class="tab-btn" data-tab="quiz">✏️ Quiz <span class="count">20</span></button>
+    <button class="tab-btn" data-tab="flashcards">📇 Flashcards <span class="count">10</span></button>
+    <button class="tab-btn" data-tab="homework">✨ Homework <span class="count">5</span></button>
+    <button class="tab-btn" data-tab="references">📚 References</button>
+    <button class="tab-btn" data-tab="recall">🎨 Recall</button>
+  </nav>
+
+  <div class="features">
+    <span class="label">In this lesson</span>
+    <span class="feature-badge">🎯 learning outcomes</span>
+    <span class="feature-badge">📐 10 theorems</span>
+    <span class="feature-badge">💻 code corner</span>
+    <span class="feature-badge">🧩 5 deeper dives</span>
+    <span class="feature-badge">🔗 stochastic prep</span>
+  </div>
+
+  <!-- ========== LECTURE ========== -->
+  <div class="tab-content active" id="tab-lecture">
+
+    <div class="box box-lo">
+      <div class="box-title">🎯 Learning Outcomes</div>
+      <p>After completing this lesson, you will be able to:</p>
+      <div class="lo-grid">
+        <div>
+          <h4>Recall &amp; Understand</h4>
+          <ul>
+            <li>State the ε-δ definition of a limit and the three-condition definition of continuity</li>
+            <li>Distinguish removable, jump, and essential discontinuities</li>
+            <li>State IVT, Extreme Value Theorem, Heine-Cantor</li>
+            <li>Distinguish pointwise, uniform, Lipschitz, and Hölder continuity</li>
+            <li>Explain why Brownian motion has infinite bounded variation</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Apply</h4>
+          <ul>
+            <li>Compute indeterminate limits using factor / rationalize / squeeze</li>
+            <li>Determine continuity of piecewise functions and find unknown parameters</li>
+            <li>Apply IVT to prove existence of roots and fixed points</li>
+            <li>Use bisection method to find implied yield / implied volatility</li>
+            <li>Determine growth ordering of common functions at infinity</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Prove &amp; Analyze</h4>
+          <ul>
+            <li>Prove a limit using the ε-δ definition</li>
+            <li>Prove uniqueness of limits (Theorem 2.2)</li>
+            <li>Prove differentiability implies continuity</li>
+            <li>Show Lipschitz continuity implies uniform continuity</li>
+            <li>Use Cauchy criterion to prove convergence without knowing the limit</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Connect to Finance</h4>
+          <ul>
+            <li>Use IVT to guarantee unique implied volatility exists</li>
+            <li>Understand why SDE existence requires Lipschitz coefficients</li>
+            <li>Recognize bounded variation as prerequisite for Riemann-Stieltjes vs Itô integration</li>
+            <li>Apply bisection for robust numerical root-finding in pricing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-box">
+      <div class="outline-title">📄 On this page · 10 sections</div>
+      <div class="outline-grid">
+        <a href="#s1" class="outline-item"><span class="num">1</span>The idea of a limit</a>
+        <a href="#s6" class="outline-item"><span class="num">6</span>Intermediate Value Theorem</a>
+        <a href="#s2" class="outline-item"><span class="num">2</span>The ε-δ definition</a>
+        <a href="#s7" class="outline-item"><span class="num">7</span>Uniform continuity</a>
+        <a href="#s3" class="outline-item"><span class="num">3</span>Limit laws &amp; techniques</a>
+        <a href="#s8" class="outline-item"><span class="num">8</span>Lipschitz &amp; Hölder continuity</a>
+        <a href="#s4" class="outline-item"><span class="num">4</span>Limits at infinity</a>
+        <a href="#s9" class="outline-item"><span class="num">9</span>Bounded variation &amp; stochastic preview</a>
+        <a href="#s5" class="outline-item"><span class="num">5</span>Continuity</a>
+        <a href="#s10" class="outline-item"><span class="num">10</span>Bridge to derivatives</a>
+      </div>
+    </div>
+
+    <!-- SECTION 1 -->
+    <section id="s1">
+      <h2>1. The idea of a limit</h2>
+
+      <p>Consider the function \(f(x) = \dfrac{x^2 - 1}{x - 1}\). At \(x = 1\), the formula gives \(0/0\), which is undefined. But if we compute \(f\) at values <b>near</b> \(1\):</p>
+
+      <table class="st" style="max-width: 500px;">
+        <tr><th>x</th><th>0.9</th><th>0.99</th><th>0.999</th><th>1.001</th><th>1.01</th><th>1.1</th></tr>
+        <tr><td>\(f(x)\)</td><td>1.9</td><td>1.99</td><td>1.999</td><td>2.001</td><td>2.01</td><td>2.1</td></tr>
+      </table>
+
+      <p>The values approach \(2\) from both sides. We say the <b>limit</b> of \(f(x)\) as \(x\) approaches \(1\) is \(2\), even though \(f(1)\) itself is not defined. Algebraically, \(\dfrac{x^2-1}{x-1} = \dfrac{(x-1)(x+1)}{x-1} = x+1\) for \(x \neq 1\), which explains why the limit equals \(1 + 1 = 2\).</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.1 — Limit (informal)</div>
+        <p>We say \(\lim_{x \to a} f(x) = L\) if the values of \(f(x)\) get arbitrarily close to \(L\) whenever \(x\) is sufficiently close to (but not equal to) \(a\).</p>
+        <p>The value \(f(a)\) itself need not exist, nor equal \(L\) if it does.</p>
+      </div>
+
+      <p>Notation: \(\lim_{x \to a} f(x) = L\) or \(f(x) \to L\) as \(x \to a\).</p>
+
+      <h3>One-sided limits</h3>
+
+      <p>Sometimes \(f\) behaves differently as \(x\) approaches \(a\) from the left versus the right. We write:</p>
+
+      <ul>
+        <li>\(\lim_{x \to a^-} f(x) = L\): the <b>left-hand limit</b>, considering only \(x &lt; a\).</li>
+        <li>\(\lim_{x \to a^+} f(x) = L\): the <b>right-hand limit</b>, considering only \(x &gt; a\).</li>
+      </ul>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 1.2 — Two-sided limit exists iff both one-sided limits exist and agree</div>
+        <p>\(\lim_{x \to a} f(x) = L\) if and only if \(\lim_{x \to a^-} f(x) = L\) and \(\lim_{x \to a^+} f(x) = L\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example — sign function</div>
+        <p>Let \(\text{sgn}(x) = 1\) if \(x &gt; 0\), \(-1\) if \(x &lt; 0\), \(0\) if \(x = 0\). Then</p>
+        <p>\(\lim_{x \to 0^+} \text{sgn}(x) = 1\) and \(\lim_{x \to 0^-} \text{sgn}(x) = -1\).</p>
+        <p>Since the two disagree, \(\lim_{x \to 0} \text{sgn}(x)\) does not exist.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="s2">
+      <h2>2. The ε-δ definition</h2>
+
+      <p>The informal definition ("arbitrarily close", "sufficiently close") is intuitive but not rigorous. To prove theorems and handle subtle cases, we need a precise formulation.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 2.1 — Limit (formal, ε-δ)</div>
+        <p>Let \(f\) be defined on an open interval containing \(a\), except possibly at \(a\) itself. We say</p>
+        \[ \lim_{x \to a} f(x) = L \]
+        <p>if for every \(\varepsilon &gt; 0\), there exists \(\delta &gt; 0\) such that</p>
+        \[ 0 &lt; |x - a| &lt; \delta \implies |f(x) - L| &lt; \varepsilon. \]
+      </div>
+
+      <p>Read carefully: \(\varepsilon\) represents "how close to \(L\) we want the output"; \(\delta\) represents "how close to \(a\) the input must be". The challenger picks \(\varepsilon\); we must produce a \(\delta\) that works.</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Why "\(0 &lt; |x - a|\)"?</div>
+        <p>The condition \(|x - a| &gt; 0\) says \(x \neq a\). The limit describes behavior <b>near</b> \(a\), not <b>at</b> \(a\). Whatever \(f(a)\) is (or isn't) does not affect the limit.</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 2.1 — proving a limit with ε-δ</div>
+        <p><b>Claim.</b> \(\lim_{x \to 3} (2x + 1) = 7\).</p>
+        <p><b>Proof.</b> Given \(\varepsilon &gt; 0\), we must find \(\delta &gt; 0\) such that \(0 &lt; |x - 3| &lt; \delta \implies |(2x+1) - 7| &lt; \varepsilon\).</p>
+        <div class="step"><span class="step-num">1</span>Simplify \(|f(x) - L|\): \(|(2x+1) - 7| = |2x - 6| = 2|x - 3|\).</div>
+        <div class="step"><span class="step-num">2</span>We want \(2|x - 3| &lt; \varepsilon\), i.e., \(|x - 3| &lt; \varepsilon/2\).</div>
+        <div class="step"><span class="step-num">3</span>Choose \(\delta = \varepsilon/2\).</div>
+        <div class="step"><span class="step-num">4</span>Verify: if \(0 &lt; |x - 3| &lt; \delta = \varepsilon/2\), then \(|(2x+1) - 7| = 2|x-3| &lt; 2 \cdot \varepsilon/2 = \varepsilon\). \(\blacksquare\)</div>
+      </div>
+
+      <p>The pattern: (1) simplify \(|f(x) - L|\) in terms of \(|x - a|\), (2) determine what \(\delta\) makes the resulting expression less than \(\varepsilon\).</p>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 2.2 — Uniqueness of limit</div>
+        <p>If \(\lim_{x \to a} f(x) = L_1\) and \(\lim_{x \to a} f(x) = L_2\), then \(L_1 = L_2\).</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p>Suppose \(L_1 \neq L_2\). Let \(\varepsilon = |L_1 - L_2|/3 &gt; 0\). By hypothesis, there exist \(\delta_1, \delta_2 &gt; 0\) such that:</p>
+        <p>\(|x - a| &lt; \delta_1 \implies |f(x) - L_1| &lt; \varepsilon\), and \(|x - a| &lt; \delta_2 \implies |f(x) - L_2| &lt; \varepsilon\).</p>
+        <p>Choose \(\delta = \min(\delta_1, \delta_2)\) and pick any \(x\) with \(0 &lt; |x-a| &lt; \delta\). By triangle inequality:</p>
+        \[ |L_1 - L_2| \leq |L_1 - f(x)| + |f(x) - L_2| &lt; \varepsilon + \varepsilon = \tfrac{2}{3}|L_1 - L_2|. \]
+        <p>This gives \(|L_1 - L_2| &lt; \tfrac{2}{3}|L_1 - L_2|\), impossible unless \(L_1 = L_2\). \(\blacksquare\)</p>
+      </div>
+
+      <details class="deeper">
+        <summary>Deeper dive — Cauchy sequences and completeness of ℝ</summary>
+        <div class="deeper-body">
+          <p>The ε-δ definition compares \(f(x)\) to a known target \(L\). But how do we know the target exists in the first place? This is where <b>Cauchy sequences</b> and the <b>completeness of \(\mathbb{R}\)</b> enter.</p>
+
+          <p><b>Definition (Cauchy sequence).</b> A sequence \((x_n)\) is Cauchy if for every \(\varepsilon &gt; 0\), there exists \(N\) such that \(m, n \geq N \implies |x_m - x_n| &lt; \varepsilon\). Terms eventually get arbitrarily close to each other — without reference to a limit.</p>
+
+          <p><b>Theorem (Cauchy criterion).</b> In \(\mathbb{R}\), a sequence converges if and only if it is Cauchy.</p>
+
+          <p>The forward direction (convergent ⟹ Cauchy) uses triangle inequality. The reverse (Cauchy ⟹ convergent) is a deep property of \(\mathbb{R}\) — it fails in \(\mathbb{Q}\) (Cauchy sequence \(1, 1.4, 1.41, 1.414, \ldots\) rationally approximating \(\sqrt{2}\) has no rational limit).</p>
+
+          <p><b>Why it matters.</b> To prove a sequence converges, we do not need to guess the limit. Just show it is Cauchy — then the limit exists by completeness. This is how Itô integrals are constructed: define the integral for simple processes, show the extension is Cauchy in \(L^2\), and conclude the limit (the general Itô integral) exists.</p>
+
+          <p><b>Sequential characterization of limits</b> (bonus). \(\lim_{x \to a} f(x) = L\) if and only if for every sequence \(x_n \to a\) (with \(x_n \neq a\)), we have \(f(x_n) \to L\). This ties limits of functions to limits of sequences and is often easier to use in proofs.</p>
+        </div>
+      </details>
+
+      <details class="deeper">
+        <summary>Deeper dive — geometry of ε-δ</summary>
+        <div class="deeper-body">
+          <p>Picture the graph of \(f\). The claim \(\lim_{x \to a} f(x) = L\) means: draw a horizontal band of half-width \(\varepsilon\) around \(y = L\); we can always find a vertical strip of half-width \(\delta\) around \(x = a\) (excluding \(a\) itself) so that the graph inside the strip lies inside the band.</p>
+          <p>The challenge is that \(\varepsilon\) is chosen after \(\delta\) — for any width \(\varepsilon\), no matter how tiny, there must be a corresponding \(\delta\). If someone picks \(\varepsilon = 10^{-100}\), we must still produce a working \(\delta\).</p>
+          <p>The <b>order of quantifiers matters</b>: "\(\forall \varepsilon, \exists \delta\)" is different from "\(\exists \delta, \forall \varepsilon\)". The second would be a much stronger (usually impossible) statement.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="s3">
+      <h2>3. Limit laws and evaluation techniques</h2>
+
+      <p>Proving every limit from scratch with ε-δ would be exhausting. Fortunately, limits obey algebraic laws that reduce complex limits to simple ones.</p>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.1 — Limit laws</div>
+        <p>Suppose \(\lim_{x \to a} f(x) = L\) and \(\lim_{x \to a} g(x) = M\) (both exist). Then:</p>
+        <ul>
+          <li><b>Sum:</b> \(\lim_{x \to a} [f(x) + g(x)] = L + M\)</li>
+          <li><b>Difference:</b> \(\lim_{x \to a} [f(x) - g(x)] = L - M\)</li>
+          <li><b>Product:</b> \(\lim_{x \to a} [f(x) g(x)] = L \cdot M\)</li>
+          <li><b>Quotient:</b> \(\lim_{x \to a} \dfrac{f(x)}{g(x)} = \dfrac{L}{M}\), provided \(M \neq 0\)</li>
+          <li><b>Constant multiple:</b> \(\lim_{x \to a} [c \cdot f(x)] = c L\)</li>
+          <li><b>Power:</b> \(\lim_{x \to a} [f(x)]^n = L^n\) for positive integer \(n\)</li>
+        </ul>
+      </div>
+
+      <p>These are proved from the ε-δ definition using triangle inequality manipulations. See any analysis textbook (e.g., Rudin Ch 4) for full proofs.</p>
+
+      <h3>Continuous functions behave nicely</h3>
+
+      <p>For any polynomial \(P(x)\), \(\lim_{x \to a} P(x) = P(a)\) — just substitute. Same for rational functions \(P(x)/Q(x)\) where \(Q(a) \neq 0\). Same for exponential, logarithm, sine, cosine at any point in their domain.</p>
+
+      <p>This "just plug in" behavior is exactly the property called <b>continuity</b>, which we define formally in §5.</p>
+
+      <h3>Indeterminate forms</h3>
+
+      <p>When "plug in" gives \(0/0\), \(\infty/\infty\), \(0 \cdot \infty\), \(\infty - \infty\), \(0^0\), \(\infty^0\), or \(1^\infty\), the limit's value is not determined by the form — it depends on how the pieces approach their limiting values. These are called <b>indeterminate forms</b>. Techniques to resolve them:</p>
+
+      <div class="box box-example">
+        <div class="box-title">Technique 1 — Factor and cancel</div>
+        <p>\(\displaystyle \lim_{x \to 2} \frac{x^2 - 4}{x - 2}\) gives \(0/0\).</p>
+        <p>Factor: \(\dfrac{x^2 - 4}{x - 2} = \dfrac{(x-2)(x+2)}{x - 2} = x + 2\) for \(x \neq 2\).</p>
+        <p>Limit: \(\lim_{x \to 2} (x + 2) = 4\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Technique 2 — Rationalize</div>
+        <p>\(\displaystyle \lim_{x \to 0} \frac{\sqrt{x+1} - 1}{x}\) gives \(0/0\).</p>
+        <p>Multiply top and bottom by \(\sqrt{x+1} + 1\):</p>
+        \[ \frac{(\sqrt{x+1} - 1)(\sqrt{x+1} + 1)}{x(\sqrt{x+1}+1)} = \frac{(x+1) - 1}{x(\sqrt{x+1}+1)} = \frac{1}{\sqrt{x+1}+1}. \]
+        <p>Limit: \(\dfrac{1}{\sqrt{1} + 1} = \dfrac{1}{2}\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.2 — Squeeze Theorem</div>
+        <p>Suppose \(g(x) \leq f(x) \leq h(x)\) for all \(x\) near \(a\) (except possibly at \(a\)), and \(\lim_{x \to a} g(x) = \lim_{x \to a} h(x) = L\). Then</p>
+        \[ \lim_{x \to a} f(x) = L. \]
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Squeeze in action</div>
+        <p>\(\displaystyle \lim_{x \to 0} x^2 \sin(1/x) = ?\)</p>
+        <p>\(\sin(1/x)\) oscillates wildly as \(x \to 0\), but is bounded: \(-1 \leq \sin(1/x) \leq 1\). Multiplying by \(x^2 \geq 0\):</p>
+        \[ -x^2 \leq x^2 \sin(1/x) \leq x^2. \]
+        <p>Both \(-x^2 \to 0\) and \(x^2 \to 0\) as \(x \to 0\), so by squeeze theorem the middle expression also \(\to 0\).</p>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="s4">
+      <h2>4. Limits at infinity and asymptotic behavior</h2>
+
+      <p>Beyond limits at finite points, we care how a function behaves as \(x\) grows without bound.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.1 — Limit at infinity</div>
+        <p>\(\lim_{x \to \infty} f(x) = L\) means: for every \(\varepsilon &gt; 0\), there exists \(N\) such that \(x &gt; N \implies |f(x) - L| &lt; \varepsilon\).</p>
+        <p>Analogous definition for \(x \to -\infty\).</p>
+      </div>
+
+      <p>Examples:</p>
+      <ul>
+        <li>\(\lim_{x \to \infty} \dfrac{1}{x} = 0\)</li>
+        <li>\(\lim_{x \to \infty} e^{-x} = 0\)</li>
+        <li>\(\lim_{x \to \infty} \arctan(x) = \pi/2\)</li>
+      </ul>
+
+      <p>When a limit at infinity exists, we say \(f\) has a <b>horizontal asymptote</b> \(y = L\).</p>
+
+      <h3>Growth hierarchy</h3>
+
+      <p>As \(x \to \infty\), common functions grow at different rates:</p>
+
+      \[ 1 \ll \log x \ll x^p \; (p&gt;0) \ll a^x \; (a&gt;1) \ll x^x \]
+
+      <p>Here \(f \ll g\) means \(f/g \to 0\), i.e., \(f = o(g)\). Concretely: logarithm grows slower than any positive power of \(x\); exponentials outpace any polynomial.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Comparing growth</div>
+        <p>\(\displaystyle \lim_{x \to \infty} \frac{x^3}{e^x} = 0\) — exponential dominates cubic.</p>
+        <p>\(\displaystyle \lim_{x \to \infty} \frac{\ln x}{x} = 0\) — polynomial dominates logarithm.</p>
+        <p>\(\displaystyle \lim_{x \to \infty} \frac{2x^3 - x + 1}{5x^3 + 7} = \frac{2}{5}\) — same-degree polynomials give ratio of leading coefficients.</p>
+      </div>
+
+      <h3>Infinite limits</h3>
+
+      <p>Sometimes \(f(x)\) grows without bound. We write \(\lim_{x \to a} f(x) = \infty\) if for every \(M\), there exists \(\delta\) such that \(0 &lt; |x-a| &lt; \delta \implies f(x) &gt; M\). This is a "limit does not exist" statement in the finite sense but captures the behavior.</p>
+
+      <p>Example: \(\lim_{x \to 0^+} 1/x = \infty\), \(\lim_{x \to 0^-} 1/x = -\infty\), so \(\lim_{x \to 0} 1/x\) does not exist. The graph has a <b>vertical asymptote</b> at \(x = 0\).</p>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section id="s5">
+      <h2>5. Continuity</h2>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 5.1 — Continuity at a point</div>
+        <p>A function \(f\) is <b>continuous at \(a\)</b> if all three conditions hold:</p>
+        <ol>
+          <li>\(f(a)\) is defined.</li>
+          <li>\(\lim_{x \to a} f(x)\) exists.</li>
+          <li>\(\lim_{x \to a} f(x) = f(a)\).</li>
+        </ol>
+        <p>\(f\) is <b>continuous on an interval</b> if it is continuous at every point in the interval.</p>
+      </div>
+
+      <p>Continuity captures the intuition "no jumps, no gaps, no vertical asymptotes". Formally, small changes in input produce small changes in output.</p>
+
+      <h3>Types of discontinuities</h3>
+
+      <p>When \(f\) fails to be continuous at \(a\), the failure can take several forms:</p>
+
+      <table class="st">
+        <tr><th>Type</th><th>Description</th><th>Example</th></tr>
+        <tr><td><b>Removable</b></td><td>Limit exists but \(f(a)\) is undefined or wrong</td><td>\(f(x) = \frac{x^2-1}{x-1}\) at \(x=1\)</td></tr>
+        <tr><td><b>Jump</b></td><td>Left and right limits exist but differ</td><td>\(\text{sgn}(x)\) at \(x=0\)</td></tr>
+        <tr><td><b>Essential (infinite)</b></td><td>Limit is \(\pm\infty\) or oscillates</td><td>\(1/x\) at \(x=0\); \(\sin(1/x)\) at \(x=0\)</td></tr>
+      </table>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 5.2 — Continuity of arithmetic combinations</div>
+        <p>If \(f\) and \(g\) are continuous at \(a\), then \(f+g\), \(f-g\), \(fg\) are continuous at \(a\). If also \(g(a) \neq 0\), then \(f/g\) is continuous at \(a\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 5.3 — Continuity of composition</div>
+        <p>If \(g\) is continuous at \(a\) and \(f\) is continuous at \(g(a)\), then \(f \circ g\) is continuous at \(a\).</p>
+      </div>
+
+      <p><b>Consequence.</b> Polynomials, rational functions (on their domain), \(e^x\), \(\ln x\), \(\sin x\), \(\cos x\), \(\sqrt{x}\) are all continuous on their domains. Any function built from these by sum, product, quotient, or composition is continuous on the appropriate set.</p>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section id="s6">
+      <h2>6. The Intermediate Value Theorem</h2>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 6.1 — Intermediate Value Theorem (IVT)</div>
+        <p>Suppose \(f\) is continuous on the closed interval \([a, b]\), and let \(y_0\) be any value between \(f(a)\) and \(f(b)\). Then there exists \(c \in [a, b]\) such that \(f(c) = y_0\).</p>
+      </div>
+
+      <p>Geometrically: the graph of a continuous function on \([a, b]\) has no jumps, so it takes every value between \(f(a)\) and \(f(b)\).</p>
+
+      <div class="diagram-single">
+        <svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Axes -->
+          <line x1="60" y1="180" x2="440" y2="180" stroke="#a89e8b" stroke-width="1"/>
+          <line x1="60" y1="30" x2="60" y2="200" stroke="#a89e8b" stroke-width="1"/>
+          <!-- Curve -->
+          <path d="M 80 50 Q 200 30 250 100 Q 300 170 420 150" stroke="#e5a54e" stroke-width="2.5" fill="none"/>
+          <!-- Endpoints -->
+          <circle cx="80" cy="50" r="4" fill="#8fb5e0"/>
+          <text x="55" y="45" fill="#8fb5e0" font-size="12" font-family="Georgia">f(a)</text>
+          <circle cx="420" cy="150" r="4" fill="#8fb5e0"/>
+          <text x="425" y="150" fill="#8fb5e0" font-size="12" font-family="Georgia">f(b)</text>
+          <!-- y0 line -->
+          <line x1="60" y1="110" x2="440" y2="110" stroke="#86c084" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="35" y="114" fill="#86c084" font-size="12" font-family="Georgia">y₀</text>
+          <!-- c mark -->
+          <circle cx="270" cy="110" r="4" fill="#e0a4c4"/>
+          <line x1="270" y1="110" x2="270" y2="180" stroke="#e0a4c4" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="265" y="196" fill="#e0a4c4" font-size="12" font-family="Georgia">c</text>
+          <!-- a b labels -->
+          <text x="76" y="196" fill="#a89e8b" font-size="12" font-family="Georgia">a</text>
+          <text x="416" y="196" fill="#a89e8b" font-size="12" font-family="Georgia">b</text>
+        </svg>
+        <div class="diag-caption">A continuous curve joining \((a, f(a))\) and \((b, f(b))\) must cross every horizontal line \(y = y_0\) between them, at some \(c\).</div>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">What IVT does and doesn't give</div>
+        <p><b>Does give:</b> existence of a \(c\) with \(f(c) = y_0\).</p>
+        <p><b>Doesn't give:</b> the value of \(c\), uniqueness of \(c\), or a formula. There may be many such \(c\).</p>
+      </div>
+
+      <h3>Application: root existence</h3>
+
+      <p>Setting \(y_0 = 0\) gives a powerful tool: if \(f\) is continuous on \([a, b]\) with \(f(a) &lt; 0 &lt; f(b)\), then \(f\) has at least one root in \((a, b)\).</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example — implied yield of a bond</div>
+        <p>The price of a zero-coupon bond is \(P(r) = 100 e^{-rT}\). Given a market price \(P^* = 78.66\) and maturity \(T = 5\), the yield satisfies \(P(r) - P^* = 0\). Consider \(g(r) = 100 e^{-5r} - 78.66\).</p>
+        <p>\(g(0) = 100 - 78.66 = 21.34 &gt; 0\); \(g(0.10) = 100 e^{-0.5} - 78.66 \approx 60.65 - 78.66 = -18.01 &lt; 0\). \(g\) is continuous. By IVT, a yield \(r^* \in (0, 0.10)\) exists.</p>
+        <p>The <b>bisection method</b> in the Code Corner (§8) uses this idea repeatedly to narrow down \(r^*\).</p>
+      </div>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section id="s7">
+      <h2>7. Uniform continuity</h2>
+
+      <p>Ordinary continuity is a <b>pointwise</b> property: for each \(a\) and each \(\varepsilon\), a suitable \(\delta\) exists — but \(\delta\) may depend on both \(a\) and \(\varepsilon\). <b>Uniform continuity</b> demands a single \(\delta\) that works for every point.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 7.1 — Uniform continuity</div>
+        <p>\(f\) is <b>uniformly continuous on a set \(S\)</b> if for every \(\varepsilon &gt; 0\), there exists \(\delta &gt; 0\) (depending only on \(\varepsilon\), not on the point) such that</p>
+        \[ x, y \in S, \; |x - y| &lt; \delta \implies |f(x) - f(y)| &lt; \varepsilon. \]
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Continuous but not uniformly continuous</div>
+        <p>\(f(x) = 1/x\) on \((0, 1]\). It is continuous at every point, but near \(x = 0\) the function is very steep — a tiny change in \(x\) produces a huge change in \(f(x)\). No single \(\delta\) works for all points; smaller \(x\) requires smaller \(\delta\). Hence not uniformly continuous on \((0, 1]\).</p>
+        <p>\(f(x) = x^2\) on \(\mathbb{R}\). Continuous everywhere, but for large \(x\) the slope grows; near \(x = 10^6\), moving even slightly changes \(f\) by a huge amount. Not uniformly continuous on \(\mathbb{R}\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 7.2 — Heine-Cantor</div>
+        <p>If \(f\) is continuous on a closed and bounded interval \([a, b]\), then \(f\) is uniformly continuous on \([a, b]\).</p>
+      </div>
+
+      <p>The key restriction is <b>compactness</b> (closed and bounded in \(\mathbb{R}\)). Continuous \(1/x\) on \((0, 1]\) fails because the interval isn't closed; continuous \(x^2\) on \(\mathbb{R}\) fails because \(\mathbb{R}\) is not bounded.</p>
+
+      <p>Uniform continuity is a technical strengthening rarely emphasized in introductory calculus, but it becomes essential in integration theory, Fourier analysis, and Ito calculus (where we work with continuous martingales on bounded time intervals).</p>
+
+      <details class="deeper">
+        <summary>Deeper dive — extreme value theorem</summary>
+        <div class="deeper-body">
+          <p>A close cousin of Heine-Cantor:</p>
+          <p><b>Extreme Value Theorem.</b> If \(f\) is continuous on \([a, b]\), then \(f\) attains both a maximum and a minimum on \([a, b]\).</p>
+          <p>The proof relies on \([a, b]\) being compact: a continuous image of a compact set is compact (hence closed and bounded), so the maximum is achieved.</p>
+          <p><b>Application.</b> In optimization, EVT guarantees that a continuous cost function on a bounded, closed feasible region has a global optimum. This is what lets us talk about "the" minimum variance portfolio on a bounded weight simplex.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 8 -->
+    <section id="s8">
+      <h2>8. Lipschitz and Hölder continuity</h2>
+
+      <p>Between continuity and differentiability lies a spectrum of quantitative regularity conditions. Two of them are essential in stochastic analysis.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 8.1 — Lipschitz continuity</div>
+        <p>\(f: S \to \mathbb{R}\) is <b>Lipschitz continuous</b> on \(S\) if there exists a constant \(K \geq 0\) such that</p>
+        \[ |f(x) - f(y)| \leq K |x - y| \quad \text{for all } x, y \in S. \]
+        <p>The smallest such \(K\) is the <b>Lipschitz constant</b>. If \(f\) is differentiable and \(|f'|\) is bounded by \(K\), then \(f\) is Lipschitz with constant \(K\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 8.2 — Lipschitz ⟹ uniformly continuous</div>
+        <p>If \(f\) is Lipschitz with constant \(K\), then for any \(\varepsilon &gt; 0\) the choice \(\delta = \varepsilon / K\) works uniformly.</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p>Given \(\varepsilon &gt; 0\), let \(\delta = \varepsilon / K\). If \(|x - y| &lt; \delta\), then \(|f(x) - f(y)| \leq K |x - y| &lt; K \delta = \varepsilon\). This \(\delta\) depends only on \(\varepsilon\), not on the point. Hence uniformly continuous. \(\blacksquare\)</p>
+      </div>
+
+      <p>The chain of implications:</p>
+      \[ \text{Lipschitz} \implies \text{uniformly continuous} \implies \text{continuous} \]
+      <p>Each strengthening buys quantitative information about how much the output can change per unit change in input.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Examples</div>
+        <p><b>\(f(x) = \sin x\)</b>: Lipschitz on \(\mathbb{R}\) with \(K = 1\) (since \(|f'(x)| = |\cos x| \leq 1\)).</p>
+        <p><b>\(f(x) = x^2\)</b>: Lipschitz on any bounded interval \([-M, M]\) with \(K = 2M\), but NOT Lipschitz on all of \(\mathbb{R}\) — slope \(2x\) is unbounded.</p>
+        <p><b>\(f(x) = \sqrt{x}\)</b> on \([0, 1]\): NOT Lipschitz (derivative \(1/(2\sqrt{x}) \to \infty\) as \(x \to 0^+\)). Uniformly continuous but not Lipschitz — a weaker regularity.</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 8.3 — Hölder continuity</div>
+        <p>\(f\) is <b>Hölder continuous of exponent \(\alpha \in (0, 1]\)</b> on \(S\) if there exists \(C &gt; 0\) with</p>
+        \[ |f(x) - f(y)| \leq C |x - y|^\alpha \quad \text{for all } x, y \in S. \]
+        <p>Special cases: \(\alpha = 1\) is Lipschitz. As \(\alpha\) decreases, the condition weakens (allows more flexibility).</p>
+      </div>
+
+      <p>\(\sqrt{x}\) on \([0, 1]\) is Hölder-\(1/2\) but not Lipschitz. This is generic: functions with \(|x|^\alpha\)-type singularities in their derivative are Hölder-\(\alpha\) at that point.</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Why Lipschitz matters for stochastic differential equations</div>
+        <p>Consider the SDE \(dX_t = b(X_t) dt + \sigma(X_t) dW_t\) with initial condition \(X_0 = x_0\).</p>
+        <p><b>Theorem (Existence and uniqueness of SDE solutions).</b> If \(b\) and \(\sigma\) are Lipschitz continuous with linear growth, then the SDE has a unique strong solution.</p>
+        <p>Without Lipschitz continuity, multiple solutions can exist (or none). For example, \(dX_t = \sqrt{|X_t|}\, dt\) with \(X_0 = 0\) admits both \(X_t \equiv 0\) and \(X_t = t^2/4\) — non-uniqueness because \(\sqrt{|x|}\) is only Hölder-\(1/2\) at 0, not Lipschitz.</p>
+        <p>Every well-posed SDE in Track C (Stochastic Processes) requires this hypothesis. This is where §8 pays off.</p>
+      </div>
+
+      <details class="deeper">
+        <summary>Deeper dive — Hölder regularity of Brownian motion</summary>
+        <div class="deeper-body">
+          <p>Brownian motion paths \(t \mapsto W_t(\omega)\) are almost surely continuous. But how continuous?</p>
+          <p><b>Theorem (path regularity).</b> Brownian motion paths are Hölder continuous of exponent \(\alpha\) for every \(\alpha &lt; 1/2\), but are NOT Hölder continuous of exponent \(1/2\).</p>
+          <p>This precise regularity level (\(\alpha \to 1/2\) but not achieving it) is characteristic of the Wiener process and explains many of its quirks: paths are continuous, but "just barely" — they have infinite bounded variation (§9) and are nowhere differentiable.</p>
+          <p>This regularity underlies why we need Itô calculus, not classical calculus, to integrate against \(dW\).</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 9 (NEW) -->
+    <section id="s9">
+      <h2>9. Bounded variation and a preview of stochastic integration</h2>
+
+      <p>Continuity tells us a function has no jumps. But continuity alone allows very wild behavior. A stronger regularity, <b>bounded variation</b>, is prerequisite for classical integration and its failure defines the divide between Riemann-Stieltjes and Itô integrals.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 9.1 — Total variation</div>
+        <p>For a function \(f\) on \([a, b]\) and a partition \(P = \{a = t_0 &lt; t_1 &lt; \cdots &lt; t_n = b\}\), define</p>
+        \[ V(f, P) = \sum_{i=1}^{n} |f(t_i) - f(t_{i-1})|. \]
+        <p>The <b>total variation</b> of \(f\) on \([a, b]\) is</p>
+        \[ V_a^b(f) = \sup_{P} V(f, P), \]
+        <p>the supremum taken over all partitions. \(f\) is of <b>bounded variation</b> (BV) on \([a, b]\) if \(V_a^b(f) &lt; \infty\).</p>
+      </div>
+
+      <p>Intuitively, total variation measures the "total distance traveled" by \(f\) — how much the graph goes up and down cumulatively.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Examples</div>
+        <p><b>Monotone functions</b>: any monotone \(f\) has \(V_a^b(f) = |f(b) - f(a)|\), finite. Bounded variation.</p>
+        <p><b>Differentiable with bounded derivative</b>: if \(|f'| \leq K\), then \(V_a^b(f) \leq K(b-a)\), finite.</p>
+        <p><b>Continuous but wildly oscillating</b>: \(f(x) = x \sin(1/x)\) for \(x &gt; 0\), \(f(0) = 0\). Continuous on \([0, 1]\), but total variation is INFINITE. Bounded variation fails.</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">Brownian motion: continuous but NOT of bounded variation</div>
+        <p><b>Theorem.</b> Almost every Brownian motion path \(t \mapsto W_t\) has infinite total variation on any interval \([0, T]\), \(T &gt; 0\).</p>
+        <p>Sketch: on a partition with mesh \(\Delta t\), the sum \(\sum |W_{t_i} - W_{t_{i-1}}|\) grows like \(\sqrt{n}\) times the standard deviation of a single increment, which is \(\sqrt{\Delta t}\). Total sum is on the order of \(\sqrt{n \cdot \Delta t} \cdot \sqrt{n} = \sqrt{n} \cdot \sqrt{T}\), which \(\to \infty\) as \(n \to \infty\).</p>
+        <p><b>Quadratic variation is finite.</b> By contrast, \(\sum (W_{t_i} - W_{t_{i-1}})^2 \to T\) (in \(L^2\)) as the mesh shrinks. This is the famous \([W, W]_t = t\), the cornerstone of Itô calculus.</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Why this matters for integration</div>
+        <p><b>Riemann-Stieltjes integral \(\int f\, dg\)</b> is well-defined when \(g\) has bounded variation and \(f\) is continuous. This covers all "classical" integration.</p>
+        <p><b>Itô integral \(\int f\, dW\)</b> is required when integrating against processes of infinite variation but finite quadratic variation (like Brownian motion). Requires a completely different construction (limits in \(L^2\) using isometry), not Riemann sums.</p>
+        <p>This is why stochastic calculus is its own subject and not just "calculus with random noise." The very definition of the integral changes.</p>
+      </div>
+
+      <p>Sections §7-§9 together prepare you for Track C (Stochastic Processes). When you meet Brownian motion, you will already know exactly which classical property fails (bounded variation), which one holds (continuity), and what stronger property emerges (finite quadratic variation).</p>
+    </section>
+
+    <!-- SECTION 10 (Bridge to derivatives, renumbered from old §8) -->
+    <section id="s10">
+      <h2>10. Bridge to derivatives</h2>
+
+      <p>Every derivative is a limit. The definition, which we will develop fully in Lesson 3:</p>
+
+      \[ f'(a) = \lim_{h \to 0} \frac{f(a + h) - f(a)}{h}, \]
+
+      <p>captures the instantaneous rate of change. The fraction inside is the slope of a secant line joining \((a, f(a))\) and \((a+h, f(a+h))\); the limit as \(h \to 0\) is the slope of the tangent line — provided the limit exists.</p>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 8.1 — Differentiability implies continuity</div>
+        <p>If \(f\) is differentiable at \(a\) (i.e., \(f'(a)\) exists), then \(f\) is continuous at \(a\).</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p>Write \(f(x) - f(a) = \dfrac{f(x) - f(a)}{x - a} \cdot (x - a)\) for \(x \neq a\).</p>
+        <p>Take limits as \(x \to a\). The first factor \(\to f'(a)\) (by differentiability), the second \(\to 0\). Product law gives</p>
+        \[ \lim_{x \to a} [f(x) - f(a)] = f'(a) \cdot 0 = 0, \]
+        <p>which is \(\lim_{x \to a} f(x) = f(a)\), the definition of continuity. \(\blacksquare\)</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">The converse is FALSE</div>
+        <p>Continuity does not imply differentiability. Example: \(|x|\) is continuous at \(0\) but has a corner there — the left and right slopes disagree (\(-1\) vs \(+1\)), so \(f'(0)\) does not exist.</p>
+        <p>More strikingly, the Weierstrass function is continuous everywhere but differentiable nowhere. Brownian motion paths share this property (foundational for stochastic calculus, Lesson later in Track C).</p>
+      </div>
+
+      <details class="deeper">
+        <summary>Code corner — bisection method for implied yield</summary>
+        <div class="deeper-body">
+          <p>IVT (§6) guarantees a root exists between sign changes. The bisection method locates it by repeatedly halving the interval.</p>
+
+          <p><b>Algorithm — pseudocode</b>:</p>
+          <div class="pseudocode-title">Bisection root-finder for \(g(r) = 0\)</div>
+          <div class="pseudocode">ALGORITHM Bisection(g, lo, hi, tol)
+  Precondition: g continuous, g(lo) and g(hi) have opposite signs
+  Postcondition: returns r with |r - true root| &lt; tol
+
+  while (hi - lo) &gt; tol:
+      mid ← (lo + hi) / 2
+      if g(mid) = 0:
+          return mid
+      if sign(g(mid)) = sign(g(lo)):
+          lo ← mid          # root is in [mid, hi]
+      else:
+          hi ← mid          # root is in [lo, mid]
+  return (lo + hi) / 2</div>
+
+          <p>Each iteration halves the search interval, so after \(n\) steps the error is bounded by \((\text{hi}_0 - \text{lo}_0) / 2^n\). Reliable but slow (linear convergence in bits).</p>
+
+          <p><b>Python implementation</b>:</p>
+          <div class="code-py-title">Python — implied bond yield via bisection</div>
+          <div class="code-py">import math
+
+def bisection(g, lo, hi, tol=1e-8, max_iter=100):
+    """Find root of g in [lo, hi]. Requires g(lo)*g(hi) &lt; 0."""
+    if g(lo) * g(hi) &gt; 0:
+        raise ValueError("g must change sign over [lo, hi]")
+    for _ in range(max_iter):
+        mid = 0.5 * (lo + hi)
+        if hi - lo &lt; tol:
+            return mid
+        if g(mid) == 0:
+            return mid
+        if g(lo) * g(mid) &lt; 0:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+# Implied yield of a 5-year zero-coupon bond priced at 78.66
+face, price, T = 100.0, 78.66, 5.0
+g = lambda r: face * math.exp(-r * T) - price
+
+r_implied = bisection(g, 0.0, 0.5)
+print(f"Implied yield: {r_implied:.4%}")   # -&gt; ~4.80%
+
+# Sanity check with closed form (from Lesson 1)
+r_closed = math.log(face / price) / T
+print(f"Closed form:   {r_closed:.4%}")</div>
+
+          <p><b>Comparison with Newton's method</b> (from L1 Code Corner). Newton is quadratic convergence, faster, but requires derivative and can fail to converge without a good starting point. Bisection needs only continuity and a sign-changing bracket — always converges, if slowly. Use bisection when robustness matters more than speed.</p>
+        </div>
+      </details>
+
+      <p style="margin-top: 2rem;" class="muted">Coming up next: <a href="derivatives.html">Derivatives</a> — turning the difference quotient into a formal object we can compute and manipulate.</p>
+    </section>
+  </div>
+
+  <!-- ========== EXAMPLES ========== -->
+  <div class="tab-content" id="tab-examples">
+    <h2>🔍 Worked Examples</h2>
+
+    <div class="example-card">
+      <h3>Example 1 — Factor-and-cancel indeterminate form</h3>
+      <p><b>Compute</b> \(\displaystyle \lim_{x \to 3} \frac{x^2 - 5x + 6}{x - 3}\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Direct substitution gives \(0/0\). Factor the numerator: \(x^2 - 5x + 6 = (x-3)(x-2)\).</p>
+        <p>For \(x \neq 3\): \(\dfrac{(x-3)(x-2)}{x-3} = x - 2\).</p>
+        <p>Limit: \(\lim_{x \to 3} (x - 2) = 1\).</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 2 — Prove a limit using ε-δ</h3>
+      <p><b>Show</b> \(\lim_{x \to 4} \sqrt{x} = 2\) using the ε-δ definition.</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Given \(\varepsilon &gt; 0\), we find \(\delta &gt; 0\) so \(|x-4| &lt; \delta\) forces \(|\sqrt{x} - 2| &lt; \varepsilon\).</p>
+        <p>Rationalize:</p>
+        \[ |\sqrt{x} - 2| = \left| \frac{(\sqrt{x} - 2)(\sqrt{x}+2)}{\sqrt{x}+2} \right| = \frac{|x - 4|}{\sqrt{x} + 2}. \]
+        <p>If \(|x - 4| &lt; 1\), then \(3 &lt; x &lt; 5\), so \(\sqrt{x} + 2 &gt; \sqrt{3} + 2 &gt; 3\).</p>
+        <p>Hence \(|\sqrt{x} - 2| &lt; |x-4| / 3\). To make this \(&lt; \varepsilon\), require \(|x - 4| &lt; 3\varepsilon\).</p>
+        <p>Choose \(\delta = \min(1, 3\varepsilon)\). Then \(|x - 4| &lt; \delta\) implies both bounds, giving \(|\sqrt{x} - 2| &lt; \varepsilon\). \(\blacksquare\)</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 3 — Continuity of a piecewise function</h3>
+      <p><b>For what value of \(k\) is</b> \(f(x) = \begin{cases} x^2 + 1 &amp; x \leq 2 \\ kx + 3 &amp; x &gt; 2 \end{cases}\) <b>continuous at \(x = 2\)?</b></p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Left limit: \(\lim_{x \to 2^-} f(x) = 2^2 + 1 = 5\).</p>
+        <p>Right limit: \(\lim_{x \to 2^+} f(x) = 2k + 3\).</p>
+        <p>Also \(f(2) = 5\) (from the top piece).</p>
+        <p>Continuity requires all three equal: \(5 = 2k + 3\), giving \(\boxed{k = 1}\).</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 4 — Applying IVT</h3>
+      <p><b>Show that \(f(x) = x^3 + x - 1\) has a root in \((0, 1)\).</b></p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>\(f\) is a polynomial, hence continuous everywhere, including on \([0, 1]\).</p>
+        <p>\(f(0) = -1 &lt; 0\) and \(f(1) = 1 + 1 - 1 = 1 &gt; 0\).</p>
+        <p>By IVT with \(y_0 = 0\), there exists \(c \in (0, 1)\) with \(f(c) = 0\). \(\blacksquare\)</p>
+        <p>Numerically, bisection converges to \(c \approx 0.6823\).</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 5 — Squeeze theorem</h3>
+      <p><b>Compute</b> \(\displaystyle \lim_{x \to \infty} \frac{\sin x}{x}\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>\(\sin x\) oscillates in \([-1, 1]\), so \(-\dfrac{1}{x} \leq \dfrac{\sin x}{x} \leq \dfrac{1}{x}\) for \(x &gt; 0\).</p>
+        <p>Both bounds tend to \(0\) as \(x \to \infty\), so by squeeze theorem \(\dfrac{\sin x}{x} \to 0\).</p>
+        <p><b>Note</b>: this is different from \(\lim_{x \to 0} \dfrac{\sin x}{x} = 1\), a famous limit proved with a geometric argument (see any calculus text or 3Blue1Brown).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== QUIZ ========== -->
+  <div class="tab-content" id="tab-quiz">
+    <h2>✏️ Quiz — 20 self-check questions</h2>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Q1 · §1</div>
+      <div class="q-question">\(\lim_{x \to a} f(x) = L\) requires that:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f(a)\) must be defined and equal to \(L\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(f(a) = L\), but \(f(a)\) may be undefined at \(a\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(f(x)\) approaches \(L\) as \(x\) approaches \(a\), regardless of \(f(a)\)</button>
+        <button class="quiz-opt" data-ans="d">D. \(f\) must be continuous at \(a\)</button>
+      </div>
+      <div class="quiz-feedback">C. The value of \(f(a)\) is irrelevant to the limit; only the behavior near \(a\) matters.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Q2 · §1</div>
+      <div class="q-question">A two-sided limit exists at \(a\) if and only if:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f\) is continuous at \(a\)</button>
+        <button class="quiz-opt" data-ans="b">B. Both one-sided limits exist and are equal</button>
+        <button class="quiz-opt" data-ans="c">C. \(f(a)\) is defined</button>
+        <button class="quiz-opt" data-ans="d">D. The function is bounded near \(a\)</button>
+      </div>
+      <div class="quiz-feedback">B. Theorem 1.2.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Q3 · §2</div>
+      <div class="q-question">In the ε-δ definition, the order of quantifiers is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. For every ε &gt; 0, there exists δ &gt; 0</button>
+        <button class="quiz-opt" data-ans="b">B. There exists δ &gt; 0 such that for every ε &gt; 0</button>
+        <button class="quiz-opt" data-ans="c">C. Both orders are equivalent</button>
+        <button class="quiz-opt" data-ans="d">D. Neither, we use α and β</button>
+      </div>
+      <div class="quiz-feedback">A. δ is chosen in response to ε, so ε must come first. The reversed order would be a much stronger claim.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="d">
+      <div class="q-num">Q4 · §2</div>
+      <div class="q-question">To prove \(\lim_{x \to 5}(3x - 2) = 13\), what δ works given ε?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. δ = ε</button>
+        <button class="quiz-opt" data-ans="b">B. δ = 2ε</button>
+        <button class="quiz-opt" data-ans="c">C. δ = 3ε</button>
+        <button class="quiz-opt" data-ans="d">D. δ = ε/3</button>
+      </div>
+      <div class="quiz-feedback">D. |(3x-2) - 13| = 3|x - 5|. Want 3|x-5| &lt; ε, so |x-5| &lt; ε/3.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Q5 · §3</div>
+      <div class="q-question">Compute \(\displaystyle \lim_{x \to 2}\frac{x^2 - 4}{x - 2}\).</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. 0</button>
+        <button class="quiz-opt" data-ans="b">B. 2</button>
+        <button class="quiz-opt" data-ans="c">C. 4</button>
+        <button class="quiz-opt" data-ans="d">D. Undefined</button>
+      </div>
+      <div class="quiz-feedback">C. Factor: (x-2)(x+2)/(x-2) = x+2 for x ≠ 2. Limit is 4.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Q6 · §3</div>
+      <div class="q-question">Which is an indeterminate form?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. 5/0 (finite over zero)</button>
+        <button class="quiz-opt" data-ans="b">B. ∞ − ∞</button>
+        <button class="quiz-opt" data-ans="c">C. 0/5</button>
+        <button class="quiz-opt" data-ans="d">D. 1 + 1</button>
+      </div>
+      <div class="quiz-feedback">B. ∞−∞ can be anything depending on rates. 5/0 typically means ±∞ (not indeterminate). 0/5 = 0. Other indeterminates: 0/0, ∞/∞, 0·∞, 0⁰, ∞⁰, 1^∞.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Q7 · §3</div>
+      <div class="q-question">The Squeeze Theorem says: if \(g \leq f \leq h\) near \(a\) and \(g, h \to L\), then:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f \to L\) as well</button>
+        <button class="quiz-opt" data-ans="b">B. \(f\) is bounded but its limit is unknown</button>
+        <button class="quiz-opt" data-ans="c">C. \(f\) is continuous at \(a\)</button>
+        <button class="quiz-opt" data-ans="d">D. \(f\) is between \(g\) and \(h\) at \(a\)</button>
+      </div>
+      <div class="quiz-feedback">A. Theorem 3.2. Great for oscillating functions bounded by things that go to zero.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Q8 · §4</div>
+      <div class="q-question">\(\displaystyle \lim_{x \to \infty} \frac{x^2}{e^x}\) equals:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. ∞</button>
+        <button class="quiz-opt" data-ans="b">B. 1</button>
+        <button class="quiz-opt" data-ans="c">C. 0</button>
+        <button class="quiz-opt" data-ans="d">D. Does not exist</button>
+      </div>
+      <div class="quiz-feedback">C. Exponential dominates any polynomial: \(x^n = o(e^x)\).</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Q9 · §4</div>
+      <div class="q-question">Which grows fastest as \(x \to \infty\)?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(2^x\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(x^{100}\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(x \ln x\)</button>
+        <button class="quiz-opt" data-ans="d">D. \((\ln x)^{100}\)</button>
+      </div>
+      <div class="quiz-feedback">A. Exponential beats any polynomial regardless of the exponent. Growth hierarchy: log &lt; poly &lt; exp.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Q10 · §5</div>
+      <div class="q-question">Continuity at \(a\) requires:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f(a)\) defined only</button>
+        <button class="quiz-opt" data-ans="b">B. The limit exists only</button>
+        <button class="quiz-opt" data-ans="c">C. \(f(a)\) defined, limit exists, and they are equal</button>
+        <button class="quiz-opt" data-ans="d">D. \(f\) is bounded near \(a\)</button>
+      </div>
+      <div class="quiz-feedback">C. All three conditions of Definition 5.1.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Q11 · §5</div>
+      <div class="q-question">What type of discontinuity does \(f(x) = \frac{\sin x}{x}\) have at \(x = 0\)?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Jump</button>
+        <button class="quiz-opt" data-ans="b">B. Removable</button>
+        <button class="quiz-opt" data-ans="c">C. Essential</button>
+        <button class="quiz-opt" data-ans="d">D. No discontinuity — it is continuous</button>
+      </div>
+      <div class="quiz-feedback">B. \(f(0)\) undefined but \(\lim_{x \to 0} \sin x / x = 1\), so redefining \(f(0) = 1\) removes the discontinuity.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Q12 · §5</div>
+      <div class="q-question">\(f(x) = |x|\) at \(x = 0\) is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Continuous but not differentiable</button>
+        <button class="quiz-opt" data-ans="b">B. Differentiable but not continuous</button>
+        <button class="quiz-opt" data-ans="c">C. Both continuous and differentiable</button>
+        <button class="quiz-opt" data-ans="d">D. Neither</button>
+      </div>
+      <div class="quiz-feedback">A. |x| is continuous everywhere but has a corner at 0 where left and right slopes disagree.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="d">
+      <div class="q-num">Q13 · §6</div>
+      <div class="q-question">IVT requires \(f\) to be:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Differentiable</button>
+        <button class="quiz-opt" data-ans="b">B. Monotonic</button>
+        <button class="quiz-opt" data-ans="c">C. Bounded</button>
+        <button class="quiz-opt" data-ans="d">D. Continuous on a closed interval</button>
+      </div>
+      <div class="quiz-feedback">D. Continuity is the only hypothesis. Others are not needed.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Q14 · §6</div>
+      <div class="q-question">IVT guarantees the existence of \(c\) with \(f(c) = y_0\). Does it give:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. A formula for \(c\)</button>
+        <button class="quiz-opt" data-ans="b">B. Uniqueness of \(c\)</button>
+        <button class="quiz-opt" data-ans="c">C. Existence only</button>
+        <button class="quiz-opt" data-ans="d">D. All of the above</button>
+      </div>
+      <div class="quiz-feedback">C. IVT is a pure existence statement. Multiple \(c\) may exist; numerical methods (bisection, Newton) are needed to find them.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Q15 · §7</div>
+      <div class="q-question">Which function is continuous on \((0, 1]\) but NOT uniformly continuous?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(1/x\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(x^2\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(\sqrt{x}\)</button>
+        <button class="quiz-opt" data-ans="d">D. \(\sin x\)</button>
+      </div>
+      <div class="quiz-feedback">A. Near 0 the slope is unbounded; no single δ works for all points.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="d">
+      <div class="q-num">Q16 · §7</div>
+      <div class="q-question">Heine-Cantor theorem: continuous on \([a, b]\) (closed bounded) implies:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Differentiable</button>
+        <button class="quiz-opt" data-ans="b">B. Monotonic</button>
+        <button class="quiz-opt" data-ans="c">C. Bounded above only</button>
+        <button class="quiz-opt" data-ans="d">D. Uniformly continuous</button>
+      </div>
+      <div class="quiz-feedback">D. Compactness of the interval + continuity gives uniform continuity.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Q17 · §8</div>
+      <div class="q-question">If \(f\) is differentiable at \(a\), then \(f\) is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Automatically bounded</button>
+        <button class="quiz-opt" data-ans="b">B. Continuous at \(a\)</button>
+        <button class="quiz-opt" data-ans="c">C. Twice differentiable at \(a\)</button>
+        <button class="quiz-opt" data-ans="d">D. Monotonic near \(a\)</button>
+      </div>
+      <div class="quiz-feedback">B. Theorem 8.1. Differentiability is stronger than continuity — the converse fails.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Q18 · §8</div>
+      <div class="q-question">The Weierstrass function is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Continuous everywhere but differentiable nowhere</button>
+        <button class="quiz-opt" data-ans="b">B. Differentiable everywhere but nowhere continuous</button>
+        <button class="quiz-opt" data-ans="c">C. Discontinuous everywhere</button>
+        <button class="quiz-opt" data-ans="d">D. A polynomial</button>
+      </div>
+      <div class="quiz-feedback">A. Shows continuity is much weaker than differentiability. Brownian motion paths share this property.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Q19 · §6</div>
+      <div class="q-question">Bisection method requires:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Derivative of \(g\)</button>
+        <button class="quiz-opt" data-ans="b">B. Convexity of \(g\)</button>
+        <button class="quiz-opt" data-ans="c">C. Continuity of \(g\) and sign change over the initial interval</button>
+        <button class="quiz-opt" data-ans="d">D. A good initial guess close to the root</button>
+      </div>
+      <div class="quiz-feedback">C. That's it — just IVT hypotheses. Slower than Newton but more robust.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Q20 · §3</div>
+      <div class="q-question">\(\displaystyle \lim_{x \to \infty} \frac{3x^2 + 2x + 1}{5x^2 - x + 7}\) equals:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. 0</button>
+        <button class="quiz-opt" data-ans="b">B. 3/5</button>
+        <button class="quiz-opt" data-ans="c">C. ∞</button>
+        <button class="quiz-opt" data-ans="d">D. 1</button>
+      </div>
+      <div class="quiz-feedback">B. Same-degree polynomials: ratio of leading coefficients.</div>
+    </div>
+  </div>
+
+  <!-- ========== FLASHCARDS ========== -->
+  <div class="tab-content" id="tab-flashcards">
+    <h2>📇 Flashcards</h2>
+
+    <div class="flash-container">
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Informal definition of limit</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(\lim_{x \to a} f(x) = L\) means \(f(x)\) can be made arbitrarily close to \(L\) by taking \(x\) sufficiently close to (but not equal to) \(a\).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>ε-δ definition of limit</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(\lim_{x \to a} f(x) = L\) iff for every \(\varepsilon &gt; 0\), there exists \(\delta &gt; 0\) such that \(0 &lt; |x - a| &lt; \delta \implies |f(x) - L| &lt; \varepsilon\).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Two-sided limit exists iff...</div></div><div class="back-content"><div class="side-label back">Back</div><div>Both one-sided limits exist and are equal (Theorem 1.2).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Continuity at a point — 3 conditions</div></div><div class="back-content"><div class="side-label back">Back</div><div>(1) \(f(a)\) defined, (2) \(\lim_{x \to a} f(x)\) exists, (3) they are equal.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Squeeze theorem</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(g \leq f \leq h\) near \(a\), \(g, h \to L\) ⟹ \(f \to L\).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>List: indeterminate forms</div></div><div class="back-content"><div class="side-label back">Back</div><div>0/0, ∞/∞, 0·∞, ∞−∞, 0⁰, ∞⁰, 1^∞.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Growth hierarchy at ∞</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(1 \ll \log x \ll x^p \ll a^x\) (for \(p &gt; 0, a &gt; 1\)).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Intermediate Value Theorem</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(f\) continuous on \([a,b]\), \(y_0\) between \(f(a)\) and \(f(b)\) ⟹ some \(c \in [a,b]\) with \(f(c) = y_0\). Existence only.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Uniform continuity — key difference</div></div><div class="back-content"><div class="side-label back">Back</div><div>Same \(\delta\) works for every point in the domain (not just each point separately). Heine-Cantor: continuous on compact ⟹ uniformly continuous.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Differentiability vs continuity</div></div><div class="back-content"><div class="side-label back">Back</div><div>Differentiable ⟹ continuous. Continuous ⟹ differentiable is FALSE (\(|x|\) at 0, Weierstrass function).</div></div></div>
+    </div>
+  </div>
+
+  <!-- ========== HOMEWORK ========== -->
+  <div class="tab-content" id="tab-homework">
+    <h2>✨ Homework — 5 problems</h2>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 1</div><span class="hw-tag">Computation</span>
+      <h3>Evaluate several limits</h3>
+      <p>Compute each. Justify indeterminate cases with a technique.</p>
+      <ol>
+        <li>\(\displaystyle \lim_{x \to 4} \frac{x - 4}{\sqrt{x} - 2}\)</li>
+        <li>\(\displaystyle \lim_{x \to 0} \frac{\sqrt{1 + x} - \sqrt{1 - x}}{x}\)</li>
+        <li>\(\displaystyle \lim_{x \to \infty} (\sqrt{x^2 + x} - x)\)</li>
+        <li>\(\displaystyle \lim_{x \to 0^+} x \ln x\)</li>
+      </ol>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solutions</button>
+      <div class="solution">
+        <p><b>(1)</b> Rationalize denominator: \((x-4)/(\sqrt{x}-2) = (x-4)(\sqrt{x}+2)/(x-4) = \sqrt{x}+2\). Limit = 4.</p>
+        <p><b>(2)</b> Rationalize numerator: numerator becomes \(((1+x) - (1-x))/(\sqrt{1+x}+\sqrt{1-x}) = 2x/(\sqrt{1+x}+\sqrt{1-x})\). Divide by x: \(2/(\sqrt{1+x}+\sqrt{1-x}) \to 2/(1+1) = 1\).</p>
+        <p><b>(3)</b> ∞−∞ form. Multiply by conjugate: \((\sqrt{x^2+x} - x) \cdot \frac{\sqrt{x^2+x}+x}{\sqrt{x^2+x}+x} = \frac{x}{\sqrt{x^2+x}+x} = \frac{1}{\sqrt{1+1/x}+1} \to \frac{1}{1+1} = 1/2\).</p>
+        <p><b>(4)</b> 0·(−∞) form. Rewrite as \(\ln x / (1/x)\); apply L'Hôpital (or use growth hierarchy): \(\ln x / (1/x) = -x \ln x \cdot (-1)\)... use substitution \(y = 1/x\), \(y \to \infty\): \(x \ln x = (1/y) \ln(1/y) = -\ln y / y \to 0\). Answer 0.</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 2</div><span class="hw-tag">ε-δ proof</span>
+      <h3>Prove a limit rigorously</h3>
+      <p>Use the ε-δ definition to prove \(\displaystyle \lim_{x \to 2} x^2 = 4\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Given ε &gt; 0. \(|x^2 - 4| = |x-2||x+2|\).</p>
+        <p>Restrict \(|x - 2| &lt; 1\), so \(1 &lt; x &lt; 3\) and \(|x + 2| &lt; 5\).</p>
+        <p>Then \(|x^2 - 4| &lt; 5|x - 2|\). To make this \(&lt; \varepsilon\), need \(|x-2| &lt; \varepsilon/5\).</p>
+        <p>Choose \(\delta = \min(1, \varepsilon/5)\). Then \(0 &lt; |x - 2| &lt; \delta\) gives \(|x^2 - 4| &lt; \varepsilon\). \(\blacksquare\)</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 3</div><span class="hw-tag">Continuity</span>
+      <h3>Find values making a piecewise function continuous</h3>
+      <p>Determine \(a, b\) so that</p>
+      \[ f(x) = \begin{cases} x^2 &amp; x \leq 1 \\ ax + b &amp; 1 &lt; x &lt; 2 \\ 3x - 4 &amp; x \geq 2 \end{cases} \]
+      <p>is continuous on all of \(\mathbb{R}\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Continuity at \(x = 1\): left = \(1^2 = 1\), right = \(a + b\). Need \(a + b = 1\).</p>
+        <p>Continuity at \(x = 2\): left = \(2a + b\), right = \(3(2) - 4 = 2\). Need \(2a + b = 2\).</p>
+        <p>Subtract: \(a = 1\), then \(b = 0\).</p>
+        <p>Answer: \(a = 1, b = 0\), so middle piece is \(f(x) = x\).</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 4</div><span class="hw-tag">IVT</span>
+      <h3>Prove a fixed point exists</h3>
+      <p>Let \(f: [0, 1] \to [0, 1]\) be continuous. Show that there exists \(c \in [0, 1]\) with \(f(c) = c\) (a "fixed point").</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Consider \(g(x) = f(x) - x\). \(g\) is continuous on \([0, 1]\) as a difference of continuous functions.</p>
+        <p>\(g(0) = f(0) - 0 = f(0) \geq 0\) (since \(f(0) \in [0, 1]\)).</p>
+        <p>\(g(1) = f(1) - 1 \leq 0\) (since \(f(1) \in [0, 1]\)).</p>
+        <p>If \(g(0) = 0\), take \(c = 0\). If \(g(1) = 0\), take \(c = 1\). Otherwise \(g(0) &gt; 0 &gt; g(1)\); by IVT, some \(c \in (0, 1)\) has \(g(c) = 0\), i.e., \(f(c) = c\). \(\blacksquare\)</p>
+        <p><b>Remark</b>: This is the 1-D Brouwer fixed-point theorem. The multi-dimensional version is central to game theory (Nash equilibrium) and general equilibrium in economics.</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 5</div><span class="hw-tag">Finance</span>
+      <h3>Bisection convergence for implied volatility</h3>
+      <p>Suppose a European call has market price \(C_{\text{mkt}} = 5.20\), spot \(S = 100\), strike \(K = 100\), rate \(r = 0.05\), maturity \(T = 0.25\). The Black-Scholes call price as a function of σ is strictly increasing and continuous on \((0, \infty)\).</p>
+      <ol>
+        <li>Explain why bisection must converge to a unique implied volatility.</li>
+        <li>How many iterations of bisection on an initial bracket \([\sigma_{\text{lo}}, \sigma_{\text{hi}}] = [0.01, 2.0]\) are needed to reach tolerance \(10^{-6}\)?</li>
+      </ol>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p><b>(1)</b> Let \(g(\sigma) = C_{\text{BS}}(\sigma) - C_{\text{mkt}}\). As \(\sigma \to 0^+\), \(C_{\text{BS}} \to \max(S - Ke^{-rT}, 0)\), and as \(\sigma \to \infty\), \(C_{\text{BS}} \to S\). Both bounds bracket \(C_{\text{mkt}}\) for typical market prices, so \(g\) changes sign. By IVT (continuity + sign change) a root exists. By strict monotonicity, the root is unique.</p>
+        <p><b>(2)</b> Initial bracket width \(w_0 = 2.0 - 0.01 = 1.99\). After \(n\) bisections, width is \(w_n = w_0 / 2^n\). Require \(w_0 / 2^n \leq 10^{-6}\).</p>
+        \[ 2^n \geq w_0 \cdot 10^6 = 1.99 \times 10^6, \]
+        \[ n \geq \log_2(1.99 \times 10^6) \approx 20.9. \]
+        <p>So \(n = 21\) iterations suffice.</p>
+        <p><b>Remark</b>: Newton's method typically converges in 4-6 iterations, an order of magnitude faster. But bisection is guaranteed to converge; Newton can fail near vanishing Vega.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REFERENCES ========== -->
+  <div class="tab-content" id="tab-references">
+    <h2>📚 References</h2>
+
+    <div class="ref-section">
+      <h3>Standard textbook coverage</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">Stewart — Calculus: Early Transcendentals</div><div class="ref-detail">Chapters 2 and 3.4: limits, continuity, IVT. Abundant computation exercises.</div></li>
+        <li><div class="ref-title">Spivak — Calculus</div><div class="ref-detail">Chapters 5, 6: rigorous ε-δ treatment. Excellent for internalizing the definition.</div></li>
+        <li><div class="ref-title">Rudin — Principles of Mathematical Analysis</div><div class="ref-detail">Chapter 4: continuity in metric spaces. Where ε-δ meets topology.</div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Finance-oriented</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">Stefanica — A Primer for the Mathematics of Financial Engineering</div><div class="ref-detail">Section 1.4 (Limits) and 1.5 (L'Hôpital's rule). Financial applications throughout.</div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Video and interactive</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">3Blue1Brown — Essence of Calculus, Ch. 7 (Limits, L'Hôpital, ε-δ)</div><div class="ref-detail">Excellent visual introduction to ε-δ. <a href="https://www.youtube.com/watch?v=kfF40MiS7zA" target="_blank">YouTube</a></div></li>
+        <li><div class="ref-title">MIT 18.01SC — Session 5-8</div><div class="ref-detail">Prof. Jerison's videos on limits and continuity. <a href="https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/" target="_blank">OCW</a></div></li>
+        <li><div class="ref-title">Khan Academy — Limits and Continuity</div><div class="ref-detail">Step-by-step exercises. <a href="https://www.khanacademy.org/math/calculus-1/cs1-limits-and-continuity" target="_blank">Course</a></div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Advanced (PhD prep)</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">Rudin — Principles of Mathematical Analysis, Ch. 3-4</div><div class="ref-detail">Sequences, series, continuity in topological setting. Uniform continuity via compactness (Heine-Cantor).</div></li>
+        <li><div class="ref-title">Royden &amp; Fitzpatrick — Real Analysis</div><div class="ref-detail">Extension to measurable functions and \(L^p\) spaces. Basis for probability theory and stochastic calculus.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========== RECALL ========== -->
+  <div class="tab-content" id="tab-recall">
+    <h2>🎨 Recall</h2>
+
+    <div class="recall-item"><b>§1 Idea of a limit</b>: \(\lim_{x \to a} f(x) = L\) — outputs get arbitrarily close to \(L\) as inputs approach \(a\). Value \(f(a)\) irrelevant. Two-sided limit exists iff both one-sided limits exist and agree.</div>
+    <div class="recall-item"><b>§2 ε-δ</b>: for every \(\varepsilon &gt; 0\), some \(\delta &gt; 0\) makes \(0 &lt; |x - a| &lt; \delta \implies |f(x) - L| &lt; \varepsilon\). Quantifier order matters. Uniqueness of limit proved via triangle inequality.</div>
+    <div class="recall-item"><b>§3 Limit laws</b>: sum, product, quotient (\(M \neq 0\)). Squeeze theorem. Indeterminate forms (0/0, ∞/∞, etc.) resolved by factor, rationalize, or growth arguments.</div>
+    <div class="recall-item"><b>§4 Limits at infinity</b>: horizontal asymptotes. Growth hierarchy: \(1 \ll \log x \ll x^p \ll a^x\). Infinite limits give vertical asymptotes.</div>
+    <div class="recall-item"><b>§5 Continuity</b>: three conditions. Removable / jump / essential discontinuity classification. Polynomials, rationals (on domain), exp, log, trig, all continuous. Continuity preserved by arithmetic and composition.</div>
+    <div class="recall-item"><b>§6 IVT</b>: continuous on \([a, b]\), \(y_0\) between \(f(a), f(b)\) ⟹ \(f(c) = y_0\) for some \(c\). Existence only, not uniqueness or formula. Basis for bisection root-finding.</div>
+    <div class="recall-item"><b>§7 Uniform continuity</b>: single \(\delta\) for all points, not per-point. Heine-Cantor: continuous on compact ⟹ uniformly continuous. Extreme Value Theorem: continuous on \([a,b]\) attains max and min.</div>
+    <div class="recall-item"><b>§8 Lipschitz &amp; Hölder</b>: \(|f(x)-f(y)| \leq K|x-y|\) (Lipschitz) or \(\leq C|x-y|^\alpha\) (Hölder). Chain: Lipschitz ⟹ uniform ⟹ continuous. SDE existence requires Lipschitz coefficients.</div>
+    <div class="recall-item"><b>§9 Bounded variation</b>: total variation \(V_a^b(f) = \sup_P \sum|f(t_i)-f(t_{i-1})|\). Brownian motion has infinite variation but finite quadratic variation \([W,W]_t = t\). This is why Itô calculus differs from Riemann-Stieltjes.</div>
+    <div class="recall-item"><b>§10 Bridge to derivatives</b>: derivative = limit of difference quotient. Differentiable ⟹ continuous, converse fails (\(|x|\) at 0, Weierstrass). Brownian paths are continuous but nowhere differentiable.</div>
+
+    <div class="box box-warning" style="margin-top:2rem;">
+      <div class="box-title">Preparing for Lesson 3 — Derivatives</div>
+      <p>Solid understanding of limits is prerequisite because every derivative is a limit. Ensure comfort with:</p>
+      <ul>
+        <li>Computing \(0/0\) limits by factor / rationalize</li>
+        <li>Applying limit laws mechanically</li>
+        <li>The three-condition definition of continuity</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="lesson-footer">
+    <a href="functions.html" class="nav-btn">← Lesson 1: Functions</a>
+    <a href="../Quant-Roadmap.html" class="nav-btn">↑ Atlas</a>
+    <a href="derivatives.html" class="nav-btn">Lesson 3: Derivatives →</a>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+});
+
+document.querySelectorAll('.quiz-item').forEach(item => {
+  const correct = item.dataset.correct;
+  item.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (item.classList.contains('answered')) return;
+      const chosen = opt.dataset.ans;
+      item.querySelectorAll('.quiz-opt').forEach(o => {
+        if (o.dataset.ans === correct) o.classList.add('correct');
+        else if (o.dataset.ans === chosen) o.classList.add('wrong');
+      });
+      item.classList.add('answered');
+    });
+  });
+});
+</script>
+</body>
+</html>

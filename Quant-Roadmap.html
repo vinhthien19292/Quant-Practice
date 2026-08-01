@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quant-Practice — Learning Atlas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- PWA: install as app on tablet/phone home screen -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<meta name="theme-color" content="#1a1510">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Quant Atlas">
+<meta name="application-name" content="Quant Atlas">
+
+<!-- Smart font loader: try local first, fall back to CDN -->
+<script>
+  var ASSET_ROOT = 'assets/';
+  var CDN_FONTS = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap';
+  function loadWithFallback(tagName, attrs, cdnUrl) {
+    var el = document.createElement(tagName);
+    Object.keys(attrs).forEach(function(k) { el.setAttribute(k, attrs[k]); });
+    el.onerror = function() {
+      var fb = document.createElement(tagName);
+      Object.keys(attrs).forEach(function(k) {
+        if (k === 'src' || k === 'href') fb.setAttribute(k, cdnUrl);
+        else fb.setAttribute(k, attrs[k]);
+      });
+      document.head.appendChild(fb);
+    };
+    document.head.appendChild(el);
+  }
+  loadWithFallback('link', {rel: 'stylesheet', href: ASSET_ROOT + 'fonts/fonts.css'}, CDN_FONTS);
+</script>
+<style>
+  :root {
+    --bg: #1a1510; --bg-soft: #221c15; --bg-card: #2a2218;
+    --text: #ede4d3; --text-muted: #a89e8b; --text-dim: #6b6152;
+    --accent: #e5a54e; --accent-soft: #b8823d;
+    --green: #86c084; --purple: #b8a4de; --blue: #8fb5e0; --pink: #e0a4c4;
+    --red: #d97056; --orange: #d97848; --cyan: #78bdc9; --yellow: #d4b348; --violet: #a884cc;
+    --border: #3a2f22;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* Top bar */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: rgba(26, 21, 16, 0.9); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border); z-index: 100;
+    display: flex; align-items: center; padding: 0 1.5rem; gap: 1rem;
+  }
+  .brand { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+  .brand-sub { color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem; }
+  .search-box { flex: 1; max-width: 400px; margin-left: auto; position: relative; }
+  .search-box input {
+    width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 14px 8px 36px; border-radius: 8px; font-family: inherit; font-size: 0.9rem;
+  }
+  .search-box input:focus { outline: none; border-color: var(--accent); }
+  .search-box::before { content: '🔎'; position: absolute; left: 10px; top: 8px; font-size: 0.9rem; }
+  .search-hint { color: var(--text-dim); font-size: 0.75rem; padding: 4px 8px; background: var(--bg-card); border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
+  .top-stats { color: var(--text-muted); font-size: 0.85rem; }
+  .top-stats b { color: var(--green); }
+
+  /* Main layout */
+  .main { position: absolute; top: 60px; left: 0; right: 0; bottom: 0; display: flex; }
+
+  /* Left nav */
+  .left-nav {
+    width: 300px; background: var(--bg-soft); border-right: 1px solid var(--border);
+    overflow-y: auto; flex-shrink: 0;
+  }
+  .left-nav-header {
+    padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg-soft); z-index: 5;
+  }
+  .left-nav-header h3 { font-family: 'Playfair Display', serif; font-size: 1rem; margin: 0; color: var(--text); }
+  .left-nav-header .hint { color: var(--text-dim); font-size: 0.75rem; margin-top: 3px; }
+  .pillar-section { border-bottom: 1px solid var(--border); }
+  .pillar-header {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+    cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .pillar-header:hover { background: var(--bg-card); }
+  .pillar-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+  }
+  .pillar-info { flex: 1; min-width: 0; }
+  .pillar-name {
+    font-family: 'Playfair Display', serif; font-weight: 600; font-size: 1.05rem;
+    color: var(--text); line-height: 1.3;
+  }
+  .pillar-count {
+    color: var(--text-dim); font-size: 0.75rem; margin-left: 6px; font-weight: 400;
+  }
+  .pillar-desc {
+    color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; line-height: 1.5;
+  }
+  .pillar-toggle {
+    color: var(--text-dim); font-size: 0.7rem; margin-top: 6px; transition: transform 0.15s;
+  }
+  .pillar-section.open .pillar-toggle { transform: rotate(90deg); }
+  .pillar-concepts { display: none; padding: 0 16px 12px 34px; }
+  .pillar-section.open .pillar-concepts { display: block; }
+  .concept-link {
+    display: block; padding: 10px 12px; margin: 3px 0; border-radius: 6px;
+    color: var(--text-muted); font-size: 0.88rem; cursor: pointer;
+    text-decoration: none; line-height: 1.35;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .concept-link:hover, .concept-link:active { background: var(--bg-card); color: var(--text); }
+  .concept-link.active { background: var(--bg-card); color: var(--accent); font-weight: 500; }
+  .concept-link .level-dot {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor; margin-right: 6px; opacity: 0.5; vertical-align: middle;
+  }
+  .concept-link.built { color: var(--text); }
+  .concept-link.built::after { content: '📖'; margin-left: 6px; font-size: 0.75rem; }
+  .concept-link.nav-mastered { color: #86c084; font-weight: 500; }
+  .concept-link.nav-mastered::before { content: '✓ '; margin-right: 2px; }
+  .concept-link.nav-learning { color: #b8a4de; }
+  .concept-link.nav-learning::before { content: '◐ '; margin-right: 2px; opacity: 0.8; }
+
+  .atlas-wrap { flex: 1; position: relative; overflow: hidden; background: radial-gradient(ellipse at center, #1f1912 0%, #0f0c08 100%); }
+  #atlas-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: grab; }
+  #atlas-svg.dragging { cursor: grabbing; }
+
+  .zoom-controls { position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+  .zoom-btn {
+    width: 48px; height: 48px; border-radius: 10px; background: var(--bg-card);
+    border: 1px solid var(--border); color: var(--text); cursor: pointer;
+    font-size: 1.4rem; display: flex; align-items: center; justify-content: center;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .zoom-btn:hover, .zoom-btn:active { border-color: var(--accent); color: var(--accent); }
+
+  .legend { position: absolute; bottom: 20px; left: 20px; background: rgba(42, 34, 24, 0.85); backdrop-filter: blur(8px); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.8rem; z-index: 10; max-width: 280px; }
+  .legend-title { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Sidebar (detail panel) */
+  .sidebar {
+    width: 380px; background: var(--bg-soft); border-left: 1px solid var(--border);
+    padding: 1.5rem; overflow-y: auto; transition: transform 0.25s;
+  }
+  .sidebar.hidden { transform: translateX(100%); width: 0; padding: 0; border: 0; }
+  .sidebar-close { position: absolute; top: 8px; right: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; line-height: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .sidebar-close:hover, .sidebar-close:active { border-color: var(--accent); color: var(--accent); }
+  .sidebar-empty { text-align: center; color: var(--text-dim); padding: 3rem 1rem; }
+  .sidebar-empty .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+  .detail-pillar { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; }
+  .detail-title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.6rem; font-weight: 700; margin: 0.5rem 0; line-height: 1.15; }
+  .detail-desc { color: var(--text-muted); margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+  .detail-mastery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 1rem 0; }
+  .mastery-btn {
+    padding: 12px 4px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    border: 1px solid; background: transparent; color: white; text-align: center;
+    min-height: 44px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .mastery-btn.active { transform: scale(1.05); }
+  .mastery-new { border-color: #6b6152; }
+  .mastery-new.active { background: #6b6152; }
+  .mastery-learning { border-color: var(--purple); }
+  .mastery-learning.active { background: var(--purple); }
+  .mastery-mastered { border-color: var(--green); }
+  .mastery-mastered.active { background: var(--green); }
+
+  .open-btn {
+    display: block; width: 100%; text-align: center; padding: 12px; margin-top: 1rem;
+    background: var(--accent); color: var(--bg); border: none; border-radius: 8px;
+    font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer;
+  }
+  .open-btn:hover { background: var(--accent-soft); }
+  .open-btn.disabled { background: var(--bg-card); color: var(--text-dim); cursor: not-allowed; }
+
+  .detail-section { margin: 1.25rem 0; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .detail-section-title { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700; }
+  .prereq-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .prereq-chip { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; background: var(--bg-card); color: var(--text); cursor: pointer; border: 1px solid var(--border); }
+  .prereq-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Node styles */
+  .node { cursor: pointer; transition: filter 0.2s; }
+  .node:hover { filter: brightness(1.4); }
+  .node.active > circle { stroke: white !important; stroke-width: 3 !important; }
+  .node.dimmed { opacity: 0.15; }
+  .node text { pointer-events: none; user-select: none; transition: fill 0.2s; }
+
+  /* Mastery state — node glow */
+  .node.mastered > circle {
+    stroke: #86c084; stroke-width: 3;
+    filter: drop-shadow(0 0 8px #86c084) drop-shadow(0 0 3px #86c084);
+  }
+  .node.mastered > text { fill: #86c084; font-weight: 600; }
+  .node.learning > circle {
+    stroke: #b8a4de; stroke-width: 3;
+    filter: drop-shadow(0 0 6px #b8a4de);
+  }
+  .node.learning > text { fill: #b8a4de; }
+
+  /* Edges — brightness reflects mastery of endpoints */
+  .edge { stroke-opacity: 0.28; stroke: #d4a054; stroke-width: 1.3; transition: all 0.3s; }
+  .edge.highlighted { stroke-opacity: 0.95; stroke-width: 2.2; stroke: #f5c06e; filter: drop-shadow(0 0 3px #f5c06e); }
+  .edge.reachable { stroke-opacity: 0.55; stroke: #c2b0e8; stroke-width: 1.6; }
+  .edge.mastered { stroke-opacity: 0.90; stroke: #86c084; stroke-width: 2; filter: drop-shadow(0 0 4px rgba(134,192,132,0.6)); }
+  .edge.mastered-partial { stroke-opacity: 0.65; stroke: #a8d5a6; stroke-width: 1.7; }
+
+  /* Progress modal */
+  .progress-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 4vh 2rem; overflow-y: auto; }
+  .progress-modal.open { display: flex; }
+  .progress-modal-box {
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px;
+    width: 100%; max-width: 780px; padding: 1.75rem 2rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative;
+  }
+  .progress-modal-box h2 { font-family: 'Playfair Display', serif; margin: 0 0 0.25rem; color: var(--accent); font-size: 1.5rem; }
+  .progress-modal-box .sub { color: var(--text-muted); font-size: 0.85rem; }
+  .progress-close { position: absolute; top: 12px; right: 14px; background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
+  .progress-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 1.25rem 0; }
+  .progress-stat { background: var(--bg-card); border-radius: 8px; padding: 12px; text-align: center; }
+  .progress-stat .num { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .progress-stat .num.green { color: var(--green); }
+  .progress-stat .num.purple { color: var(--purple); }
+  .progress-stat .lbl { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; }
+  .pillar-bar-row { margin: 8px 0; }
+  .pillar-bar-label { display: flex; justify-content: space-between; font-size: 0.83rem; color: var(--text); margin-bottom: 3px; }
+  .pillar-bar-label .name { display: flex; align-items: center; gap: 6px; }
+  .pillar-bar-label .count { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+  .pillar-bar { position: relative; height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden; }
+  .pillar-bar-mastered { position: absolute; left: 0; top: 0; height: 100%; background: var(--green); transition: width 0.4s; }
+  .pillar-bar-learning { position: absolute; top: 0; height: 100%; background: var(--purple); transition: width 0.4s, left 0.4s; }
+  .progress-section { margin: 1.5rem 0 0.5rem; }
+  .progress-section-title { font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: 700; }
+  .activity-log { background: var(--bg-card); border-radius: 6px; padding: 10px 14px; max-height: 180px; overflow-y: auto; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
+  .activity-log .item { color: var(--text-muted); padding: 3px 0; }
+  .activity-log .item .date { color: var(--text-dim); margin-right: 8px; }
+  .activity-log .item .state.mastered { color: var(--green); }
+  .activity-log .item .state.learning { color: var(--purple); }
+  .progress-actions { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
+  .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); padding: 10px 16px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.88rem; }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: var(--bg); border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 0.88rem; }
+  .btn-primary:hover { background: var(--accent-soft); }
+  .export-area { width: 100%; min-height: 180px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.5; margin-top: 8px; resize: vertical; }
+  .top-progress-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 8px; font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .top-progress-btn:hover, .top-progress-btn:active { border-color: var(--accent); color: var(--accent); background: var(--bg-soft); }
+  .top-progress-btn kbd, .top-help-btn kbd, .search-hint {
+    background: var(--bg-soft); padding: 2px 6px; border-radius: 3px;
+    font-size: 0.68rem; font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim); border: 1px solid var(--border);
+  }
+  /* Hide keyboard chips on touch devices where they mislead — button is the primary control */
+  @media (hover: none) and (pointer: coarse) {
+    .top-progress-btn kbd, .search-hint { display: none; }
+  }
+  .top-help-btn {
+    width: 44px; height: 44px; border-radius: 8px; background: var(--bg-card);
+    border: 1px solid var(--border); color: var(--text); cursor: pointer;
+    font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .top-help-btn:hover, .top-help-btn:active { border-color: var(--accent); color: var(--accent); background: var(--bg-soft); }
+
+  /* Help modal */
+  .help-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; }
+  .help-modal.open { display: flex; }
+  .help-modal-box {
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px;
+    width: 100%; max-width: 520px; padding: 1.75rem 2rem; position: relative;
+  }
+  .help-modal-box h2 { font-family: 'Playfair Display', serif; margin: 0 0 1rem; color: var(--accent); font-size: 1.4rem; }
+  .help-modal-box h3 { font-family: 'Playfair Display', serif; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin: 1.25rem 0 0.5rem; font-weight: 700; }
+  .help-close { position: absolute; top: 10px; right: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; line-height: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .help-close:hover, .help-close:active { border-color: var(--accent); color: var(--accent); }
+  .help-list { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; margin: 0.5rem 0; align-items: center; }
+  .help-list .action { color: var(--text); font-size: 0.9rem; }
+  .help-list .keys { display: flex; gap: 4px; }
+  .help-list .keys kbd {
+    background: var(--bg-card); padding: 3px 8px; border-radius: 4px;
+    font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;
+    color: var(--accent); border: 1px solid var(--border);
+  }
+
+  /* Search modal */
+  .search-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding-top: 12vh; }
+  .search-modal.open { display: flex; }
+  .search-modal-box { background: var(--bg-soft); border: 2px solid var(--accent); border-radius: 12px; width: 90%; max-width: 600px; padding: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .search-modal input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 1.15rem; padding: 8px; outline: none; }
+  .search-results { max-height: 400px; overflow-y: auto; margin-top: 0.5rem; }
+  .search-result { padding: 10px 14px; border-radius: 6px; cursor: pointer; }
+  .search-result:hover, .search-result.focused { background: var(--bg-card); }
+  .search-result .r-name { color: var(--text); font-weight: 500; }
+  .search-result .r-meta { color: var(--text-muted); font-size: 0.75rem; margin-top: 2px; }
+
+  /* Onboarding hint */
+  .onboarding { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(42, 34, 24, 0.9); backdrop-filter: blur(8px); padding: 10px 20px; border-radius: 999px; font-size: 0.85rem; color: var(--text-muted); border: 1px solid var(--border); z-index: 10; animation: fadeIn 0.5s; }
+  .onboarding.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="brand">⚛ Quant-Practice</div>
+  <div class="brand-sub">Learning Atlas</div>
+  <div class="search-box" style="margin-left:2rem;">
+    <input type="text" id="search-box" placeholder="Search concepts, formulas, symbols..." onclick="openSearch()">
+  </div>
+  <span class="search-hint">Ctrl K</span>
+  <button class="top-progress-btn" onclick="openProgress()" title="Open progress dashboard">📊 Progress <kbd>Ctrl P</kbd></button>
+  <button class="top-help-btn" onclick="openHelp()" title="Shortcuts &amp; help" aria-label="Help">?</button>
+  <div class="top-stats" id="top-stats"></div>
+</div>
+
+<div class="main">
+  <nav class="left-nav" id="left-nav">
+    <div class="left-nav-header">
+      <h3>Concept Pillars</h3>
+      <div class="hint">Click pillar to expand · Click concept to open in atlas</div>
+    </div>
+    <!-- Populated by JS -->
+  </nav>
+  <div class="atlas-wrap">
+    <svg id="atlas-svg" viewBox="0 0 2000 1400" preserveAspectRatio="xMidYMid meet"></svg>
+
+    <div class="onboarding" id="onboarding">
+      💡 Scroll to zoom · Drag to pan · Click a node to open lesson
+    </div>
+
+    <div class="legend">
+      <div class="legend-title">Concept pillars</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Math Foundations</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Probability &amp; Statistics</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--pink)"></span>Stochastic Processes</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Derivatives &amp; Options</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span>Time Series &amp; Econometrics</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Portfolio &amp; Asset Pricing</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--cyan)"></span>Machine Learning</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#84cc16"></span>Trading Strategies</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#f97316"></span>Strategy Production</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Market Microstructure</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a3b18a"></span>Data Engineering</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--violet)"></span>Code &amp; Systems</div>
+    </div>
+
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoom(1.3)">+</button>
+      <button class="zoom-btn" onclick="zoom(1/1.3)">−</button>
+      <button class="zoom-btn" onclick="resetView()" title="Reset view">⤢</button>
+    </div>
+  </div>
+
+  <aside class="sidebar hidden" id="sidebar">
+    <button class="sidebar-close" onclick="closeSidebar()">×</button>
+    <div class="sidebar-empty" id="sidebar-empty">
+      <div class="icon">🎯</div>
+      <p>Click any node in the atlas to see its concept description, prerequisites, and open the lesson.</p>
+    </div>
+    <div id="sidebar-content" style="display:none;"></div>
+  </aside>
+</div>
+
+<!-- Help modal (keyboard shortcuts) -->
+<div class="help-modal" id="help-modal" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal-box">
+    <button class="help-close" onclick="closeHelp()">×</button>
+    <h2>⌨️ Shortcuts &amp; Guide</h2>
+
+    <h3>Keyboard shortcuts</h3>
+    <div class="help-list">
+      <span class="action">Open Search</span>
+      <span class="keys"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+
+      <span class="action">Open Progress dashboard</span>
+      <span class="keys"><kbd>Ctrl</kbd><kbd>P</kbd></span>
+
+      <span class="action">Close any modal</span>
+      <span class="keys"><kbd>Esc</kbd></span>
+
+      <span class="action">Navigate search results</span>
+      <span class="keys"><kbd>↑</kbd><kbd>↓</kbd></span>
+
+      <span class="action">Select highlighted result</span>
+      <span class="keys"><kbd>Enter</kbd></span>
+    </div>
+
+    <h3>Mouse &amp; touch</h3>
+    <div class="help-list">
+      <span class="action">Zoom atlas in/out</span>
+      <span class="keys"><kbd>Scroll wheel</kbd></span>
+
+      <span class="action">Pan atlas</span>
+      <span class="keys"><kbd>Click + drag</kbd></span>
+
+      <span class="action">Zoom on tablet</span>
+      <span class="keys"><kbd>Pinch</kbd></span>
+
+      <span class="action">Open concept detail</span>
+      <span class="keys"><kbd>Click node</kbd></span>
+    </div>
+
+    <h3>Workflow tips</h3>
+    <div style="font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+      <p>• Mark <b style="color:var(--purple)">Learning</b> when you start a concept · <b style="color:var(--green)">Mastered</b> after you solve homework without peeking.</p>
+      <p>• Every Sunday: Open Progress → Export summary → paste in chat so I can adjust the plan.</p>
+      <p>• Node glow shows what you've learned · Edges light up when both endpoints are mastered.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Progress modal -->
+<div class="progress-modal" id="progress-modal" onclick="if(event.target===this)closeProgress()">
+  <div class="progress-modal-box">
+    <button class="progress-close" onclick="closeProgress()">×</button>
+    <h2>📊 Study Progress</h2>
+    <div class="sub" id="progress-date"></div>
+
+    <div class="progress-overview" id="progress-overview"></div>
+
+    <div class="progress-section">
+      <div class="progress-section-title">Per Pillar</div>
+      <div id="progress-bars"></div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-section-title">Recent Activity (last 20)</div>
+      <div class="activity-log" id="progress-activity"></div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-section-title">Currently Learning</div>
+      <div id="progress-learning" style="font-size:0.85rem;color:var(--text-muted);"></div>
+    </div>
+
+    <div class="progress-actions">
+      <button class="btn-secondary" onclick="showExport()">📤 Export summary (paste to chat)</button>
+      <button class="btn-secondary" onclick="downloadJSON()">💾 Backup JSON</button>
+      <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📥 Restore JSON</button>
+      <button class="btn-secondary" onclick="confirmReset()" style="color:#d97056;border-color:#d97056;">🗑 Reset all</button>
+      <button class="btn-primary" onclick="closeProgress()">Close</button>
+    </div>
+    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(event)">
+    <div id="import-status" style="display:none;margin-top:8px;padding:10px;border-radius:6px;font-size:0.85rem;"></div>
+
+    <textarea class="export-area" id="export-area" style="display:none;" readonly></textarea>
+  </div>
+</div>
+
+<!-- Search modal -->
+<div class="search-modal" id="search-modal" onclick="if(event.target===this)closeSearch()">
+  <div class="search-modal-box">
+    <input type="text" id="search-input" placeholder="Search concepts, symbols... (Esc to close)" autocomplete="off">
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+// 10 pillars, ~85 concepts. Lesson file paths are given for built ones.
+const PILLARS = [
+  {id: 'math', name: 'Math Foundations', color: '#8fb5e0', angle: -90,
+    desc: 'The classical toolkit — calculus, linear algebra, ODEs. Every quantitative model downstream is built from these ingredients.',
+    concepts: [
+    {id: 'functions', name: 'Functions', level: 1, file: 'lessons/functions.html', desc: 'Formal definition, injectivity/surjectivity/bijectivity, composition, inverses, transformations, elementary function families.'},
+    {id: 'limits', name: 'Limits &amp; Continuity', level: 2, file: 'lessons/limits.html', desc: 'ε-δ definition, one-sided limits, continuity, uniform continuity, IVT.'},
+    {id: 'derivatives', name: 'Derivatives', level: 2, desc: 'Rate of change, chain rule, product rule, implicit differentiation, mean value theorem.'},
+    {id: 'integrals', name: 'Integrals', level: 3, desc: 'Riemann integral, FTC, u-substitution, integration by parts, improper integrals.'},
+    {id: 'taylor', name: 'Taylor Series', level: 3, desc: 'Taylor / Maclaurin series, remainder estimates, key expansions of e^x, sin, cos, log(1+x).'},
+    {id: 'multivar', name: 'Multivariable Calc', level: 3, desc: 'Partial derivatives, gradient, chain rule for multivariable, multiple integrals, Lagrange multipliers.'},
+    {id: 'ode', name: 'ODEs', level: 4, desc: 'First-order linear, separable, second-order linear with constant coefficients, systems.'},
+    {id: 'pde', name: 'PDEs (intro)', level: 4, desc: 'Heat equation, wave equation, Laplace equation. Groundwork for Black-Scholes PDE.'},
+    {id: 'linalg-basics', name: 'Vectors &amp; Matrices', level: 2, desc: 'Vector spaces, matrix operations, systems of linear equations, determinants.'},
+    {id: 'eigen', name: 'Eigenvalues', level: 3, desc: 'Eigenvalues/vectors, diagonalization, spectral theorem for symmetric matrices.'},
+    {id: 'linalg-advanced', name: 'SVD &amp; Cholesky', level: 4, desc: 'Singular value decomposition, Cholesky decomposition. Applications: PCA, Monte Carlo sampling.'},
+    {id: 'optim', name: 'Optimization', level: 3, desc: 'Convex analysis, unconstrained/constrained optimization, KKT conditions, gradient descent.'},
+    {id: 'real-analysis', name: 'Real Analysis', level: 5, desc: 'Sequences, series convergence, completeness of ℝ. Prerequisite for rigorous probability.'},
+    {id: 'measure', name: 'Measure Theory', level: 5, desc: 'σ-algebras, Lebesgue integration, measurable functions. Foundation for modern probability.'},
+  ]},
+
+  {id: 'prob', name: 'Probability &amp; Statistics', color: '#b8a4de', angle: -54,
+    desc: 'How to reason under uncertainty. Random variables, distributions, expectation, inference from data.',
+    concepts: [
+    {id: 'prob-basics', name: 'Probability Basics', level: 1, desc: 'Sample spaces, events, axioms, conditional probability, independence, Bayes.'},
+    {id: 'random-vars', name: 'Random Variables', level: 2, desc: 'Discrete and continuous RVs, PMF, PDF, CDF, expectation, variance.'},
+    {id: 'distributions', name: 'Distributions', level: 2, desc: 'Bernoulli, Binomial, Poisson, Normal, Log-Normal, Exponential, Gamma, Beta.'},
+    {id: 'joint-dist', name: 'Joint Distributions', level: 3, desc: 'Joint, marginal, conditional distributions. Covariance and correlation.'},
+    {id: 'mvn', name: 'Multivariate Normal', level: 3, desc: 'Vector Gaussian, covariance matrices, marginals and conditionals, cholesky sampling.'},
+    {id: 'moments', name: 'Moments &amp; MGF', level: 3, desc: 'Moments, cumulants, moment generating functions, characteristic functions.'},
+    {id: 'clt', name: 'CLT &amp; LLN', level: 3, desc: 'Central Limit Theorem, Law of Large Numbers (weak, strong), convergence modes.'},
+    {id: 'copulas', name: 'Copulas', level: 4, desc: 'Sklar\'s theorem, Gaussian and t-copulas, tail dependence, credit correlation.'},
+    {id: 'mle', name: 'Maximum Likelihood', level: 3, desc: 'MLE construction, consistency, asymptotic normality, Fisher information.'},
+    {id: 'regression', name: 'Regression', level: 3, desc: 'OLS, assumptions, inference, diagnostics, GLS, robust regression.'},
+    {id: 'hypothesis', name: 'Hypothesis Testing', level: 3, desc: 'p-values, Type I/II errors, likelihood ratio, Wald, permutation tests.'},
+    {id: 'bayesian', name: 'Bayesian Inference', level: 4, desc: 'Priors, posteriors, conjugate priors, MCMC, Bayesian regression.'},
+    {id: 'extreme-value', name: 'Extreme Value Theory', level: 5, desc: 'GEV distributions, POT method, applications to tail risk and VaR.'},
+  ]},
+
+  {id: 'stoch', name: 'Stochastic Processes', color: '#e0a4c4', angle: -18,
+    desc: 'Time-indexed randomness. From Brownian motion to Itô calculus — the language of continuous-time finance.',
+    concepts: [
+    {id: 'markov', name: 'Markov Chains', level: 3, desc: 'Discrete-time Markov chains, transition matrices, stationary distributions, ergodicity.'},
+    {id: 'poisson-proc', name: 'Poisson Process', level: 3, desc: 'Counting process, exponential interarrivals, compound Poisson, Poisson thinning.'},
+    {id: 'random-walks', name: 'Random Walks', level: 2, desc: 'Simple random walk, first passage times, recurrence, drift.'},
+    {id: 'brownian', name: 'Brownian Motion', level: 4, desc: 'Wiener process, path properties (continuous, nowhere differentiable), quadratic variation.'},
+    {id: 'gbm', name: 'Geometric Brownian Motion', level: 4, desc: 'dS = μS dt + σS dW. Log-normal terminal distribution. Basis for Black-Scholes.'},
+    {id: 'ito-calc', name: 'Itô Calculus', level: 5, desc: 'Stochastic integrals, Itô isometry, quadratic variation identity (dW)² = dt.'},
+    {id: 'ito-lemma', name: "Itô's Lemma", level: 5, desc: 'Chain rule for stochastic processes. Foundation for pricing derivatives.'},
+    {id: 'sde', name: 'Stochastic DEs', level: 5, desc: 'General SDEs, existence and uniqueness, Euler-Maruyama, Milstein schemes.'},
+    {id: 'martingale', name: 'Martingales', level: 4, desc: 'Definition, optional stopping theorem, martingale representation theorem.'},
+    {id: 'girsanov', name: 'Girsanov Theorem', level: 5, desc: 'Change of measure. Transition from real-world P to risk-neutral Q.'},
+    {id: 'feynman-kac', name: 'Feynman-Kac', level: 5, desc: 'Link between PDEs and expectations of stochastic processes. Alternative BS derivation.'},
+    {id: 'jump-diff', name: 'Jump Diffusion', level: 5, desc: 'Merton jump-diffusion. Lévy processes. Non-Gaussian returns.'},
+    {id: 'hmm', name: 'Hidden Markov Models', level: 4, desc: 'Regime detection, Viterbi and Baum-Welch algorithms, forward-backward.'},
+  ]},
+
+  {id: 'deriv', name: 'Derivatives &amp; Options', color: '#d97056', angle: 18,
+    desc: 'Pricing and hedging contracts whose payoff depends on other assets. Black-Scholes at the center, Greeks for hedging.',
+    concepts: [
+    {id: 'forwards', name: 'Forwards &amp; Futures', level: 2, desc: 'Cost of carry, forward pricing, basis, contango and backwardation.'},
+    {id: 'options-basics', name: 'Options Basics', level: 2, desc: 'Calls, puts, payoff diagrams, moneyness, put-call parity.'},
+    {id: 'binomial', name: 'Binomial Tree', level: 3, desc: 'One-step and multi-step binomial pricing, risk-neutral probabilities, CRR model.'},
+    {id: 'bs-formula', name: 'Black-Scholes Formula', level: 4, desc: 'Closed-form European option pricing. Derivation via PDE and via risk-neutral valuation.'},
+    {id: 'greeks', name: 'Greeks', level: 3, desc: 'Delta, Gamma, Vega, Theta, Rho. Higher-order Greeks (Vanna, Volga, Charm).'},
+    {id: 'delta-hedge', name: 'Delta Hedging', level: 4, desc: 'Dynamic replication, self-financing portfolios, hedging error under discrete rebalancing.'},
+    {id: 'implied-vol', name: 'Implied Volatility', level: 4, desc: 'Inverting BS. Volatility smile and skew. Newton\'s method for numerical inversion.'},
+    {id: 'vol-surface', name: 'Vol Surface', level: 5, desc: 'Term structure, moneyness dimension, static arbitrage constraints (no butterfly/calendar arbitrage).'},
+    {id: 'local-vol', name: 'Local Volatility', level: 5, desc: 'Dupire equation, calibration to market. Deterministic function of (S, t).'},
+    {id: 'stoch-vol', name: 'Stochastic Volatility', level: 5, desc: 'Heston model, SABR. Vol as its own stochastic process.'},
+    {id: 'exotic', name: 'Exotic Options', level: 5, desc: 'Barriers, Asians, lookbacks, digitals. Pricing via MC and PDE methods.'},
+    {id: 'mc-pricing', name: 'Monte Carlo Pricing', level: 4, desc: 'Variance reduction (antithetic, control variate, importance sampling), quasi-random sequences.'},
+    {id: 'american', name: 'American Options', level: 5, desc: 'Optimal stopping, Longstaff-Schwartz regression, binomial trees for early exercise.'},
+  ]},
+
+  {id: 'ts', name: 'Time Series &amp; Econometrics', color: '#d4b348', angle: 54,
+    desc: 'Modeling sequential data and inferring causal / structural relationships from economic data. ARMA, GARCH, cointegration, panel data, IV, causal inference.',
+    concepts: [
+    {id: 'ts-basics', name: 'TS Fundamentals', level: 2, desc: 'Stationarity, ACF, PACF, white noise, differencing. The atoms of time-series analysis.'},
+    {id: 'arma', name: 'ARMA / ARIMA', level: 3, desc: 'Autoregressive and moving average models. Model identification (AIC, BIC), Box-Jenkins methodology, forecasting.'},
+    {id: 'unit-root', name: 'Unit Roots', level: 3, desc: 'ADF, KPSS, Phillips-Perron tests. Non-stationarity in financial time series and its consequences (spurious regression).'},
+    {id: 'garch', name: 'GARCH Family', level: 4, desc: 'ARCH, GARCH(1,1), EGARCH, GJR-GARCH. Volatility clustering, asymmetric response to positive vs negative shocks.'},
+    {id: 'cointegration', name: 'Cointegration', level: 4, desc: 'Engle-Granger and Johansen tests. Long-run equilibrium relationships. Basis for pairs trading strategies.'},
+    {id: 'kalman', name: 'Kalman Filter', level: 4, desc: 'State-space models, recursive Bayesian filtering and smoothing. Dynamic linear models, hidden state estimation.'},
+    {id: 'realized-vol', name: 'Realized Volatility', level: 4, desc: 'High-frequency vol estimators, microstructure noise correction, HAR-RV model. Bridge to intraday data.'},
+    {id: 'var-vecm', name: 'VAR / VECM', level: 4, desc: 'Vector Autoregression for multivariate time series. VECM adds cointegration constraints. Impulse response functions and variance decomposition.'},
+    {id: 'panel-data', name: 'Panel Data', level: 4, desc: 'Cross-section combined with time series. Fixed effects, random effects, Hausman test. Fama-MacBeth regressions build on this.'},
+    {id: 'iv-methods', name: 'Instrumental Variables', level: 4, desc: '2SLS, GMM. Handling endogeneity when regressors correlate with the error. Critical for causal claims in economics.'},
+    {id: 'robust-se', name: 'Heteroscedasticity &amp; Robust SE', level: 3, desc: 'White, Breusch-Pagan tests. Newey-West and HAC standard errors when residuals violate OLS assumptions.'},
+    {id: 'causal-inference', name: 'Causal Inference', level: 5, desc: 'Difference-in-differences, regression discontinuity, propensity scores. Moving from correlation to causation with observational data.'},
+  ]},
+
+  {id: 'port', name: 'Portfolio &amp; Asset Pricing', color: '#86c084', angle: 90,
+    desc: 'How to combine assets and what returns to expect. Markowitz, CAPM, factor models, risk budgeting.',
+    concepts: [
+    {id: 'mv-portfolio', name: 'Mean-Variance', level: 3, desc: 'Markowitz frontier, tangency portfolio, minimum variance portfolio.'},
+    {id: 'capm', name: 'CAPM', level: 3, desc: 'Sharpe-Lintner CAPM, beta, Security Market Line, Sharpe ratio.'},
+    {id: 'apt', name: 'APT &amp; Factors', level: 4, desc: 'Arbitrage Pricing Theory, Fama-French 3/5-factor, momentum, quality factors.'},
+    {id: 'black-litterman', name: 'Black-Litterman', level: 4, desc: 'Bayesian portfolio optimization combining market equilibrium with investor views.'},
+    {id: 'risk-parity', name: 'Risk Parity', level: 4, desc: 'Equal risk contribution portfolios, leverage-based allocation.'},
+    {id: 'var-cvar', name: 'VaR &amp; CVaR', level: 3, desc: 'Value at Risk, Conditional VaR (Expected Shortfall), historical vs parametric methods.'},
+    {id: 'rebalancing', name: 'Rebalancing', level: 4, desc: 'Transaction costs, optimal rebalancing frequency, threshold rebalancing.'},
+  ]},
+
+  {id: 'ml', name: 'Machine Learning', color: '#78bdc9', angle: 126,
+    desc: 'Data-driven pattern extraction. From regression to neural networks, applied to alpha generation and regime detection.',
+    concepts: [
+    {id: 'ml-regression', name: 'Regression Methods', level: 3, desc: 'Ridge, Lasso, Elastic Net. Regularization for finance data.'},
+    {id: 'trees', name: 'Trees &amp; Ensembles', level: 3, desc: 'Decision trees, random forests, gradient boosting (XGBoost, LightGBM).'},
+    {id: 'neural-nets', name: 'Neural Networks', level: 4, desc: 'MLPs, activation functions, backpropagation, applications to alpha generation.'},
+    {id: 'clustering', name: 'Clustering', level: 3, desc: 'K-means, hierarchical, DBSCAN. Regime identification.'},
+    {id: 'dim-reduction', name: 'Dimension Reduction', level: 3, desc: 'PCA, ICA, autoencoders. Factor extraction from returns.'},
+    {id: 'rl-trading', name: 'RL for Trading', level: 5, desc: 'Q-learning, policy gradient. Optimal execution and market making via RL.'},
+  ]},
+
+  {id: 'strat', name: 'Trading Strategies', color: '#84cc16', angle: 162,
+    desc: 'Systematic ways to extract alpha. Mean reversion, momentum, pairs trading, market making, volatility arbitrage.',
+    concepts: [
+    {id: 'mean-reversion', name: 'Mean Reversion', level: 3, desc: 'Ornstein-Uhlenbeck process, Bollinger bands, statistical arbitrage.'},
+    {id: 'momentum', name: 'Momentum', level: 3, desc: 'Time-series and cross-sectional momentum, trend-following, CTA strategies.'},
+    {id: 'pairs-trading', name: 'Pairs Trading', level: 4, desc: 'Cointegration-based, mean-reverting spread, entry/exit thresholds.'},
+    {id: 'market-making', name: 'Market Making', level: 5, desc: 'Bid-ask spread capture, inventory management, adverse selection.'},
+    {id: 'stat-arb', name: 'Statistical Arbitrage', level: 5, desc: 'Multi-asset relative-value strategies, factor-neutral portfolios.'},
+    {id: 'vol-arb', name: 'Volatility Arbitrage', level: 5, desc: 'Realized vs implied vol, dispersion trading, variance swaps.'},
+  ]},
+
+  {id: 'strategy-prod', name: 'Strategy Production', color: '#f97316', angle: 150,
+    desc: 'End-to-end anatomy of a live trading system. Seven layers from data ingestion to monitoring — the parts a strategy owner cannot outsource.',
+    concepts: [
+      {id: 'sys-arch', name: 'System Architecture', level: 2, desc: 'The 7-layer stack: data ingestion → storage → research/backtest → signal → execution → risk → monitoring. Understanding the whole map.'},
+      {id: 'backtest-engine', name: 'Backtest Engine', level: 3, desc: 'Event-driven vs vectorized architecture. Handling slippage, commissions, look-ahead bias, survivorship.'},
+      {id: 'walk-forward', name: 'Walk-Forward Validation', level: 4, desc: 'Time-series cross-validation preventing overfitting. Rolling-window parameter optimization with expanding vs sliding.'},
+      {id: 'feature-eng-prod', name: 'Feature Engineering Pipeline', level: 3, desc: 'Turning raw prices into signals: technical indicators, cross-asset ratios, calendar effects, alternative data features.'},
+      {id: 'signal-gen', name: 'Signal Generation', level: 3, desc: 'Rules or ML models producing entry/exit decisions. Signal aggregation across strategies, decay, half-life.'},
+      {id: 'position-sizing', name: 'Position Sizing', level: 4, desc: 'Kelly criterion, fixed fractional, volatility targeting, risk parity applied per position.'},
+      {id: 'portfolio-constr', name: 'Portfolio Construction', level: 4, desc: 'Combining signals across assets. Beta-neutral, market-neutral, sector-neutral constraints.'},
+      {id: 'order-routing', name: 'Order Routing', level: 4, desc: 'Deciding which broker, which venue, which order type (market, limit, IOC, hidden). Smart order routers.'},
+      {id: 'broker-api', name: 'Broker API Integration', level: 3, desc: 'Connecting to SSI, VNDIRECT, Interactive Brokers. REST + WebSocket auth, order lifecycle management, reconciliation.'},
+      {id: 'execution-algo-prod', name: 'Execution Algorithms', level: 4, desc: 'TWAP, VWAP, implementation shortfall. Splitting large orders across time to minimize market impact.'},
+      {id: 'risk-mgmt', name: 'Real-Time Risk Management', level: 4, desc: 'Position limits, live VaR, drawdown caps, correlation checks. Recomputed on every fill.'},
+      {id: 'kill-switch', name: 'Kill Switch', level: 4, desc: 'Automated emergency halt. Triggers on limit breach, connectivity loss, unusual PnL swing. Liquidates and locks trading.'},
+      {id: 'pnl-attribution', name: 'PnL Attribution', level: 4, desc: 'Breaking realized PnL by strategy, asset, factor, time-of-day. Answers: what actually made or lost money today.'},
+      {id: 'monitoring', name: 'Monitoring &amp; Alerts', level: 3, desc: 'Grafana dashboards, Slack/email alerts. Health checks on data feed, order flow, latency, PnL anomalies.'},
+      {id: 'live-paper', name: 'Live vs Paper Trading', level: 3, desc: 'Paper trading period before real capital. Comparing backtest to live results, detecting drift, understanding slippage in production.'},
+    ]
+  },
+
+  {id: 'micro', name: 'Market Microstructure', color: '#d97848', angle: 198,
+    desc: 'How trades actually happen. Order books, execution algorithms, market impact, latency in high-frequency contexts.',
+    concepts: [
+    {id: 'order-book', name: 'Order Book', level: 3, desc: 'Limit order book dynamics, bid-ask spread, depth, queue position.'},
+    {id: 'market-impact', name: 'Market Impact', level: 4, desc: 'Almgren-Chriss, square-root law, permanent vs temporary impact.'},
+    {id: 'execution', name: 'Execution Algos', level: 4, desc: 'TWAP, VWAP, implementation shortfall, participation-rate strategies.'},
+    {id: 'hft', name: 'HFT Concepts', level: 5, desc: 'Latency arbitrage, colocation, quote stuffing detection.'},
+  ]},
+
+  {id: 'data-eng', name: 'Data Engineering', color: '#a3b18a', angle: 210,
+    desc: 'How financial data gets into your machine and stays organized. Focused subset for quant: prices, fundamentals, alternative data, storage.',
+    concepts: [
+      {id: 'data-sources', name: 'Data Sources &amp; Vendors', level: 1, desc: 'Free (vnstock, TCBS, yfinance, FRED), paid (Bloomberg, Refinitiv, Norgate). Vietnam market data landscape: HOSE, HNX, UPCOM feeds.'},
+      {id: 'rest-api', name: 'REST APIs', level: 2, desc: 'HTTP verbs, JSON, authentication (API keys, OAuth), rate limits, pagination, error handling.'},
+      {id: 'websocket', name: 'WebSocket Streams', level: 3, desc: 'Real-time price feeds. Reconnection logic, message parsing, heartbeat, buffering, back-pressure.'},
+      {id: 'web-scraping', name: 'Web Scraping', level: 3, desc: 'BeautifulSoup for static HTML, Selenium/Playwright for JS-rendered pages, robots.txt compliance, rate limiting.'},
+      {id: 'data-cleaning', name: 'Data Cleaning &amp; Validation', level: 2, desc: 'Missing values, outliers, timezone alignment, corporate actions (splits, dividends, mergers), currency conversions.'},
+      {id: 'ts-db', name: 'Time-Series Databases', level: 3, desc: 'Parquet files (columnar, compressed), DuckDB (embedded analytics), TimescaleDB (PostgreSQL extension), kdb+ (professional). Choosing based on scale and query pattern.'},
+      {id: 'etl', name: 'ETL Pipelines', level: 3, desc: 'Extract-Transform-Load orchestration. Prefect, Airflow, cron. Idempotency, retry logic, dependency management.'},
+      {id: 'data-versioning', name: 'Data Versioning', level: 4, desc: 'Snapshot immutable datasets. DVC or timestamped folders. Reproducible research — same data yesterday, next year.'},
+      {id: 'alt-data', name: 'Alternative Data', level: 4, desc: 'News sentiment (NLP on Reuters/Bloomberg), satellite imagery, credit card transactions, weather, Google Trends. Signal extraction from unstructured sources.'},
+      {id: 'batch-stream', name: 'Batch vs Streaming', level: 3, desc: 'When to run once/day vs process every tick. Lambda architecture combining both. Trade-offs of latency vs completeness.'},
+    ]
+  },
+
+  {id: 'code', name: 'Code &amp; Systems', color: '#a884cc', angle: 234,
+    desc: 'Implementation infrastructure. Python for quant work, numerical methods, backtesting, production systems.',
+    concepts: [
+    {id: 'python', name: 'Python for Quant', level: 1, desc: 'Language basics, NumPy, Pandas, scikit-learn, standard library for financial data.'},
+    {id: 'numerical', name: 'Numerical Methods', level: 3, desc: 'Root finding (Newton, bisection), numerical integration, finite differences.'},
+    {id: 'mc-methods', name: 'Monte Carlo', level: 4, desc: 'Random number generation, variance reduction, quasi-Monte Carlo.'},
+    {id: 'backtesting', name: 'Backtesting', level: 3, desc: 'Event-driven vs vectorized, look-ahead bias, walk-forward analysis, overfitting.'},
+    {id: 'cpp', name: 'C++ for Finance', level: 5, desc: 'Templates, STL, memory management. When performance matters (HFT, low-latency).'},
+    {id: 'data-pipeline', name: 'Data Pipelines', level: 3, desc: 'Data ingestion, cleaning, storage (kdb+, Parquet), streaming vs batch.'},
+  ]},
+];
+
+// Cross-pillar prerequisite edges (concept id → concept id)
+const EDGES = [
+  // Math within
+  ['functions','limits'], ['limits','derivatives'], ['derivatives','integrals'], ['integrals','taylor'],
+  ['derivatives','multivar'], ['integrals','ode'], ['ode','pde'],
+  ['linalg-basics','eigen'], ['eigen','linalg-advanced'], ['multivar','optim'],
+  ['real-analysis','measure'],
+  // Math → Prob
+  ['integrals','random-vars'], ['multivar','joint-dist'], ['linalg-basics','mvn'],
+  ['taylor','moments'], ['measure','clt'],
+  // Prob within
+  ['prob-basics','random-vars'], ['random-vars','distributions'], ['distributions','joint-dist'],
+  ['joint-dist','mvn'], ['random-vars','moments'], ['moments','mle'],
+  ['random-vars','clt'], ['regression','hypothesis'], ['mle','bayesian'], ['distributions','extreme-value'],
+  ['mvn','copulas'],
+  // Prob → Stoch
+  ['random-vars','markov'], ['random-vars','random-walks'], ['distributions','poisson-proc'],
+  ['random-walks','brownian'], ['clt','brownian'], ['brownian','gbm'],
+  // Stoch within
+  ['brownian','ito-calc'], ['ito-calc','ito-lemma'], ['ito-lemma','sde'],
+  ['martingale','girsanov'], ['ito-lemma','girsanov'], ['sde','feynman-kac'],
+  ['poisson-proc','jump-diff'], ['markov','hmm'],
+  // Stoch → Deriv
+  ['gbm','bs-formula'], ['ito-lemma','bs-formula'], ['girsanov','bs-formula'],
+  ['feynman-kac','bs-formula'], ['bs-formula','greeks'], ['greeks','delta-hedge'],
+  ['bs-formula','implied-vol'], ['implied-vol','vol-surface'], ['vol-surface','local-vol'],
+  ['vol-surface','stoch-vol'], ['bs-formula','exotic'], ['sde','mc-pricing'],
+  ['exotic','american'], ['jump-diff','stoch-vol'],
+  // Deriv within
+  ['options-basics','binomial'], ['forwards','options-basics'], ['binomial','bs-formula'],
+  // Time Series
+  ['ts-basics','arma'], ['arma','garch'], ['ts-basics','unit-root'], ['unit-root','cointegration'],
+  ['arma','kalman'], ['garch','realized-vol'],
+  // Portfolio
+  ['mvn','mv-portfolio'], ['mv-portfolio','capm'], ['capm','apt'],
+  ['bayesian','black-litterman'], ['mv-portfolio','risk-parity'], ['distributions','var-cvar'],
+  ['extreme-value','var-cvar'],
+  // ML
+  ['regression','ml-regression'], ['ml-regression','trees'], ['trees','neural-nets'],
+  ['linalg-advanced','dim-reduction'], ['clustering','dim-reduction'],
+  ['neural-nets','rl-trading'], ['hmm','clustering'],
+  // Strategies
+  ['cointegration','pairs-trading'], ['pairs-trading','stat-arb'], ['implied-vol','vol-arb'],
+  ['delta-hedge','vol-arb'], ['ml-regression','stat-arb'], ['markov','mean-reversion'],
+  // Micro
+  ['order-book','market-impact'], ['market-impact','execution'], ['execution','hft'],
+  ['market-making','order-book'],
+  // Code
+  ['python','numerical'], ['numerical','mc-methods'], ['python','backtesting'],
+  ['python','data-pipeline'], ['mc-methods','mc-pricing'],
+];
+
+// Auto-assign angles evenly around the circle so new pillars integrate cleanly.
+PILLARS.forEach((p, i) => {
+  p.angle = -90 + i * (360 / PILLARS.length);
+});
+
+// ============ LAYOUT ============
+const CENTER = {x: 1000, y: 700};
+const RADII = {1: 200, 2: 340, 3: 480, 4: 620, 5: 760};
+
+const positions = {};
+const idToPillar = {};
+
+PILLARS.forEach(pillar => {
+  const baseAngle = pillar.angle * Math.PI / 180;
+  // Distribute concepts within the pillar's angular slice, grouped by level
+  const byLevel = {};
+  pillar.concepts.forEach(c => {
+    if (!byLevel[c.level]) byLevel[c.level] = [];
+    byLevel[c.level].push(c);
+    idToPillar[c.id] = pillar;
+  });
+
+  Object.keys(byLevel).forEach(lvl => {
+    const list = byLevel[lvl];
+    const r = RADII[lvl];
+    const spread = 0.30; // radians of angular room per pillar
+    list.forEach((c, i) => {
+      const offset = (i - (list.length - 1) / 2) * (spread / Math.max(list.length, 2));
+      const angle = baseAngle + offset;
+      positions[c.id] = {
+        x: CENTER.x + r * Math.cos(angle),
+        y: CENTER.y + r * Math.sin(angle),
+        angle: angle,
+        r: r,
+        ...c,
+        color: pillar.color,
+        pillarId: pillar.id,
+        pillarName: pillar.name.replace('&amp;', '&'),
+      };
+    });
+  });
+});
+
+// ============ RENDER ============
+const svg = document.getElementById('atlas-svg');
+
+// Background subtle pillar wedges
+PILLARS.forEach(pillar => {
+  const angleRad = pillar.angle * Math.PI / 180;
+  const spread = 0.29;
+  const R = 900;
+  const x1 = CENTER.x + R * Math.cos(angleRad - spread);
+  const y1 = CENTER.y + R * Math.sin(angleRad - spread);
+  const x2 = CENTER.x + R * Math.cos(angleRad + spread);
+  const y2 = CENTER.y + R * Math.sin(angleRad + spread);
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M ${CENTER.x} ${CENTER.y} L ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2} Z`);
+  path.setAttribute('fill', pillar.color);
+  path.setAttribute('opacity', '0.05');
+  svg.appendChild(path);
+});
+
+// Pillar labels at outer edge
+PILLARS.forEach(pillar => {
+  const angleRad = pillar.angle * Math.PI / 180;
+  const R = 870;
+  const lx = CENTER.x + R * Math.cos(angleRad);
+  const ly = CENTER.y + R * Math.sin(angleRad);
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('x', lx);
+  text.setAttribute('y', ly);
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('fill', pillar.color);
+  text.setAttribute('font-family', "'Playfair Display', Georgia, serif");
+  text.setAttribute('font-size', '24');
+  text.setAttribute('font-weight', '700');
+  text.setAttribute('opacity', '0.7');
+  text.textContent = pillar.name.replace('&amp;', '&');
+  svg.appendChild(text);
+});
+
+// Edges (cross-concept links)
+EDGES.forEach(([a, b]) => {
+  const p1 = positions[a], p2 = positions[b];
+  if (!p1 || !p2) return;
+  const midX = (p1.x + p2.x) / 2 + (CENTER.x - (p1.x + p2.x) / 2) * 0.15;
+  const midY = (p1.y + p2.y) / 2 + (CENTER.y - (p1.y + p2.y) / 2) * 0.15;
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M ${p1.x} ${p1.y} Q ${midX} ${midY} ${p2.x} ${p2.y}`);
+  path.setAttribute('stroke', '#e5a54e');
+  path.setAttribute('stroke-width', '1');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('class', 'edge');
+  path.dataset.nodes = `${a},${b}`;
+  svg.appendChild(path);
+});
+
+// Center hub
+const hubCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+hubCircle.setAttribute('cx', CENTER.x);
+hubCircle.setAttribute('cy', CENTER.y);
+hubCircle.setAttribute('r', 60);
+hubCircle.setAttribute('fill', '#1a1510');
+hubCircle.setAttribute('stroke', '#e5a54e');
+hubCircle.setAttribute('stroke-width', '2');
+svg.appendChild(hubCircle);
+const hubText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+hubText.setAttribute('x', CENTER.x);
+hubText.setAttribute('y', CENTER.y - 5);
+hubText.setAttribute('text-anchor', 'middle');
+hubText.setAttribute('fill', '#e5a54e');
+hubText.setAttribute('font-family', "'Playfair Display', Georgia, serif");
+hubText.setAttribute('font-size', '22');
+hubText.setAttribute('font-weight', '700');
+hubText.textContent = 'QUANT';
+svg.appendChild(hubText);
+const hubText2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+hubText2.setAttribute('x', CENTER.x);
+hubText2.setAttribute('y', CENTER.y + 20);
+hubText2.setAttribute('text-anchor', 'middle');
+hubText2.setAttribute('fill', '#a89e8b');
+hubText2.setAttribute('font-size', '11');
+const total = Object.keys(positions).length;
+hubText2.textContent = `${total} concepts`;
+svg.appendChild(hubText2);
+
+// Nodes
+Object.entries(positions).forEach(([id, p]) => {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', 'node');
+  g.setAttribute('data-id', id);
+  const r = 8 + p.level * 1.5;
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', p.x);
+  circle.setAttribute('cy', p.y);
+  circle.setAttribute('r', r);
+  circle.setAttribute('fill', p.color);
+  circle.setAttribute('stroke', '#1a1510');
+  circle.setAttribute('stroke-width', '2');
+  g.appendChild(circle);
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', p.x);
+  label.setAttribute('y', p.y - r - 5);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('fill', '#ede4d3');
+  label.setAttribute('font-size', '13');
+  label.setAttribute('font-weight', '500');
+  label.setAttribute('font-family', 'Inter, sans-serif');
+  label.innerHTML = p.name;
+  g.appendChild(label);
+  g.addEventListener('click', () => selectConcept(id));
+  svg.appendChild(g);
+});
+
+// ============ LEFT NAV ============
+function renderLeftNav() {
+  const nav = document.getElementById('left-nav');
+  const sections = PILLARS.map((pillar, idx) => {
+    const conceptItems = pillar.concepts.map(c => {
+      const built = c.file ? 'built' : '';
+      return `<a class="concept-link ${built}" data-id="${c.id}" onclick="selectConcept('${c.id}'); event.stopPropagation();"><span class="level-dot" style="color:${pillar.color}"></span>${c.name.replace('&amp;','&')}</a>`;
+    }).join('');
+    return `
+      <div class="pillar-section ${idx === 0 ? 'open' : ''}" data-pillar="${pillar.id}">
+        <div class="pillar-header" onclick="togglePillar('${pillar.id}')">
+          <span class="pillar-dot" style="background:${pillar.color}"></span>
+          <div class="pillar-info">
+            <div class="pillar-name">${pillar.name.replace('&amp;','&')}<span class="pillar-count">(${pillar.concepts.length})</span></div>
+            <div class="pillar-desc">${pillar.desc}</div>
+          </div>
+          <span class="pillar-toggle">▶</span>
+        </div>
+        <div class="pillar-concepts">${conceptItems}</div>
+      </div>
+    `;
+  }).join('');
+  nav.insertAdjacentHTML('beforeend', sections);
+}
+
+function togglePillar(pillarId) {
+  const section = document.querySelector(`.pillar-section[data-pillar="${pillarId}"]`);
+  if (section) section.classList.toggle('open');
+}
+
+renderLeftNav();
+
+// ============ INTERACTIONS ============
+let currentTransform = {x: 0, y: 0, k: 1};
+
+function updateTransform() {
+  svg.style.transform = `translate(${currentTransform.x}px, ${currentTransform.y}px) scale(${currentTransform.k})`;
+  svg.style.transformOrigin = '0 0';
+}
+
+// Zoom
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 1.1 : 1/1.1;
+  const rect = svg.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  currentTransform.x = mx - (mx - currentTransform.x) * delta;
+  currentTransform.y = my - (my - currentTransform.y) * delta;
+  currentTransform.k *= delta;
+  currentTransform.k = Math.max(0.3, Math.min(4, currentTransform.k));
+  updateTransform();
+  hideOnboarding();
+}, {passive: false});
+
+function zoom(factor) {
+  const rect = svg.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+  currentTransform.x = cx - (cx - currentTransform.x) * factor;
+  currentTransform.y = cy - (cy - currentTransform.y) * factor;
+  currentTransform.k *= factor;
+  currentTransform.k = Math.max(0.3, Math.min(4, currentTransform.k));
+  updateTransform();
+}
+
+function resetView() {
+  currentTransform = {x: 0, y: 0, k: 1};
+  updateTransform();
+}
+
+// Pan
+let isDragging = false;
+let dragStart = {x: 0, y: 0};
+svg.addEventListener('mousedown', e => {
+  isDragging = true;
+  dragStart = {x: e.clientX - currentTransform.x, y: e.clientY - currentTransform.y};
+  svg.classList.add('dragging');
+  hideOnboarding();
+});
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  currentTransform.x = e.clientX - dragStart.x;
+  currentTransform.y = e.clientY - dragStart.y;
+  updateTransform();
+});
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  svg.classList.remove('dragging');
+});
+
+// Touch (for tablet)
+let touchStart = null;
+let pinchStart = null;
+svg.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    touchStart = {x: e.touches[0].clientX - currentTransform.x, y: e.touches[0].clientY - currentTransform.y};
+  } else if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    pinchStart = {dist: Math.sqrt(dx*dx + dy*dy), k: currentTransform.k};
+  }
+  hideOnboarding();
+});
+svg.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && touchStart) {
+    currentTransform.x = e.touches[0].clientX - touchStart.x;
+    currentTransform.y = e.touches[0].clientY - touchStart.y;
+    updateTransform();
+  } else if (e.touches.length === 2 && pinchStart) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    currentTransform.k = Math.max(0.3, Math.min(4, pinchStart.k * (dist / pinchStart.dist)));
+    updateTransform();
+  }
+}, {passive: false});
+svg.addEventListener('touchend', () => { touchStart = null; pinchStart = null; });
+
+function hideOnboarding() {
+  document.getElementById('onboarding').classList.add('hidden');
+}
+
+// ============ SIDEBAR ============
+function loadMastery() { try { return JSON.parse(localStorage.getItem('qp_mastery') || '{}'); } catch(e) { return {}; } }
+function saveMastery(m) { localStorage.setItem('qp_mastery', JSON.stringify(m)); }
+function loadHistory() { try { return JSON.parse(localStorage.getItem('qp_history') || '[]'); } catch(e) { return []; } }
+function saveHistory(h) { localStorage.setItem('qp_history', JSON.stringify(h)); }
+let mastery = loadMastery();
+let history = loadHistory();
+
+function updateStats() {
+  const total = Object.keys(positions).length;
+  const mastered = Object.values(mastery).filter(v => v === 'mastered').length;
+  const learning = Object.values(mastery).filter(v => v === 'learning').length;
+  document.getElementById('top-stats').innerHTML = `<b>${mastered}</b> mastered · ${learning} learning · ${total} total`;
+}
+updateStats();
+
+function selectConcept(id) {
+  const p = positions[id];
+  if (!p) return;
+
+  // Highlight node and edges
+  document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+  const nodeEl = document.querySelector(`.node[data-id="${id}"]`);
+  if (nodeEl) nodeEl.classList.add('active');
+
+  // Highlight in left nav + expand its pillar
+  document.querySelectorAll('.concept-link').forEach(el => el.classList.remove('active'));
+  const linkEl = document.querySelector(`.concept-link[data-id="${id}"]`);
+  if (linkEl) {
+    linkEl.classList.add('active');
+    const pillarSection = linkEl.closest('.pillar-section');
+    if (pillarSection) pillarSection.classList.add('open');
+    linkEl.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  }
+
+  document.querySelectorAll('.edge').forEach(e => {
+    const nodes = (e.dataset.nodes || '').split(',');
+    if (nodes.includes(id)) e.classList.add('highlighted');
+    else e.classList.remove('highlighted');
+  });
+
+  // Populate sidebar
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.remove('hidden');
+  document.getElementById('sidebar-empty').style.display = 'none';
+  const content = document.getElementById('sidebar-content');
+  content.style.display = 'block';
+
+  const state = mastery[id] || 'new';
+  const levelName = ['', 'Foundation', 'Basic', 'Intermediate', 'Advanced', 'Expert'][p.level] || 'Level ' + p.level;
+
+  const prereqs = EDGES.filter(([a, b]) => b === id).map(([a]) => a);
+  const prereqHtml = prereqs.length === 0
+    ? '<span style="color:var(--text-dim);font-size:0.85rem;">No prerequisites.</span>'
+    : prereqs.map(pid => positions[pid] ? `<span class="prereq-chip" onclick="selectConcept('${pid}')">${positions[pid].name.replace('&amp;','&')}</span>` : '').join('');
+
+  const openBtn = p.file
+    ? `<a href="${p.file}" class="open-btn">📖 Open Lesson</a>`
+    : `<button class="open-btn disabled">Lesson not yet built</button>`;
+
+  content.innerHTML = `
+    <div class="detail-pillar" style="color:${p.color};">${p.pillarName}</div>
+    <h2 class="detail-title">${p.name.replace('&amp;','&')}</h2>
+    <div style="color:var(--text-dim);font-size:0.85rem;">L${p.level} · ${levelName}</div>
+    <div class="detail-desc">${p.desc}</div>
+
+    <div class="detail-mastery">
+      <button class="mastery-btn mastery-new ${state==='new'?'active':''}" onclick="setMastery('${id}','new')">Not started</button>
+      <button class="mastery-btn mastery-learning ${state==='learning'?'active':''}" onclick="setMastery('${id}','learning')">Learning</button>
+      <button class="mastery-btn mastery-mastered ${state==='mastered'?'active':''}" onclick="setMastery('${id}','mastered')">Mastered</button>
+    </div>
+
+    ${openBtn}
+
+    <div class="detail-section">
+      <div class="detail-section-title">Prerequisites</div>
+      <div class="prereq-list">${prereqHtml}</div>
+    </div>
+  `;
+}
+
+function applyNodeMastery(id) {
+  const nodeEl = document.querySelector(`.node[data-id="${id}"]`);
+  if (!nodeEl) return;
+  const state = mastery[id] || 'new';
+  nodeEl.classList.remove('mastered', 'learning');
+  if (state === 'mastered') nodeEl.classList.add('mastered');
+  else if (state === 'learning') nodeEl.classList.add('learning');
+
+  // Update label with ✓ prefix for mastered
+  const label = nodeEl.querySelector('text');
+  if (label) {
+    const conceptName = positions[id].name;
+    label.innerHTML = (state === 'mastered' ? '✓ ' : '') + conceptName;
+  }
+}
+
+function edgeMasteryClass(fromId, toId) {
+  const a = mastery[fromId] || 'new';
+  const b = mastery[toId] || 'new';
+  if (a === 'mastered' && b === 'mastered') return 'mastered';
+  if (a === 'mastered' || b === 'mastered') return 'mastered-partial';
+  if (a === 'learning' || b === 'learning') return 'reachable';
+  return '';
+}
+
+function applyEdgeMastery() {
+  document.querySelectorAll('.edge').forEach(e => {
+    const nodes = (e.dataset.nodes || '').split(',');
+    if (nodes.length !== 2) return;
+    e.classList.remove('mastered', 'mastered-partial', 'reachable');
+    const cls = edgeMasteryClass(nodes[0], nodes[1]);
+    if (cls) e.classList.add(cls);
+  });
+}
+
+function setMastery(id, state) {
+  const prevState = mastery[id];
+  mastery[id] = state;
+  saveMastery(mastery);
+  // Record in history only if state actually changed
+  if (prevState !== state) {
+    history.push({ts: Date.now(), id: id, state: state, prev: prevState || 'new'});
+    // Cap history at 500 entries
+    if (history.length > 500) history = history.slice(-500);
+    saveHistory(history);
+  }
+  updateStats();
+  applyNodeMastery(id);
+  applyEdgeMastery();
+  selectConcept(id);
+
+  // Update nav concept link — add ✓ if mastered
+  const linkEl = document.querySelector(`.concept-link[data-id="${id}"]`);
+  if (linkEl) {
+    linkEl.classList.remove('nav-mastered', 'nav-learning');
+    if (state === 'mastered') linkEl.classList.add('nav-mastered');
+    else if (state === 'learning') linkEl.classList.add('nav-learning');
+  }
+}
+
+// Apply mastery classes on page load
+Object.keys(positions).forEach(applyNodeMastery);
+applyEdgeMastery();
+document.querySelectorAll('.concept-link').forEach(el => {
+  const id = el.dataset.id;
+  const state = mastery[id];
+  if (state === 'mastered') el.classList.add('nav-mastered');
+  else if (state === 'learning') el.classList.add('nav-learning');
+});
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.add('hidden');
+  document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.edge').forEach(e => e.classList.remove('highlighted'));
+}
+
+// ============ HELP MODAL ============
+function openHelp() { document.getElementById('help-modal').classList.add('open'); }
+function closeHelp() { document.getElementById('help-modal').classList.remove('open'); }
+
+// ============ PROGRESS MODAL ============
+function openProgress() {
+  renderProgress();
+  document.getElementById('progress-modal').classList.add('open');
+  document.getElementById('export-area').style.display = 'none';
+}
+function closeProgress() {
+  document.getElementById('progress-modal').classList.remove('open');
+}
+
+function renderProgress() {
+  const now = new Date();
+  document.getElementById('progress-date').textContent = 'As of ' + now.toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'});
+
+  // Overall counters
+  const total = Object.keys(positions).length;
+  const mastered = Object.values(mastery).filter(v => v === 'mastered').length;
+  const learning = Object.values(mastery).filter(v => v === 'learning').length;
+  const started = mastered + learning;
+  const pctMastered = total ? Math.round(mastered * 100 / total) : 0;
+
+  // Study days: unique days in history
+  const uniqueDays = new Set(history.map(h => new Date(h.ts).toDateString())).size;
+
+  document.getElementById('progress-overview').innerHTML = `
+    <div class="progress-stat"><div class="num green">${mastered}</div><div class="lbl">Mastered</div></div>
+    <div class="progress-stat"><div class="num purple">${learning}</div><div class="lbl">Learning</div></div>
+    <div class="progress-stat"><div class="num">${total - started}</div><div class="lbl">Not started</div></div>
+    <div class="progress-stat"><div class="num">${pctMastered}%</div><div class="lbl">Overall</div></div>
+    <div class="progress-stat"><div class="num">${uniqueDays}</div><div class="lbl">Study days</div></div>
+  `;
+
+  // Per-pillar bars
+  const barsHtml = PILLARS.map(pillar => {
+    const conceptIds = pillar.concepts.map(c => c.id);
+    const nP = conceptIds.length;
+    const mP = conceptIds.filter(id => mastery[id] === 'mastered').length;
+    const lP = conceptIds.filter(id => mastery[id] === 'learning').length;
+    const mPct = (mP / nP) * 100;
+    const lPct = (lP / nP) * 100;
+    return `
+      <div class="pillar-bar-row">
+        <div class="pillar-bar-label">
+          <span class="name"><span class="legend-dot" style="background:${pillar.color}"></span>${pillar.name.replace('&amp;','&')}</span>
+          <span class="count">${mP}/${nP}${lP>0?` <span style="color:var(--purple)">+${lP}</span>`:''}</span>
+        </div>
+        <div class="pillar-bar">
+          <div class="pillar-bar-mastered" style="width:${mPct}%"></div>
+          <div class="pillar-bar-learning" style="left:${mPct}%;width:${lPct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('progress-bars').innerHTML = barsHtml;
+
+  // Recent activity (last 20)
+  const activityHtml = history.slice(-20).reverse().map(h => {
+    const conceptName = positions[h.id] ? positions[h.id].name.replace('&amp;','&') : h.id;
+    const date = new Date(h.ts);
+    const dateStr = date.toLocaleDateString('en-GB', {day: '2-digit', month: 'short'}) + ' ' + date.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+    const stateLabel = h.state === 'mastered' ? '✓ mastered' : (h.state === 'learning' ? '◐ learning' : '○ reset');
+    return `<div class="item"><span class="date">${dateStr}</span><span class="state ${h.state}">${stateLabel}</span> — ${conceptName}</div>`;
+  }).join('');
+  document.getElementById('progress-activity').innerHTML = activityHtml || '<div class="item">No activity yet. Click a node and mark it Learning or Mastered to start.</div>';
+
+  // Currently learning
+  const learningIds = Object.entries(mastery).filter(([_, v]) => v === 'learning').map(([id]) => id);
+  const learningHtml = learningIds.length === 0
+    ? '<span style="color:var(--text-dim);">None currently.</span>'
+    : learningIds.map(id => positions[id] ? `<span style="display:inline-block;padding:3px 10px;margin:2px;background:var(--bg-card);border-radius:12px;font-size:0.78rem;">${positions[id].name.replace('&amp;','&')}</span>` : '').join('');
+  document.getElementById('progress-learning').innerHTML = learningHtml;
+}
+
+function showExport() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'});
+  const total = Object.keys(positions).length;
+  const mastered = Object.entries(mastery).filter(([_, v]) => v === 'mastered');
+  const learning = Object.entries(mastery).filter(([_, v]) => v === 'learning');
+  const pctMastered = total ? Math.round(mastered.length * 100 / total) : 0;
+  const uniqueDays = new Set(history.map(h => new Date(h.ts).toDateString())).size;
+
+  let out = `# Quant-Practice Progress Report — ${dateStr}\n\n`;
+  out += `Overall: ${mastered.length} / ${total} mastered (${pctMastered}%) · ${learning.length} learning · ${uniqueDays} study days\n\n`;
+
+  out += `## Per Pillar\n`;
+  PILLARS.forEach(pillar => {
+    const conceptIds = pillar.concepts.map(c => c.id);
+    const nP = conceptIds.length;
+    const mP = conceptIds.filter(id => mastery[id] === 'mastered').length;
+    const lP = conceptIds.filter(id => mastery[id] === 'learning').length;
+    const bar = '█'.repeat(Math.floor(mP * 12 / nP)) + '▒'.repeat(Math.floor(lP * 12 / nP));
+    const bg = '░'.repeat(Math.max(0, 12 - bar.length));
+    out += `- ${pillar.name.replace('&amp;','&').padEnd(24)} [${bar}${bg}] ${mP}/${nP} mastered${lP>0?`, ${lP} learning`:''}\n`;
+  });
+
+  if (mastered.length > 0) {
+    out += `\n## Mastered concepts\n`;
+    mastered.forEach(([id]) => {
+      if (positions[id]) out += `- ${positions[id].name.replace('&amp;','&')} (${positions[id].pillarName})\n`;
+    });
+  }
+
+  if (learning.length > 0) {
+    out += `\n## Currently learning\n`;
+    learning.forEach(([id]) => {
+      if (positions[id]) out += `- ${positions[id].name.replace('&amp;','&')} (${positions[id].pillarName})\n`;
+    });
+  }
+
+  if (history.length > 0) {
+    out += `\n## Recent activity (last 15)\n`;
+    history.slice(-15).reverse().forEach(h => {
+      const name = positions[h.id] ? positions[h.id].name.replace('&amp;','&') : h.id;
+      const date = new Date(h.ts).toLocaleDateString('en-GB', {day: '2-digit', month: 'short'});
+      out += `- ${date}: ${h.state} — ${name}\n`;
+    });
+  }
+
+  out += `\n---\n_Please analyze weak/strong pillars and suggest what to focus on next._`;
+
+  const area = document.getElementById('export-area');
+  area.value = out;
+  area.style.display = 'block';
+  area.select();
+  try { navigator.clipboard.writeText(out); } catch(e) {}
+  area.focus();
+}
+
+function downloadJSON() {
+  const data = {
+    version: 1,
+    exported_at: new Date().toISOString(),
+    mastery: mastery,
+    history: history,
+    total_concepts: Object.keys(positions).length
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `quant-progress-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  const status = document.getElementById('import-status');
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.mastery || typeof data.mastery !== 'object') throw new Error('Invalid format: missing mastery field');
+
+      const importedMastery = data.mastery;
+      const importedHistory = Array.isArray(data.history) ? data.history : [];
+
+      // Merge — keep the most recent state per concept
+      const merged = Object.assign({}, mastery, importedMastery);
+      const mergedHistory = [...history, ...importedHistory]
+        .sort((a, b) => a.ts - b.ts)
+        .filter((h, i, arr) => i === 0 || h.ts !== arr[i-1].ts || h.id !== arr[i-1].id);
+
+      mastery = merged;
+      history = mergedHistory.slice(-500);
+      saveMastery(mastery);
+      saveHistory(history);
+
+      // Re-apply visuals
+      Object.keys(positions).forEach(applyNodeMastery);
+      applyEdgeMastery();
+      document.querySelectorAll('.concept-link').forEach(el => {
+        const id = el.dataset.id;
+        const state = mastery[id];
+        el.classList.remove('nav-mastered', 'nav-learning');
+        if (state === 'mastered') el.classList.add('nav-mastered');
+        else if (state === 'learning') el.classList.add('nav-learning');
+      });
+      updateStats();
+      renderProgress();
+
+      const importedCount = Object.keys(importedMastery).length;
+      status.style.display = 'block';
+      status.style.background = 'rgba(134,192,132,0.15)';
+      status.style.color = '#86c084';
+      status.textContent = `✓ Imported ${importedCount} concepts and ${importedHistory.length} history events. Merged with current data.`;
+    } catch (err) {
+      status.style.display = 'block';
+      status.style.background = 'rgba(217,112,86,0.15)';
+      status.style.color = '#d97056';
+      status.textContent = `✗ Import failed: ${err.message}`;
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';  // reset so re-importing same file works
+}
+
+function confirmReset() {
+  if (!confirm('This will erase ALL mastery marks and history. Consider backing up first (Backup JSON). Continue?')) return;
+  mastery = {};
+  history = [];
+  saveMastery(mastery);
+  saveHistory(history);
+  Object.keys(positions).forEach(applyNodeMastery);
+  applyEdgeMastery();
+  document.querySelectorAll('.concept-link').forEach(el => el.classList.remove('nav-mastered', 'nav-learning'));
+  updateStats();
+  renderProgress();
+  const status = document.getElementById('import-status');
+  status.style.display = 'block';
+  status.style.background = 'rgba(217,112,86,0.15)';
+  status.style.color = '#d97056';
+  status.textContent = '⚠ All progress cleared.';
+}
+
+// ============ SEARCH ============
+const searchIndex = Object.entries(positions).map(([id, p]) => ({
+  id, name: p.name.replace('&amp;','&'), desc: p.desc, pillar: p.pillarName
+}));
+
+function openSearch() {
+  document.getElementById('search-modal').classList.add('open');
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-input').focus();
+  renderSearchResults('');
+}
+function closeSearch() {
+  document.getElementById('search-modal').classList.remove('open');
+}
+let focusedResult = 0;
+function renderSearchResults(q) {
+  const query = q.toLowerCase().trim();
+  let results;
+  if (!query) results = searchIndex.slice(0, 12);
+  else results = searchIndex.filter(item =>
+    item.name.toLowerCase().includes(query) ||
+    item.desc.toLowerCase().includes(query) ||
+    item.pillar.toLowerCase().includes(query)
+  ).slice(0, 25);
+  focusedResult = 0;
+  document.getElementById('search-results').innerHTML = results.map((r, i) => `
+    <div class="search-result ${i===0?'focused':''}" data-id="${r.id}" onclick="pickSearchResult('${r.id}')">
+      <div class="r-name">${r.name}</div>
+      <div class="r-meta">${r.pillar} · ${r.desc.substring(0, 100)}</div>
+    </div>
+  `).join('');
+}
+function pickSearchResult(id) {
+  closeSearch();
+  selectConcept(id);
+}
+document.getElementById('search-input').addEventListener('input', e => renderSearchResults(e.target.value));
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'p' && !e.shiftKey) {
+    // Only intercept if not printing (rare) — user can bypass with Ctrl+Shift+P
+    e.preventDefault(); openProgress();
+  }
+  if (e.key === '?' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { openHelp(); }
+  if (e.key === 'Escape') { closeSearch(); closeProgress(); closeHelp(); }
+  if (document.getElementById('search-modal').classList.contains('open')) {
+    const results = document.querySelectorAll('.search-result');
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusedResult = Math.min(focusedResult+1, results.length-1); results.forEach((r,i) => r.classList.toggle('focused', i===focusedResult)); if (results[focusedResult]) results[focusedResult].scrollIntoView({block:'nearest'}); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); focusedResult = Math.max(focusedResult-1, 0); results.forEach((r,i) => r.classList.toggle('focused', i===focusedResult)); if (results[focusedResult]) results[focusedResult].scrollIntoView({block:'nearest'}); }
+    if (e.key === 'Enter' && results[focusedResult]) pickSearchResult(results[focusedResult].dataset.id);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "Quant-Practice Atlas",
+  "short_name": "Quant",
+  "description": "Personal quant learning roadmap — 12 pillars, 115 concepts",
+  "start_url": "./Quant-Roadmap.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1a1510",
+  "background_color": "#1a1510",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Functions & the Language of Change — Calculus/Foundations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Smart font + MathJax loader: try local (offline) first, fall back to CDN. -->
+<script>
+  window.MathJax = {
+    tex: {inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']]},
+    svg: {fontCache: 'global', scale: 1, minScale: 0.5},
+    chtml: {scale: 1, minScale: 0.5},
+    options: {enableMenu: false}
+  };
+
+  // Try local assets first. Path: ../../assets/ from Codex/Calculus/01-Foundations/*.html
+  var ASSET_ROOT = '../assets/';
+  var CDN = {
+    mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js',
+    fonts: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap'
+  };
+
+  function loadWithFallback(tagName, attrs, cdnUrl) {
+    var el = document.createElement(tagName);
+    Object.keys(attrs).forEach(function(k) { el.setAttribute(k, attrs[k]); });
+    el.onerror = function() {
+      var fb = document.createElement(tagName);
+      Object.keys(attrs).forEach(function(k) {
+        if (k === 'src' || k === 'href') fb.setAttribute(k, cdnUrl);
+        else fb.setAttribute(k, attrs[k]);
+      });
+      document.head.appendChild(fb);
+    };
+    document.head.appendChild(el);
+  }
+
+  // Fonts: try local fonts.css, fall back to Google Fonts CDN
+  loadWithFallback('link', {rel: 'stylesheet', href: ASSET_ROOT + 'fonts/fonts.css'}, CDN.fonts);
+
+  // MathJax: try local SVG bundle, fall back to CDN
+  loadWithFallback('script', {src: ASSET_ROOT + 'mathjax/tex-mml-svg.js'}, CDN.mathjax);
+</script>
+<style>
+  :root {
+    --bg: #1a1510; --bg-soft: #221c15; --bg-card: #2a2218;
+    --text: #ede4d3; --text-muted: #a89e8b; --text-dim: #6b6152;
+    --accent: #e5a54e; --accent-soft: #b8823d;
+    --green: #86c084; --purple: #b8a4de; --blue: #8fb5e0; --pink: #e0a4c4;
+    --border: #3a2f22;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.7; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .breadcrumb { font-size: 0.9rem; color: var(--accent); margin-bottom: 1.5rem; }
+  .breadcrumb .sep { color: var(--text-dim); margin: 0 0.4rem; }
+  .breadcrumb .current { color: var(--text-muted); }
+  .meta { font-size: 0.75rem; color: var(--green); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; font-weight: 500; }
+  .meta .dot { color: var(--text-dim); margin: 0 0.5rem; }
+  .meta .status { color: var(--text-dim); }
+  h1.lesson-title { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 3.5rem; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 0.75rem; color: var(--text); }
+  @media (max-width: 640px) { h1.lesson-title { font-size: 2.25rem; } }
+  .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .progress-dots { display: inline-flex; gap: 6px; margin-left: 0.5rem; vertical-align: middle; }
+  .progress-dots .dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text-dim); }
+  .progress-dots .dot.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(229, 165, 78, 0.15); }
+  .tabs { display: flex; gap: 0; margin: 2.5rem 0 1.5rem; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 1rem 1.25rem; font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 400; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-btn .count { background: var(--bg-card); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tab-btn.active .count { background: var(--accent); color: var(--bg); }
+  .features { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
+  .features .label { color: var(--text-dim); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; margin-right: 0.5rem; }
+  .feature-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.85rem; color: var(--text-muted); }
+  .outline-box { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
+  .outline-box .outline-title { color: var(--accent); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; font-weight: 500; }
+  .outline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 2rem; }
+  @media (max-width: 640px) { .outline-grid { grid-template-columns: 1fr; } }
+  .outline-item { display: flex; gap: 12px; padding: 6px 10px; border-radius: 6px; color: var(--text); text-decoration: none; align-items: baseline; font-size: 0.95rem; }
+  .outline-item:hover { background: var(--bg-card); text-decoration: none; }
+  .outline-item .num { color: var(--text-dim); font-family: 'Playfair Display', serif; font-size: 1rem; min-width: 14px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  section { margin: 3rem 0; scroll-margin-top: 20px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--text); margin: 2rem 0 1rem; }
+  h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 0.75rem; }
+  h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 1.25rem 0 0.5rem; }
+  p { margin: 0.85rem 0; }
+  .box { padding: 1.2rem 1.4rem; margin: 1.25rem 0; border-radius: 8px; border-left: 3px solid; }
+  .box-thm { background: rgba(184, 164, 222, 0.06); border-color: var(--purple); }
+  .box-def { background: rgba(143, 181, 224, 0.06); border-color: var(--blue); }
+  .box-proof { background: rgba(224, 164, 196, 0.06); border-color: var(--pink); }
+  .box-example { background: rgba(134, 192, 132, 0.06); border-color: var(--green); }
+  .box-warning { background: rgba(229, 165, 78, 0.08); border-color: var(--accent); }
+  .box .box-title { font-family: 'Playfair Display', serif; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; }
+  .box-thm .box-title { color: var(--purple); }
+  .box-def .box-title { color: var(--blue); }
+  .box-proof .box-title { color: var(--pink); }
+  .box-example .box-title { color: var(--green); }
+  .box-warning .box-title { color: var(--accent); }
+  .box-lo { background: rgba(229, 165, 78, 0.06); border-color: var(--accent); }
+  .box-lo .box-title { color: var(--accent); }
+  .lo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 2rem; margin-top: 0.75rem; }
+  @media (max-width: 640px) { .lo-grid { grid-template-columns: 1fr; } }
+  .lo-grid h4 { font-family: 'Playfair Display', serif; font-size: 0.8rem; color: var(--accent); margin: 0 0 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  .lo-grid ul { padding-left: 1.25rem; margin: 0; font-size: 0.88rem; line-height: 1.55; }
+  .lo-grid li { margin: 4px 0; }
+  .step { padding: 8px 14px; margin: 6px 0; background: var(--bg-card); border-radius: 6px; border-left: 2px solid var(--text-dim); }
+  .step .step-num { display: inline-block; width: 22px; height: 22px; background: var(--pink); color: var(--bg); text-align: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; margin-right: 8px; line-height: 22px; }
+  table.st { border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; width: 100%; }
+  table.st th, table.st td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.st th { color: var(--accent); font-weight: 600; letter-spacing: 0.05em; font-size: 0.8rem; text-transform: uppercase; }
+  code { background: var(--bg-card); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.9em; color: var(--accent); }
+  .interactive { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 640px) { .slider-row { grid-template-columns: 1fr; } }
+  .slider-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .slider-value { font-family: 'JetBrains Mono', Consolas, monospace; background: var(--bg-card); padding: 2px 8px; border-radius: 4px; color: var(--accent); font-size: 0.85rem; }
+  .family { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1rem 0; }
+  .family h4 { color: var(--accent); margin-top: 0; margin-bottom: 0.5rem; }
+  .family .family-formula { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--accent); font-style: italic; margin-bottom: 0.6rem; }
+  .family-graph { width: 100%; max-width: 280px; height: 100px; display: block; margin: 8px 0 12px; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 4px; }
+  .diagram-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 1.5rem 0; }
+  .diagram-fig { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+  .diagram-fig svg { width: 100%; height: auto; display: block; }
+  .diagram-fig figcaption { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
+  .diagram-single { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin: 1.25rem 0; text-align: center; }
+  .diagram-single svg { max-width: 600px; width: 100%; height: auto; }
+  .diagram-single .diag-caption { color: var(--text-muted); font-size: 0.85rem; font-style: italic; margin-top: 8px; }
+  .pseudocode { background: rgba(184, 164, 222, 0.06); border-left: 3px solid var(--purple); padding: 12px 16px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.85rem; line-height: 1.6; margin: 12px 0; border-radius: 4px; color: var(--text); white-space: pre; overflow-x: auto; }
+  .pseudocode-title { font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple); margin-bottom: 6px; font-weight: 700; }
+  .code-py { background: #1e293b; color: #e2e8f0; padding: 12px 16px; border-radius: 6px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.85rem; line-height: 1.5; margin: 12px 0; overflow-x: auto; white-space: pre; }
+  .code-py-title { font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #86efac; margin-bottom: 6px; font-weight: 700; }
+  /* MathJax SVG output — force sane sizing to prevent runaway growth */
+  mjx-container { display: inline-block; line-height: 0; }
+  mjx-container[display="true"] { display: block; text-align: center; margin: 1em 0; line-height: normal; }
+  mjx-container > svg { max-width: 100%; height: auto; display: inline-block; vertical-align: middle; }
+  mjx-container[display="true"] > svg { display: block; margin: 0 auto; }
+  .example-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .example-card h3 { margin-top: 0; }
+  .reveal-btn { background: var(--accent); color: var(--bg); border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-top: 8px; }
+  .reveal-btn:hover { background: var(--accent-soft); }
+  .solution { display: none; margin-top: 1rem; padding: 1rem 1.25rem; background: rgba(134, 192, 132, 0.06); border-left: 3px solid var(--green); border-radius: 6px; }
+  .example-card.open .solution { display: block; }
+  .quiz-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin: 1rem 0; }
+  .quiz-item .q-num { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .quiz-item .q-question { margin-bottom: 1rem; font-size: 1.05rem; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; }
+  .quiz-opt { background: var(--bg-card); border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px; cursor: pointer; color: var(--text); font-size: 0.95rem; text-align: left; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--green); background: rgba(134, 192, 132, 0.12); }
+  .quiz-opt.wrong { border-color: #d97056; background: rgba(217, 112, 86, 0.12); }
+  .quiz-feedback { display: none; margin-top: 10px; padding: 10px 14px; background: var(--bg-card); border-radius: 6px; font-size: 0.9rem; color: var(--text-muted); }
+  .quiz-item.answered .quiz-feedback { display: block; }
+  .flash-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .flash { background: linear-gradient(135deg, var(--bg-soft) 0%, var(--bg-card) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer; min-height: 160px; display: flex; flex-direction: column; justify-content: center; }
+  .flash:hover { border-color: var(--accent); }
+  .flash .side-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .flash .side-label.back { color: var(--green); }
+  .flash .front-content { display: block; }
+  .flash .back-content { display: none; }
+  .flash.flipped .front-content { display: none; }
+  .flash.flipped .back-content { display: block; }
+  .hw-card { background: var(--bg-soft); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .hw-card .hw-num { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 1.1rem; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .hw-tag { display: inline-block; padding: 3px 10px; background: rgba(229, 165, 78, 0.15); color: var(--accent); border-radius: 10px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 6px; }
+  .recall-item { padding: 1rem; background: var(--bg-soft); border-radius: 8px; margin: 0.75rem 0; border-left: 3px solid var(--purple); }
+  .lesson-footer { display: flex; justify-content: space-between; margin: 4rem 0 2rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+  .nav-btn { color: var(--text-muted); text-decoration: none; padding: 0.75rem 1.25rem; border: 1px solid var(--border); border-radius: 8px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .muted { color: var(--text-muted); }
+  .dim { color: var(--text-dim); }
+  details.deeper { background: rgba(184, 164, 222, 0.04); border: 1px solid var(--border); border-left: 3px solid var(--purple); border-radius: 8px; margin: 1.25rem 0; padding: 0.75rem 1.25rem; }
+  details.deeper > summary { font-family: 'Playfair Display', serif; font-weight: 600; color: var(--purple); cursor: pointer; padding: 6px 0; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.deeper > summary::-webkit-details-marker { display: none; }
+  details.deeper > summary::before { content: '▶'; color: var(--purple); font-size: 0.75rem; transition: transform 0.15s; display: inline-block; }
+  details.deeper[open] > summary::before { transform: rotate(90deg); }
+  details.deeper > summary:hover { color: var(--accent); }
+  details.deeper[open] { padding-bottom: 1.25rem; }
+  details.deeper .deeper-body { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+  .ref-section { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin: 1rem 0; }
+  .ref-section h3 { margin-top: 0; }
+  .ref-list { list-style: none; padding: 0; margin: 0; }
+  .ref-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list .ref-title { color: var(--accent); font-weight: 500; }
+  .ref-list .ref-detail { color: var(--text-muted); font-size: 0.85rem; margin-top: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="breadcrumb">
+    <a href="../Quant-Roadmap.html">Atlas</a><span class="sep">›</span>
+    <span class="current">Functions &amp; the Language of Change</span>
+  </div>
+
+  <div class="meta">CALCULUS <span class="dot">·</span> 90 MIN LECTURE <span class="dot">·</span> ~5H COMPLETE <span class="dot">·</span> <span class="status">v2 · REBUILT</span></div>
+
+  <h1 class="lesson-title">Functions &amp; the Language of Change</h1>
+  <div class="subtitle">Foundations: Functions, Limits &amp; Continuity · <span class="muted">1/4</span>
+    <span class="progress-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="lecture">📖 Lecture</button>
+    <button class="tab-btn" data-tab="examples">🔍 Examples <span class="count">5</span></button>
+    <button class="tab-btn" data-tab="quiz">✏️ Quiz <span class="count">20</span></button>
+    <button class="tab-btn" data-tab="flashcards">📇 Flashcards <span class="count">10</span></button>
+    <button class="tab-btn" data-tab="homework">✨ Homework <span class="count">5</span></button>
+    <button class="tab-btn" data-tab="references">📚 References</button>
+    <button class="tab-btn" data-tab="recall">🎨 Recall</button>
+  </nav>
+
+  <div class="features">
+    <span class="label">In this lesson</span>
+    <span class="feature-badge">🎛️ interactive plotter</span>
+    <span class="feature-badge">📐 8 theorems with proofs</span>
+    <span class="feature-badge">🌳 8 function families</span>
+    <span class="feature-badge">📊 4 diagrams</span>
+    <span class="feature-badge">💻 code corner (optional)</span>
+    <span class="feature-badge">🧩 8 deeper dives</span>
+  </div>
+
+  <!-- ========== LECTURE ========== -->
+  <div class="tab-content active" id="tab-lecture">
+
+    <div class="box box-lo">
+      <div class="box-title">🎯 Learning Outcomes</div>
+      <p>After completing this lesson (Lecture + Examples + Homework), you will be able to:</p>
+      <div class="lo-grid">
+        <div>
+          <h4>Recall &amp; Understand</h4>
+          <ul>
+            <li>State the formal definition of a function (rule and set-theoretic form)</li>
+            <li>Distinguish injective, surjective, and bijective functions</li>
+            <li>List the seven elementary function families and their canonical shapes</li>
+            <li>Read domain/range/behavior from a graph</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Apply</h4>
+          <ul>
+            <li>Find the natural domain of a formula using the three-condition recipe</li>
+            <li>Compute compositions and inverses of concrete functions</li>
+            <li>Sketch a transformed function using shift/scale/reflect rules</li>
+            <li>Decompose any function into even and odd parts</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Prove &amp; Analyze</h4>
+          <ul>
+            <li>Prove associativity of composition (Theorem 5.2)</li>
+            <li>Prove that a two-sided inverse exists iff the function is bijective (Theorem 6.3)</li>
+            <li>Verify strict monotonicity implies injectivity</li>
+            <li>Prove uniqueness of the even-odd decomposition</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Connect to Finance</h4>
+          <ul>
+            <li>Recognize a compounding formula as a composition of scaling and exp</li>
+            <li>Derive present value as the inverse of future value</li>
+            <li>Identify the ramp function \(x^+\) as the vanilla call payoff</li>
+            <li>Interpret indicator functions as digital option payoffs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-box">
+      <div class="outline-title">📄 On this page · 8 sections</div>
+      <div class="outline-grid">
+        <a href="#s1" class="outline-item"><span class="num">1</span>The formal notion of a function</a>
+        <a href="#s5" class="outline-item"><span class="num">5</span>Composition &amp; function algebra</a>
+        <a href="#s2" class="outline-item"><span class="num">2</span>Domain, range, image, preimage</a>
+        <a href="#s6" class="outline-item"><span class="num">6</span>Injectivity, surjectivity, and inverses</a>
+        <a href="#s3" class="outline-item"><span class="num">3</span>Elementary function families</a>
+        <a href="#s7" class="outline-item"><span class="num">7</span>Transformations of functions</a>
+        <a href="#s4" class="outline-item"><span class="num">4</span>Structural properties</a>
+        <a href="#s8" class="outline-item"><span class="num">8</span>Putting it together</a>
+      </div>
+    </div>
+
+    <!-- SECTION 1: FORMAL NOTION -->
+    <section id="s1">
+      <h2>1. The formal notion of a function</h2>
+
+      <p>Calculus is the study of functions and how they change. Before differentiating anything, one needs a precise definition of the object being differentiated.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.1 — Function</div>
+        <p>Let \(A\) and \(B\) be sets. A <b>function</b> \(f\) from \(A\) to \(B\), written \(f: A \to B\), is a rule assigning to each element \(x \in A\) a unique element \(f(x) \in B\).</p>
+        <p>The set \(A\) is the <b>domain</b> and \(B\) is the <b>codomain</b>. The element \(f(x)\) is the <b>value</b> or <b>image</b> of \(x\) under \(f\).</p>
+      </div>
+
+      <details class="deeper">
+        <summary>Deeper dive — the set-theoretic definition</summary>
+        <div class="deeper-body">
+          <p>The informal phrase "rule assigning" is convenient but not rigorous. In modern mathematics, a function is defined as a specific kind of subset of the Cartesian product.</p>
+          <p><b>Definition (rigorous).</b> A function \(f: A \to B\) is a subset \(f \subseteq A \times B\) satisfying: for each \(x \in A\), there exists exactly one \(y \in B\) such that \((x, y) \in f\). We then write \(y = f(x)\).</p>
+          <p>Under this definition, a function <b>is</b> its graph. Two functions are equal iff they are equal as sets of ordered pairs. This resolves paradoxes about "the same rule with different domains" — see Theorem 1.3 below.</p>
+        </div>
+      </details>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.2 — Injective, surjective, bijective</div>
+        <p>Let \(f: A \to B\).</p>
+        <p><b>Injective</b> (one-to-one): if \(f(x_1) = f(x_2)\) then \(x_1 = x_2\). Equivalently, distinct inputs produce distinct outputs.</p>
+        <p><b>Surjective</b> (onto): for every \(y \in B\), there exists \(x \in A\) with \(f(x) = y\). Equivalently, the range equals the codomain.</p>
+        <p><b>Bijective</b>: both injective and surjective. Sometimes called a one-to-one correspondence.</p>
+      </div>
+
+      <p>The three properties are easiest to grasp visually. Elements of the domain \(A\) are on the left, elements of the codomain \(B\) on the right, and arrows show the assignment \(x \mapsto f(x)\).</p>
+
+      <div class="diagram-row">
+        <figure class="diagram-fig">
+          <svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="ar-inj" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#86c084"/></marker></defs>
+            <ellipse cx="55" cy="105" rx="35" ry="80" fill="none" stroke="#e5a54e" stroke-width="1.5"/>
+            <text x="55" y="18" text-anchor="middle" fill="#e5a54e" font-family="Georgia" font-size="14" font-style="italic">A</text>
+            <circle cx="55" cy="55" r="4" fill="#e5a54e"/><text x="30" y="59" fill="#ede4d3" font-size="11">x₁</text>
+            <circle cx="55" cy="105" r="4" fill="#e5a54e"/><text x="30" y="109" fill="#ede4d3" font-size="11">x₂</text>
+            <circle cx="55" cy="155" r="4" fill="#e5a54e"/><text x="30" y="159" fill="#ede4d3" font-size="11">x₃</text>
+            <ellipse cx="205" cy="105" rx="35" ry="80" fill="none" stroke="#8fb5e0" stroke-width="1.5"/>
+            <text x="205" y="18" text-anchor="middle" fill="#8fb5e0" font-family="Georgia" font-size="14" font-style="italic">B</text>
+            <circle cx="205" cy="45" r="4" fill="#8fb5e0"/><text x="215" y="49" fill="#ede4d3" font-size="11">y₁</text>
+            <circle cx="205" cy="85" r="4" fill="#8fb5e0"/><text x="215" y="89" fill="#ede4d3" font-size="11">y₂</text>
+            <circle cx="205" cy="125" r="4" fill="#8fb5e0"/><text x="215" y="129" fill="#ede4d3" font-size="11">y₃</text>
+            <circle cx="205" cy="165" r="4" fill="#8fb5e0"/><text x="215" y="169" fill="#ede4d3" font-size="11">y₄</text>
+            <line x1="62" y1="55" x2="198" y2="45" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-inj)"/>
+            <line x1="62" y1="105" x2="198" y2="85" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-inj)"/>
+            <line x1="62" y1="155" x2="198" y2="125" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-inj)"/>
+          </svg>
+          <figcaption>Injective</figcaption>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Distinct inputs → distinct outputs. \(y_4\) not hit.</div>
+        </figure>
+
+        <figure class="diagram-fig">
+          <svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="ar-sur" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#86c084"/></marker></defs>
+            <ellipse cx="55" cy="105" rx="35" ry="80" fill="none" stroke="#e5a54e" stroke-width="1.5"/>
+            <text x="55" y="18" text-anchor="middle" fill="#e5a54e" font-family="Georgia" font-size="14" font-style="italic">A</text>
+            <circle cx="55" cy="45" r="4" fill="#e5a54e"/><text x="30" y="49" fill="#ede4d3" font-size="11">x₁</text>
+            <circle cx="55" cy="85" r="4" fill="#e5a54e"/><text x="30" y="89" fill="#ede4d3" font-size="11">x₂</text>
+            <circle cx="55" cy="125" r="4" fill="#e5a54e"/><text x="30" y="129" fill="#ede4d3" font-size="11">x₃</text>
+            <circle cx="55" cy="165" r="4" fill="#e5a54e"/><text x="30" y="169" fill="#ede4d3" font-size="11">x₄</text>
+            <ellipse cx="205" cy="105" rx="35" ry="80" fill="none" stroke="#8fb5e0" stroke-width="1.5"/>
+            <text x="205" y="18" text-anchor="middle" fill="#8fb5e0" font-family="Georgia" font-size="14" font-style="italic">B</text>
+            <circle cx="205" cy="55" r="4" fill="#8fb5e0"/><text x="215" y="59" fill="#ede4d3" font-size="11">y₁</text>
+            <circle cx="205" cy="105" r="4" fill="#8fb5e0"/><text x="215" y="109" fill="#ede4d3" font-size="11">y₂</text>
+            <circle cx="205" cy="155" r="4" fill="#8fb5e0"/><text x="215" y="159" fill="#ede4d3" font-size="11">y₃</text>
+            <line x1="62" y1="45" x2="198" y2="55" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-sur)"/>
+            <line x1="62" y1="85" x2="198" y2="55" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-sur)"/>
+            <line x1="62" y1="125" x2="198" y2="105" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-sur)"/>
+            <line x1="62" y1="165" x2="198" y2="155" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-sur)"/>
+          </svg>
+          <figcaption>Surjective</figcaption>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Every \(y\) hit. \(x_1, x_2\) share \(y_1\).</div>
+        </figure>
+
+        <figure class="diagram-fig">
+          <svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="ar-bij" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#86c084"/></marker></defs>
+            <ellipse cx="55" cy="105" rx="35" ry="80" fill="none" stroke="#e5a54e" stroke-width="1.5"/>
+            <text x="55" y="18" text-anchor="middle" fill="#e5a54e" font-family="Georgia" font-size="14" font-style="italic">A</text>
+            <circle cx="55" cy="55" r="4" fill="#e5a54e"/><text x="30" y="59" fill="#ede4d3" font-size="11">x₁</text>
+            <circle cx="55" cy="105" r="4" fill="#e5a54e"/><text x="30" y="109" fill="#ede4d3" font-size="11">x₂</text>
+            <circle cx="55" cy="155" r="4" fill="#e5a54e"/><text x="30" y="159" fill="#ede4d3" font-size="11">x₃</text>
+            <ellipse cx="205" cy="105" rx="35" ry="80" fill="none" stroke="#8fb5e0" stroke-width="1.5"/>
+            <text x="205" y="18" text-anchor="middle" fill="#8fb5e0" font-family="Georgia" font-size="14" font-style="italic">B</text>
+            <circle cx="205" cy="55" r="4" fill="#8fb5e0"/><text x="215" y="59" fill="#ede4d3" font-size="11">y₁</text>
+            <circle cx="205" cy="105" r="4" fill="#8fb5e0"/><text x="215" y="109" fill="#ede4d3" font-size="11">y₂</text>
+            <circle cx="205" cy="155" r="4" fill="#8fb5e0"/><text x="215" y="159" fill="#ede4d3" font-size="11">y₃</text>
+            <line x1="62" y1="55" x2="198" y2="55" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-bij)"/>
+            <line x1="62" y1="105" x2="198" y2="105" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-bij)"/>
+            <line x1="62" y1="155" x2="198" y2="155" stroke="#86c084" stroke-width="1.5" marker-end="url(#ar-bij)"/>
+          </svg>
+          <figcaption>Bijective</figcaption>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Perfect matching. Invertible.</div>
+        </figure>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 1.1 — the same rule, three behaviors</div>
+        <p>Consider the rule \(x \mapsto x^2\).</p>
+        <ul>
+          <li>As \(f: \mathbb{R} \to \mathbb{R}\): neither injective (\(f(2) = f(-2) = 4\)) nor surjective (no \(x\) gives \(-1\)).</li>
+          <li>As \(f: [0, \infty) \to \mathbb{R}\): injective but not surjective.</li>
+          <li>As \(f: [0, \infty) \to [0, \infty)\): bijective.</li>
+        </ul>
+        <p>The rule alone does not determine these properties — the domain and codomain do.</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 1.3 — Function equality</div>
+        <p>Two functions \(f: A \to B\) and \(g: C \to D\) are equal if and only if:</p>
+        <p>(i) \(A = C\), (ii) \(B = D\), and (iii) \(f(x) = g(x)\) for every \(x \in A\).</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p>Under the set-theoretic definition, \(f\) and \(g\) are subsets of \(A \times B\) and \(C \times D\) respectively. If \(A \neq C\) or \(B \neq D\) then \(A \times B \neq C \times D\) so \(f \neq g\) as sets. If all three conditions hold, then \(f\) and \(g\) contain exactly the same pairs \((x, f(x)) = (x, g(x))\), so they are equal as sets. \(\blacksquare\)</p>
+      </div>
+
+      <p><b>Consequence.</b> The three versions of \(x \mapsto x^2\) in Example 1.1 are three <b>different functions</b>, not one function with three interpretations. This matters for invertibility (§6).</p>
+
+      <h3>The vertical line test</h3>
+
+      <p>Given a subset \(S\) of the plane, ask: is \(S\) the graph of a function of \(x\)? The answer is yes iff every vertical line \(x = a\) intersects \(S\) in at most one point. If some vertical line meets \(S\) twice, then the same \(x\) is paired with two \(y\)-values, violating uniqueness.</p>
+    </section>
+
+    <!-- SECTION 2: DOMAIN, RANGE, IMAGE, PREIMAGE -->
+    <section id="s2">
+      <h2>2. Domain, range, image, preimage</h2>
+
+      <p>The domain and codomain are declared as part of a function. In practice we often meet a formula without an explicit domain and must determine the largest set on which the formula is defined.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 2.1 — Image and preimage</div>
+        <p>Let \(f: A \to B\) and let \(S \subseteq A\), \(T \subseteq B\).</p>
+        <p>The <b>image</b> of \(S\) under \(f\) is</p>
+        \[ f(S) = \{ f(x) : x \in S \} \subseteq B. \]
+        <p>When \(S = A\), the image \(f(A)\) is called the <b>range</b> of \(f\).</p>
+        <p>The <b>preimage</b> of \(T\) under \(f\) is</p>
+        \[ f^{-1}(T) = \{ x \in A : f(x) \in T \} \subseteq A. \]
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">Notational trap — \(f^{-1}\)</div>
+        <p>The symbol \(f^{-1}(T)\) for preimage does NOT require \(f\) to have an inverse. It is defined for every function. If \(f\) happens to be bijective and \(y \in B\), then \(f^{-1}(\{y\}) = \{f^{-1}(y)\}\) as a set — but the preimage notation is more general.</p>
+        <p>Also \(f^{-1}\) is not \(1/f\). \(\sin^{-1}\) means arcsine, not \(\csc\). Context disambiguates.</p>
+      </div>
+
+      <h3>Three ways a formula can fail to define a real number</h3>
+
+      <table class="st">
+        <tr><th>Failure</th><th>Occurs in</th><th>Required condition</th></tr>
+        <tr><td>Division by zero</td><td>\(\frac{p(x)}{q(x)}\)</td><td>\(q(x) \neq 0\)</td></tr>
+        <tr><td>Even root of a negative number</td><td>\(\sqrt[2k]{p(x)}\)</td><td>\(p(x) \geq 0\)</td></tr>
+        <tr><td>Logarithm of a non-positive number</td><td>\(\log p(x)\)</td><td>\(p(x) &gt; 0\)</td></tr>
+      </table>
+
+      <p>Trigonometric functions add: \(\tan x, \sec x\) undefined where \(\cos x = 0\); \(\cot x, \csc x\) undefined where \(\sin x = 0\). Inverse trigonometric functions add: \(\arcsin, \arccos\) require argument in \([-1, 1]\).</p>
+
+      <div class="box box-proof">
+        <div class="box-title">Procedure — finding the natural domain</div>
+        <div class="step"><span class="step-num">1</span>Identify every occurrence of division, even root, logarithm, tangent-type, or inverse-trig.</div>
+        <div class="step"><span class="step-num">2</span>Write the required condition for each.</div>
+        <div class="step"><span class="step-num">3</span>Solve each inequality or equation.</div>
+        <div class="step"><span class="step-num">4</span>Intersect all resulting subsets of \(\mathbb{R}\).</div>
+      </div>
+
+      <h3>Finding the range</h3>
+
+      <p>Unlike the domain, the range has no universal procedure. Three common approaches:</p>
+
+      <p><b>(a) Graphical.</b> Sketch the graph and read off the vertical span.</p>
+
+      <p><b>(b) Solve backwards.</b> Set \(y = f(x)\), solve for \(x\) in terms of \(y\), and determine which \(y\)-values yield a valid \(x\) in the domain.</p>
+
+      <p><b>(c) Use structural properties.</b> If \(f\) is a sum of a bounded and an unbounded piece, or the composition of two functions with known ranges, deduce the range from these building blocks. Examples: \(x^2 \geq 0\) so \(\text{range}(x^2 + 5) = [5, \infty)\); \(e^x &gt; 0\) so \(\text{range}(e^x) = (0, \infty)\).</p>
+
+      <details class="deeper">
+        <summary>Deeper dive — image and preimage as operations on sets</summary>
+        <div class="deeper-body">
+          <p>Image and preimage are operations that respect certain set-theoretic structures but not others.</p>
+          <p><b>Preimage always respects unions and intersections:</b></p>
+          \[ f^{-1}(T_1 \cup T_2) = f^{-1}(T_1) \cup f^{-1}(T_2), \quad f^{-1}(T_1 \cap T_2) = f^{-1}(T_1) \cap f^{-1}(T_2). \]
+          <p><b>Image respects unions but only contains intersections:</b></p>
+          \[ f(S_1 \cup S_2) = f(S_1) \cup f(S_2), \quad f(S_1 \cap S_2) \subseteq f(S_1) \cap f(S_2). \]
+          <p>Equality in the second holds when \(f\) is injective on \(S_1 \cup S_2\). This asymmetry is why preimage is the "well-behaved" direction and why it appears in the definition of measurable and continuous functions (Lesson 2 and Track A10).</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 3: ELEMENTARY FUNCTION FAMILIES -->
+    <section id="s3">
+      <h2>3. Elementary function families</h2>
+
+      <p>Instead of memorizing ten specific functions, understand the seven families they belong to. Every elementary function is a polynomial, a rational function, a power, an exponential, a logarithm, a trigonometric or inverse-trigonometric function, or a hyperbolic function — possibly combined by arithmetic operations and composition.</p>
+
+      <div class="family">
+        <div class="family-formula">Polynomials: \(P(x) = a_n x^n + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="45" x2="230" y2="45" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 30 15 Q 120 130 210 15" stroke="#e5a54e" stroke-width="2" fill="none"/><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">Cubic / quadratic shape</text></svg>
+        <p>Smooth, no breaks or asymptotes, domain \(\mathbb{R}\). The <b>degree</b> \(n\) controls: the number of turning points (at most \(n-1\)), the number of real roots (at most \(n\)), and the end behavior — as \(x \to \pm\infty\), \(P(x)\) behaves like its leading term \(a_n x^n\). A degree-2 polynomial (parabola) opens up if \(a_2 &gt; 0\); a degree-3 goes from \(-\infty\) to \(+\infty\) if \(a_3 &gt; 0\).</p>
+        <p><b>Key theorems.</b> Fundamental Theorem of Algebra: every non-constant polynomial has at least one complex root; a degree-\(n\) polynomial has exactly \(n\) complex roots counted with multiplicity. Vieta's formulas relate roots to coefficients.</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Rational functions: \(R(x) = \dfrac{P(x)}{Q(x)}\) where \(P, Q\) are polynomials, \(Q \not\equiv 0\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="45" x2="230" y2="45" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 30 15 Q 80 15 115 45" stroke="#e5a54e" stroke-width="2" fill="none"/><path d="M 125 45 Q 160 75 210 75" stroke="#e5a54e" stroke-width="2" fill="none"/><line x1="120" y1="10" x2="120" y2="80" stroke="#d97056" stroke-width="0.5" stroke-dasharray="3,3"/><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">Vertical asymptote at x=0 (1/x)</text></svg>
+        <p>Domain is \(\mathbb{R}\) minus the zeros of \(Q\). Behavior near a zero \(a\) of \(Q\):</p>
+        <ul>
+          <li>If \(P(a) \neq 0\): <b>vertical asymptote</b> at \(x = a\), \(R(x) \to \pm\infty\).</li>
+          <li>If \(P(a) = 0\) with lower multiplicity than in \(Q\): asymptote still, with reduced power.</li>
+          <li>If \(P(a) = 0\) with equal or higher multiplicity: <b>removable singularity</b> (a hole in the graph).</li>
+        </ul>
+        <p>End behavior compares \(\deg P\) vs \(\deg Q\): if \(\deg P &lt; \deg Q\), horizontal asymptote \(y = 0\); if equal, horizontal asymptote at ratio of leading coefficients; if \(\deg P &gt; \deg Q\), no horizontal asymptote (grows polynomially or has an oblique asymptote when \(\deg P = \deg Q + 1\)).</p>
+        <p><b>Simplest example.</b> \(f(x) = 1/x\): two branches, asymptotes along both axes, domain and range \(\mathbb{R} \setminus \{0\}\); its own inverse.</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Power functions: \(f(x) = x^p\) for real \(p\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="45" x2="230" y2="45" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 120 45 Q 155 20 210 8" stroke="#86c084" stroke-width="1.8" fill="none"/><path d="M 120 45 Q 155 65 210 78" stroke="#86c084" stroke-width="1.8" fill="none" opacity="0.5"/><path d="M 30 12 Q 90 40 120 45 Q 150 50 210 78" stroke="#e5a54e" stroke-width="1.8" fill="none"/><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">x^(1/2) top · x^3 bottom · varies with p</text></svg>
+        <p>Behavior depends heavily on \(p\):</p>
+        <ul>
+          <li>\(p\) positive integer: polynomial, all of \(\mathbb{R}\) as domain.</li>
+          <li>\(p\) negative integer: rational, asymptote at 0.</li>
+          <li>\(p = 1/n\), \(n\) even (e.g. \(\sqrt{x}\)): domain \([0, \infty)\).</li>
+          <li>\(p = 1/n\), \(n\) odd (e.g. \(\sqrt[3]{x}\)): domain \(\mathbb{R}\).</li>
+          <li>\(p\) irrational: defined only on \((0, \infty)\) via \(x^p = e^{p \ln x}\).</li>
+        </ul>
+        <p><b>Uniform property.</b> All power functions satisfy \((xy)^p = x^p y^p\) (on their common domain), which is why they show up in scaling arguments in physics and Brownian motion (self-similarity: \(W_{ct} \stackrel{d}{=} \sqrt{c}\, W_t\) uses \(p = 1/2\)).</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Exponential functions: \(f(x) = b^x\) with \(b &gt; 0, b \neq 1\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="65" x2="230" y2="65" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 30 62 Q 100 60 130 55 Q 170 45 210 8" stroke="#e5a54e" stroke-width="2" fill="none"/><circle cx="120" cy="55" r="2" fill="#e5a54e"/><text x="122" y="53" fill="#a89e8b" font-size="8" font-family="Georgia">(0,1)</text><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">e^x — always positive, through (0,1)</text></svg>
+        <p>Domain \(\mathbb{R}\), range \((0, \infty)\) — exponentials are strictly positive. Every exponential passes through \((0, 1)\). Grows monotonically if \(b &gt; 1\), decays if \(0 &lt; b &lt; 1\), by a <b>constant multiplicative factor per unit step</b>: \(f(x + 1) = b \cdot f(x)\).</p>
+        <p>The <b>natural base</b> \(e \approx 2.71828\) is distinguished because \(\frac{d}{dx} e^x = e^x\) (proved in Lesson 3); no other base has derivative equal to itself. Every exponential converts to the natural base via \(b^x = e^{x \ln b}\), so \(e^x\) is universal.</p>
+        <p><b>Functional equation.</b> Any continuous function satisfying \(f(x + y) = f(x) f(y)\) and \(f(1) = b\) is \(b^x\). This axiomatic characterization justifies calling \(b^x\) "the" function of constant relative growth.</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Logarithmic functions: \(f(x) = \log_b x\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="45" x2="230" y2="45" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 125 85 Q 130 65 145 50 Q 175 40 210 32" stroke="#e5a54e" stroke-width="2" fill="none"/><line x1="120" y1="10" x2="120" y2="80" stroke="#d97056" stroke-width="0.5" stroke-dasharray="3,3"/><circle cx="145" cy="45" r="2" fill="#e5a54e"/><text x="148" y="43" fill="#a89e8b" font-size="8" font-family="Georgia">(1,0)</text><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">ln x — domain x&gt;0, through (1,0)</text></svg>
+        <p>The inverse of \(b^x\): domain \((0, \infty)\), range all of \(\mathbb{R}\), passing through \((1, 0)\). Turns multiplication into addition: \(\log(xy) = \log x + \log y\), and turns exponentiation into multiplication: \(\log(x^p) = p \log x\).</p>
+        <p><b>Change of base.</b> \(\log_b x = \frac{\ln x}{\ln b}\), so any log is a constant multiple of \(\ln\). In practice we use \(\ln\) (natural log) almost exclusively in finance and statistics.</p>
+        <p><b>Why it appears in ML and statistics.</b> Log-likelihoods replace likelihoods because products of probabilities (which are numerically unstable when many probabilities multiply) become sums under the log: \(\ln \prod_i p_i = \sum_i \ln p_i\). Shannon entropy \(H = -\sum p_i \ln p_i\) and Kullback-Leibler divergence both use \(\ln\).</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Trigonometric functions: \(\sin x, \cos x, \tan x, \cot x, \sec x, \csc x\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="45" x2="230" y2="45" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 15 45 Q 40 15 65 45 Q 90 75 120 45 Q 150 15 175 45 Q 200 75 230 45" stroke="#e5a54e" stroke-width="2" fill="none"/><line x1="10" y1="20" x2="230" y2="20" stroke="#6b6152" stroke-width="0.3" stroke-dasharray="2,2"/><line x1="10" y1="70" x2="230" y2="70" stroke="#6b6152" stroke-width="0.3" stroke-dasharray="2,2"/><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">sin x — period 2π, range [-1,1]</text></svg>
+        <p>\(\sin\) and \(\cos\) are <b>periodic</b> with period \(2\pi\), domain \(\mathbb{R}\), range \([-1, 1]\). They are the parent oscillations: any reasonable periodic signal decomposes into a sum of sines and cosines (Fourier analysis).</p>
+        <p><b>Pythagorean identity.</b> \(\sin^2 x + \cos^2 x = 1\) for all \(x\). Together with the addition formulas \(\sin(x + y) = \sin x \cos y + \cos x \sin y\), this generates the entire trigonometric identity zoo.</p>
+        <p>\(\tan x = \sin x / \cos x\) has period \(\pi\), range all of \(\mathbb{R}\), and vertical asymptotes where \(\cos x = 0\) (i.e., at \(x = \pi/2 + k\pi\)).</p>
+        <p><b>Inverse trig.</b> \(\arcsin\) and \(\arccos\) are defined on \([-1, 1]\) by restricting \(\sin\) to \([-\pi/2, \pi/2]\) and \(\cos\) to \([0, \pi]\). \(\arctan\) is defined on all of \(\mathbb{R}\) by restricting \(\tan\) to \((-\pi/2, \pi/2)\), and satisfies \(\lim_{x \to \pm\infty} \arctan x = \pm \pi/2\).</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Hyperbolic functions: \(\sinh x, \cosh x, \tanh x\)</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="45" x2="230" y2="45" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><path d="M 20 65 Q 80 63 115 50 Q 125 45 135 40 Q 170 27 220 25" stroke="#e5a54e" stroke-width="2" fill="none"/><line x1="10" y1="25" x2="230" y2="25" stroke="#6b6152" stroke-width="0.3" stroke-dasharray="2,2"/><line x1="10" y1="65" x2="230" y2="65" stroke="#6b6152" stroke-width="0.3" stroke-dasharray="2,2"/><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">tanh x — bounded S-curve, range (-1,1)</text></svg>
+        <p>Defined in terms of exponentials:</p>
+        \[ \sinh x = \frac{e^x - e^{-x}}{2}, \quad \cosh x = \frac{e^x + e^{-x}}{2}, \quad \tanh x = \frac{\sinh x}{\cosh x}. \]
+        <p>Satisfy the hyperbolic Pythagorean identity \(\cosh^2 x - \sinh^2 x = 1\) (note the minus sign). \(\cosh\) is even, \(\sinh\) is odd. \(\tanh: \mathbb{R} \to (-1, 1)\) is bijective; used as a smooth activation function in neural networks and to model bounded quantities.</p>
+      </div>
+
+      <div class="family">
+        <div class="family-formula">Piecewise and step-like functions</div>
+        <svg class="family-graph" viewBox="0 0 240 90"><line x1="10" y1="65" x2="230" y2="65" stroke="#6b6152" stroke-width="0.4"/><line x1="120" y1="5" x2="120" y2="85" stroke="#6b6152" stroke-width="0.4"/><line x1="30" y1="65" x2="120" y2="65" stroke="#e5a54e" stroke-width="2.5"/><line x1="120" y1="65" x2="210" y2="15" stroke="#e5a54e" stroke-width="2.5"/><circle cx="120" cy="65" r="2.5" fill="#e5a54e"/><text x="115" y="82" fill="#a89e8b" font-size="9" font-family="Georgia">Ramp x^+ = max(x,0) — the call payoff</text></svg>
+        <p>Functions defined by different rules on different pieces of the domain. Not "elementary" in the algebraic sense but ubiquitous in finance and probability.</p>
+        <p><b>Absolute value.</b> \(|x| = x\) for \(x \geq 0\), \(-x\) for \(x &lt; 0\). Even, continuous, not differentiable at 0. Appears as the \(L^1\) norm and in MAE.</p>
+        <p><b>Sign function.</b> \(\text{sgn}(x) = 1\) for \(x &gt; 0\), \(0\) for \(x = 0\), \(-1\) for \(x &lt; 0\). Discontinuous at 0. Used to encode trade direction.</p>
+        <p><b>Ramp (positive part).</b> \(x^+ = \max(x, 0)\). Continuous, kink at 0. <b>This is exactly the European call payoff</b> \((S - K)^+ = \max(S - K, 0)\) as a function of \(S\) with strike \(K\) as a horizontal shift. Every option payoff diagram is built from ramps and reflections.</p>
+        <p><b>Indicator function.</b> For a set \(A\), \(\mathbb{1}_A(x) = 1\) if \(x \in A\), \(0\) otherwise. Central to probability: \(\mathbb{E}[\mathbb{1}_A] = \mathbb{P}(A)\). A digital option pays \(\mathbb{1}_{\{S \geq K\}}\) at expiry.</p>
+        <p><b>Heaviside step.</b> \(H(x) = \mathbb{1}_{\{x \geq 0\}}\). The distributional derivative of \(H\) is the Dirac delta \(\delta\); the derivative of the ramp \(x^+\) is \(H\). This is the origin of "jump" phenomena in stochastic calculus.</p>
+        <p><b>Floor and ceiling.</b> \(\lfloor x \rfloor\) is the greatest integer \(\leq x\); \(\lceil x \rceil\) is the smallest integer \(\geq x\). Used for discrete-time indexing (day counts, tick sizes).</p>
+        <p><b>Structural note.</b> The identity \(x = x^+ - (-x)^+\) decomposes any real number into positive and negative parts. In finance, this decomposes a portfolio payoff into long and short positions in cash and calls.</p>
+      </div>
+
+      <p>The <b>interactive plotter</b> below lets you compare families side-by-side. Choose a family, tune \(a\) and \(b\).</p>
+
+      <div class="interactive">
+        <p class="muted" style="font-size:0.85rem; margin-top:0;">🎛️ Interactive plotter:</p>
+        <div style="margin: 10px 0;">
+          <select id="fn-select" style="padding:8px 12px; background:var(--bg-card); color:var(--text); border:1px solid var(--border); border-radius:6px; font-family:inherit;">
+            <option value="polynomial">Polynomial: y = a·x² + b·x</option>
+            <option value="rational">Rational: y = a / (x - b)</option>
+            <option value="power">Power: y = a·x^b</option>
+            <option value="exp" selected>Exponential: y = a·e^(bx)</option>
+            <option value="log">Logarithm: y = a·ln(x) + b</option>
+            <option value="trig">Trigonometric: y = a·sin(b·x)</option>
+            <option value="hyperbolic">Hyperbolic: y = a·tanh(b·x)</option>
+          </select>
+        </div>
+        <div class="slider-row">
+          <div>
+            <div class="slider-label">Parameter a: <span class="slider-value" id="a-val">1.0</span></div>
+            <input type="range" id="a-slider" min="-3" max="3" step="0.1" value="1">
+          </div>
+          <div>
+            <div class="slider-label">Parameter b: <span class="slider-value" id="b-val">1.0</span></div>
+            <input type="range" id="b-slider" min="-3" max="3" step="0.1" value="1">
+          </div>
+        </div>
+        <canvas id="fn-canvas" width="800" height="300" style="width:100%; height:auto; background:var(--bg); border-radius:6px;"></canvas>
+      </div>
+
+      <details class="deeper">
+        <summary>Deeper dive — Big-O and little-o notation</summary>
+        <div class="deeper-body">
+          <p>When comparing the growth or shrinkage of functions near a point or at infinity, we use asymptotic notation.</p>
+          <p><b>Definition.</b> Let \(f, g\) be defined near a point \(a\) (possibly \(a = \infty\)).</p>
+          <ul>
+            <li>\(f(x) = O(g(x))\) as \(x \to a\) means there exist constants \(C, \delta &gt; 0\) such that \(|f(x)| \leq C |g(x)|\) whenever \(|x - a| &lt; \delta\). Read: "\(f\) is big-O of \(g\)" or "\(f\) is bounded above by a constant times \(g\)."</li>
+            <li>\(f(x) = o(g(x))\) as \(x \to a\) means \(\lim_{x \to a} f(x)/g(x) = 0\). Read: "\(f\) is little-o of \(g\)" or "\(f\) is negligible compared to \(g\)."</li>
+          </ul>
+          <p><b>Examples.</b></p>
+          <ul>
+            <li>\(\sin x = O(x)\) and \(\sin x = x + O(x^3)\) as \(x \to 0\).</li>
+            <li>\(\ln x = o(x^p)\) for any \(p &gt; 0\) as \(x \to \infty\) — logarithm grows slower than any positive power.</li>
+            <li>\(x^p = o(e^x)\) for any \(p\) as \(x \to \infty\) — exponential dominates any polynomial.</li>
+            <li>Taylor expansion: \(f(x) = f(a) + f'(a)(x - a) + O((x-a)^2)\) captures a linear approximation with the error bounded quadratically.</li>
+          </ul>
+          <p><b>Why it matters.</b> Big-O is the standard tool for stating theorems about local approximation and computational complexity. It appears in every rigorous statement of the Taylor theorem, the definition of the derivative, the CLT (rate of convergence to normality), and numerical error bounds in Monte Carlo and PDE methods.</p>
+        </div>
+      </details>
+
+      <details class="deeper">
+        <summary>Deeper dive — special functions beyond the elementary</summary>
+        <div class="deeper-body">
+          <p>Elementary functions are those obtainable from polynomials, exponentials, logarithms, and trig functions by finite composition and arithmetic. Many important functions in finance and physics fall outside this class.</p>
+          <p><b>Gaussian and error function.</b> \(\phi(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2}\) (standard normal PDF) is elementary, but its antiderivative \(\Phi(x) = \int_{-\infty}^x \phi(t)\, dt\) (normal CDF) is not. Related: the error function \(\text{erf}(x) = \frac{2}{\sqrt{\pi}} \int_0^x e^{-t^2}\, dt\). \(\Phi\) is central to Black-Scholes and every Gaussian-based quantile.</p>
+          <p><b>Gamma and Beta.</b> \(\Gamma(x) = \int_0^\infty t^{x-1} e^{-t}\, dt\) extends factorial to real (and complex) arguments: \(\Gamma(n) = (n-1)!\) for positive integers. Appears in Gamma and Beta distributions.</p>
+          <p><b>Special functions in fixed-income.</b> Bessel functions appear in some interest-rate models (CIR, Vasicek transitions).</p>
+          <p>These are all treated in later lessons when they first appear in an application.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 4: STRUCTURAL PROPERTIES -->
+    <section id="s4">
+      <h2>4. Structural properties</h2>
+
+      <p>A function has properties as an object of its own: symmetries, periodicities, monotonicity. Recognizing these accelerates every subsequent argument.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.1 — Even, odd, periodic</div>
+        <p>A function \(f: \mathbb{R} \to \mathbb{R}\) is:</p>
+        <ul>
+          <li><b>Even</b> if \(f(-x) = f(x)\) for all \(x\). Graph is symmetric about the \(y\)-axis.</li>
+          <li><b>Odd</b> if \(f(-x) = -f(x)\) for all \(x\). Graph is symmetric about the origin.</li>
+          <li><b>Periodic with period \(T\)</b> if \(f(x + T) = f(x)\) for all \(x\), and \(T\) is the smallest positive number with this property (the <b>fundamental period</b>).</li>
+        </ul>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 4.2 — Even-odd decomposition</div>
+        <p>Every function \(f: \mathbb{R} \to \mathbb{R}\) can be written uniquely as</p>
+        \[ f(x) = f_e(x) + f_o(x), \]
+        <p>where \(f_e\) is even and \(f_o\) is odd. Explicitly,</p>
+        \[ f_e(x) = \frac{f(x) + f(-x)}{2}, \quad f_o(x) = \frac{f(x) - f(-x)}{2}. \]
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p><b>Existence.</b> Define \(f_e, f_o\) by the formulas above. Verify \(f_e(-x) = \frac{f(-x) + f(x)}{2} = f_e(x)\), so \(f_e\) is even. Verify \(f_o(-x) = \frac{f(-x) - f(x)}{2} = -f_o(x)\), so \(f_o\) is odd. And \(f_e(x) + f_o(x) = \frac{f(x) + f(-x) + f(x) - f(-x)}{2} = f(x)\).</p>
+        <p><b>Uniqueness.</b> Suppose \(f = g_e + g_o\) with \(g_e\) even, \(g_o\) odd. Then \(f(x) - f(-x) = (g_e(x) + g_o(x)) - (g_e(-x) + g_o(-x)) = 2 g_o(x)\), so \(g_o(x) = f_o(x)\). Similarly \(g_e = f_e\). \(\blacksquare\)</p>
+      </div>
+
+      <p><b>Application.</b> \(e^x\) decomposes into \(\cosh x + \sinh x\). This is not a coincidence: \(\cosh\) and \(\sinh\) are the even and odd parts of \(e^x\).</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.3 — Monotonicity and boundedness</div>
+        <p>\(f: A \to \mathbb{R}\) is <b>increasing</b> on \(A\) if \(x_1 &lt; x_2 \Rightarrow f(x_1) \leq f(x_2)\), and <b>strictly increasing</b> if the second inequality is strict. Decreasing and strictly decreasing are defined analogously.</p>
+        <p>\(f\) is <b>bounded above</b> if there exists \(M\) with \(f(x) \leq M\) for all \(x\); <b>bounded below</b> if there exists \(m\) with \(f(x) \geq m\); <b>bounded</b> if both.</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 4.4 — Strict monotonicity implies injectivity</div>
+        <p>If \(f: A \to \mathbb{R}\) is strictly monotonic (either strictly increasing or strictly decreasing) on \(A\), then \(f\) is injective on \(A\).</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p>Suppose \(f\) is strictly increasing and \(f(x_1) = f(x_2)\). If \(x_1 \neq x_2\), WLOG \(x_1 &lt; x_2\), then by strict increase \(f(x_1) &lt; f(x_2)\), contradicting equality. Hence \(x_1 = x_2\). The strictly decreasing case is symmetric. \(\blacksquare\)</p>
+      </div>
+
+      <p><b>Consequence.</b> Strict monotonicity is a widely applicable sufficient condition for invertibility (used with Theorem 6.3 below). In finance, this is why Black-Scholes call price is invertible in \(\sigma\) — it is strictly increasing in volatility, so implied volatility is well-defined.</p>
+
+      <details class="deeper">
+        <summary>Deeper dive — Fourier decomposition preview</summary>
+        <div class="deeper-body">
+          <p>The even-odd decomposition is a special case of a much deeper structural fact: on a suitable space of functions, one can define orthogonal projections onto subspaces.</p>
+          <p><b>Fourier decomposition.</b> A periodic function \(f\) with period \(2\pi\) decomposes (under mild conditions) as</p>
+          \[ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n \cos(nx) + b_n \sin(nx) \right] \]
+          <p>where the cosines form the "even basis" and the sines form the "odd basis." The even-odd decomposition of §4 corresponds to the \(n = 0\) case (constant vs. non-constant) generalized to all frequencies.</p>
+          <p>This is why Fourier methods appear in derivatives pricing (Track D, Lesson on Fourier methods for option pricing): characteristic functions of return distributions can be inverted via Fourier transforms to recover payoff prices.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 5: COMPOSITION -->
+    <section id="s5">
+      <h2>5. Composition (and function algebra)</h2>
+
+      <p>Given functions with a common domain, we can build new functions arithmetically or by chaining them. Both operations produce new functions from old.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 5.0 — Function algebra</div>
+        <p>Let \(f, g: A \to \mathbb{R}\). Define pointwise:</p>
+        <ul>
+          <li>Sum: \((f + g)(x) = f(x) + g(x)\).</li>
+          <li>Difference: \((f - g)(x) = f(x) - g(x)\).</li>
+          <li>Product: \((f \cdot g)(x) = f(x) g(x)\).</li>
+          <li>Quotient: \((f / g)(x) = f(x)/g(x)\), defined on \(\{x \in A : g(x) \neq 0\}\).</li>
+          <li>Scalar multiple: for \(\lambda \in \mathbb{R}\), \((\lambda f)(x) = \lambda f(x)\).</li>
+        </ul>
+        <p>Under sum and scalar multiplication, the set of functions \(A \to \mathbb{R}\) forms a <b>vector space</b>. Under sum and pointwise product, it forms a <b>ring</b>.</p>
+      </div>
+
+      <p><b>Comparison with composition.</b> Function algebra combines outputs of \(f\) and \(g\) evaluated at the same input. Composition, defined below, feeds the output of one function into the input of another. These are different constructions:</p>
+      <ul>
+        <li>\((f + g)(x) = f(x) + g(x)\) — same \(x\) into both.</li>
+        <li>\((f \circ g)(x) = f(g(x))\) — output of \(g\) into \(f\).</li>
+      </ul>
+
+      <h3>Composition</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 5.1 — Composition</div>
+        <p>Let \(f: B \to C\) and \(g: A \to B\). The <b>composition</b> \(f \circ g: A \to C\) is defined by</p>
+        \[ (f \circ g)(x) = f(g(x)) \quad \text{for } x \in A. \]
+        <p>Composition is only defined when the range of \(g\) is contained in the domain of \(f\).</p>
+      </div>
+
+      <div class="diagram-single">
+        <svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar-comp" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#86c084"/></marker>
+            <marker id="ar-comp2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#e0a4c4"/></marker>
+          </defs>
+          <!-- Three sets -->
+          <ellipse cx="80" cy="100" rx="45" ry="65" fill="none" stroke="#e5a54e" stroke-width="1.5"/>
+          <text x="80" y="30" text-anchor="middle" fill="#e5a54e" font-family="Georgia" font-size="15" font-style="italic">A</text>
+          <ellipse cx="280" cy="100" rx="45" ry="65" fill="none" stroke="#8fb5e0" stroke-width="1.5"/>
+          <text x="280" y="30" text-anchor="middle" fill="#8fb5e0" font-family="Georgia" font-size="15" font-style="italic">B</text>
+          <ellipse cx="480" cy="100" rx="45" ry="65" fill="none" stroke="#b8a4de" stroke-width="1.5"/>
+          <text x="480" y="30" text-anchor="middle" fill="#b8a4de" font-family="Georgia" font-size="15" font-style="italic">C</text>
+          <!-- Elements -->
+          <circle cx="80" cy="100" r="5" fill="#e5a54e"/>
+          <text x="62" y="90" fill="#ede4d3" font-size="13" font-style="italic">x</text>
+          <circle cx="280" cy="100" r="5" fill="#8fb5e0"/>
+          <text x="288" y="95" fill="#ede4d3" font-size="13" font-style="italic">g(x)</text>
+          <circle cx="480" cy="100" r="5" fill="#b8a4de"/>
+          <text x="488" y="95" fill="#ede4d3" font-size="13" font-style="italic">f(g(x))</text>
+          <!-- Direct arrows: g and f -->
+          <line x1="88" y1="100" x2="272" y2="100" stroke="#86c084" stroke-width="1.8" marker-end="url(#ar-comp)"/>
+          <text x="180" y="90" text-anchor="middle" fill="#86c084" font-family="Georgia" font-size="16" font-style="italic">g</text>
+          <line x1="288" y1="100" x2="472" y2="100" stroke="#86c084" stroke-width="1.8" marker-end="url(#ar-comp)"/>
+          <text x="380" y="90" text-anchor="middle" fill="#86c084" font-family="Georgia" font-size="16" font-style="italic">f</text>
+          <!-- Composition arrow (curved below, dashed) -->
+          <path d="M 80 165 Q 280 200 480 165" stroke="#e0a4c4" stroke-width="1.8" fill="none" marker-end="url(#ar-comp2)" stroke-dasharray="5,3"/>
+          <text x="280" y="195" text-anchor="middle" fill="#e0a4c4" font-family="Georgia" font-size="16" font-style="italic">f ∘ g</text>
+        </svg>
+        <div class="diag-caption">Composition \(f \circ g\) flows an input \(x\) through \(g\) first, then \(f\). It equals a direct arrow from \(A\) to \(C\) — the dashed pink arrow.</div>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 5.2 — Associativity of composition</div>
+        <p>Let \(f: C \to D\), \(g: B \to C\), \(h: A \to B\). Then</p>
+        \[ (f \circ g) \circ h = f \circ (g \circ h). \]
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof</div>
+        <p>For any \(x \in A\):</p>
+        \[ ((f \circ g) \circ h)(x) = (f \circ g)(h(x)) = f(g(h(x))). \]
+        <p>And</p>
+        \[ (f \circ (g \circ h))(x) = f((g \circ h)(x)) = f(g(h(x))). \]
+        <p>Both equal \(f(g(h(x)))\), so as functions they agree everywhere. \(\blacksquare\)</p>
+      </div>
+
+      <p><b>Consequence.</b> Because composition is associative, we may write \(f \circ g \circ h\) without parentheses. However, composition is <b>not commutative</b>: in general \(f \circ g \neq g \circ f\).</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 5.3 — Identity function; function iteration</div>
+        <p>The <b>identity function</b> on \(A\) is \(\text{id}_A: A \to A\) defined by \(\text{id}_A(x) = x\).</p>
+        <p>For \(f: A \to A\), the \(n\)-fold <b>iteration</b> is</p>
+        \[ f^{\circ n} = \underbrace{f \circ f \circ \cdots \circ f}_{n \text{ copies}}, \quad f^{\circ 0} = \text{id}_A. \]
+      </div>
+
+      <p><b>Identity as identity element.</b> For any \(f: A \to B\), \(f \circ \text{id}_A = f\) and \(\text{id}_B \circ f = f\). Composition thus turns the collection of functions into a monoid, with \(\text{id}\) playing the role of the identity element and composition the operation.</p>
+
+      <p><b>Iteration in finance.</b> Discrete-time price dynamics have the form \(X_{n+1} = f(X_n)\); the state after \(n\) steps is \(X_n = f^{\circ n}(X_0)\). If \(f\) is a contraction (Banach fixed-point theorem), iterates converge to a fixed point regardless of the starting value \(X_0\).</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 5.1 — Order matters</div>
+        <p>Let \(f(x) = \sqrt{x}\), \(g(x) = x - 3\).</p>
+        <p>\((f \circ g)(x) = \sqrt{x - 3}\), domain \([3, \infty)\).</p>
+        <p>\((g \circ f)(x) = \sqrt{x} - 3\), domain \([0, \infty)\).</p>
+        <p>Both the formulas and the domains differ.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 6: INJECTIVITY, SURJECTIVITY, INVERSES -->
+    <section id="s6">
+      <h2>6. Injectivity, surjectivity, and inverses</h2>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 6.1 — Left, right, and two-sided inverse</div>
+        <p>Let \(f: A \to B\).</p>
+        <p>A function \(g: B \to A\) is a <b>left inverse</b> of \(f\) if \(g \circ f = \text{id}_A\).</p>
+        <p>A function \(h: B \to A\) is a <b>right inverse</b> of \(f\) if \(f \circ h = \text{id}_B\).</p>
+        <p>A function that is both a left and right inverse is a <b>two-sided inverse</b>, denoted \(f^{-1}\).</p>
+      </div>
+
+      <div class="diagram-single">
+        <svg viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar-inv1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#86c084"/></marker>
+            <marker id="ar-inv2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#e0a4c4"/></marker>
+          </defs>
+          <ellipse cx="100" cy="90" rx="55" ry="65" fill="none" stroke="#e5a54e" stroke-width="1.5"/>
+          <text x="100" y="25" text-anchor="middle" fill="#e5a54e" font-family="Georgia" font-size="15" font-style="italic">A</text>
+          <circle cx="100" cy="90" r="5" fill="#e5a54e"/>
+          <text x="82" y="80" fill="#ede4d3" font-size="13" font-style="italic">x</text>
+          <ellipse cx="400" cy="90" rx="55" ry="65" fill="none" stroke="#8fb5e0" stroke-width="1.5"/>
+          <text x="400" y="25" text-anchor="middle" fill="#8fb5e0" font-family="Georgia" font-size="15" font-style="italic">B</text>
+          <circle cx="400" cy="90" r="5" fill="#8fb5e0"/>
+          <text x="408" y="85" fill="#ede4d3" font-size="13" font-style="italic">f(x)</text>
+          <!-- Forward f (top curve) -->
+          <path d="M 108 78 Q 250 40 392 78" stroke="#86c084" stroke-width="1.8" fill="none" marker-end="url(#ar-inv1)"/>
+          <text x="250" y="45" text-anchor="middle" fill="#86c084" font-family="Georgia" font-size="16" font-style="italic">f</text>
+          <!-- Inverse f⁻¹ (bottom curve) -->
+          <path d="M 392 105 Q 250 145 108 105" stroke="#e0a4c4" stroke-width="1.8" fill="none" marker-end="url(#ar-inv2)"/>
+          <text x="250" y="155" text-anchor="middle" fill="#e0a4c4" font-family="Georgia" font-size="16" font-style="italic">f⁻¹</text>
+        </svg>
+        <div class="diag-caption">A two-sided inverse: applying \(f\) then \(f^{-1}\) returns \(x\); applying \(f^{-1}\) then \(f\) returns \(f(x)\). Exists iff \(f\) is bijective.</div>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 6.2 — Characterization of one-sided inverses</div>
+        <p>Let \(f: A \to B\) with \(A\) nonempty.</p>
+        <p>(a) \(f\) has a left inverse iff \(f\) is injective.</p>
+        <p>(b) \(f\) has a right inverse iff \(f\) is surjective (assuming the Axiom of Choice for infinite \(A\)).</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof sketch of (a)</div>
+        <p><b>(\(\Rightarrow\))</b> Suppose \(g \circ f = \text{id}_A\). If \(f(x_1) = f(x_2)\), apply \(g\): \(x_1 = g(f(x_1)) = g(f(x_2)) = x_2\). So \(f\) is injective.</p>
+        <p><b>(\(\Leftarrow\))</b> Suppose \(f\) is injective. Pick any \(a_0 \in A\). Define \(g: B \to A\) by \(g(y) = x\) if \(y = f(x)\) for some (necessarily unique, by injectivity) \(x \in A\); and \(g(y) = a_0\) otherwise. Then \(g(f(x)) = x\) for all \(x \in A\), so \(g\) is a left inverse. \(\blacksquare\)</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 6.3 — Existence and uniqueness of two-sided inverse</div>
+        <p>Let \(f: A \to B\). The following are equivalent:</p>
+        <p>(i) \(f\) has a two-sided inverse.</p>
+        <p>(ii) \(f\) is bijective.</p>
+        <p>(iii) For each \(y \in B\), the equation \(f(x) = y\) has exactly one solution \(x \in A\).</p>
+        <p>Moreover, the two-sided inverse, when it exists, is unique.</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Proof of uniqueness</div>
+        <p>Suppose \(g_1, g_2\) are both two-sided inverses of \(f\). Then</p>
+        \[ g_1 = g_1 \circ \text{id}_B = g_1 \circ (f \circ g_2) = (g_1 \circ f) \circ g_2 = \text{id}_A \circ g_2 = g_2, \]
+        <p>using associativity of composition (Theorem 5.2). \(\blacksquare\)</p>
+      </div>
+
+      <p>Equivalences (i)-(iii) in Theorem 6.3 are the standard toolkit: given a specific function, decide invertibility via whichever description is easiest.</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Restricting the domain</div>
+        <p>A function that is not bijective on its natural domain often becomes bijective when restricted. Examples:</p>
+        <ul>
+          <li>\(x^2\) restricted from \(\mathbb{R}\) to \([0, \infty)\) with codomain \([0, \infty)\) is bijective, with inverse \(\sqrt{x}\).</li>
+          <li>\(\sin\) restricted from \(\mathbb{R}\) to \([-\pi/2, \pi/2]\) with codomain \([-1, 1]\) is bijective, with inverse \(\arcsin\).</li>
+          <li>\(\tan\) restricted to \((-\pi/2, \pi/2)\) with codomain \(\mathbb{R}\) is bijective, with inverse \(\arctan\).</li>
+        </ul>
+        <p>In finance: Black-Scholes call price \(C(\sigma)\) is monotonically increasing in \(\sigma\) (Vega \(&gt; 0\)), hence injective; restricting to a suitable interval gives a bijection onto observed market prices, and implied volatility is the corresponding inverse.</p>
+      </div>
+
+      <div class="box box-proof">
+        <div class="box-title">Algorithm — computing an inverse</div>
+        <div class="step"><span class="step-num">1</span>Write \(y = f(x)\).</div>
+        <div class="step"><span class="step-num">2</span>Swap: \(x = f(y)\).</div>
+        <div class="step"><span class="step-num">3</span>Solve for \(y\) in terms of \(x\).</div>
+        <div class="step"><span class="step-num">4</span>Verify: \(f(f^{-1}(x)) = x\) and \(f^{-1}(f(x)) = x\) on the appropriate domains.</div>
+      </div>
+
+      <p>The graph of \(f^{-1}\) is the reflection of the graph of \(f\) through the line \(y = x\), because every point \((a, b)\) on \(f\)'s graph corresponds to a point \((b, a)\) on \(f^{-1}\)'s graph.</p>
+
+      <details class="deeper">
+        <summary>Deeper dive — the Inverse Function Theorem</summary>
+        <div class="deeper-body">
+          <p>Theorem 6.3 addresses invertibility as a set-theoretic fact. Calculus asks a finer question: when \(f\) is differentiable, is \(f^{-1}\) also differentiable, and what is its derivative?</p>
+          <p><b>Inverse Function Theorem (statement).</b> Let \(f: U \to \mathbb{R}\) be continuously differentiable on an open set \(U \subseteq \mathbb{R}\), and suppose \(f'(a) \neq 0\) for some \(a \in U\). Then there exists an open neighborhood \(V\) of \(a\) such that:</p>
+          <ul>
+            <li>\(f: V \to f(V)\) is bijective;</li>
+            <li>The inverse \(f^{-1}: f(V) \to V\) is continuously differentiable;</li>
+            <li>\((f^{-1})'(f(a)) = \dfrac{1}{f'(a)}\).</li>
+          </ul>
+          <p>The theorem gives <b>local</b> invertibility. Globally \(f\) may fail bijectivity (e.g., \(x \mapsto x^3 - x\) has derivative zero somewhere and is not globally injective), but wherever the derivative is nonzero, a differentiable inverse exists locally.</p>
+          <p><b>Finance application.</b> Newton's method for computing implied volatility: the iteration \(\sigma_{n+1} = \sigma_n - \frac{C(\sigma_n) - C_{\text{market}}}{C'(\sigma_n)}\) uses precisely the local inverse — the update step involves \(1/C'(\sigma_n)\), which is the derivative of \(C^{-1}\) by the theorem.</p>
+          <p>Full proof: Rudin, <i>Principles of Mathematical Analysis</i>, Ch 9. Multivariable generalization is central in optimization and manifold theory.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 7: TRANSFORMATIONS -->
+    <section id="s7">
+      <h2>7. Transformations of functions</h2>
+
+      <p>Given a "parent" function \(f\), one obtains new functions by adding constants, scaling arguments, and reflecting. Recognizing these transformations lets you sketch a wide class of functions from a small memorized library.</p>
+
+      <table class="st">
+        <tr><th>Transformation</th><th>Formula</th><th>Effect on graph</th></tr>
+        <tr><td>Vertical shift</td><td>\(f(x) + k\)</td><td>Move graph up by \(k\) (down if \(k &lt; 0\))</td></tr>
+        <tr><td>Horizontal shift</td><td>\(f(x - h)\)</td><td>Move graph right by \(h\) (left if \(h &lt; 0\))</td></tr>
+        <tr><td>Vertical scaling</td><td>\(a \cdot f(x)\)</td><td>Stretch vertically by factor \(|a|\); if \(a &lt; 0\), also reflect across \(x\)-axis</td></tr>
+        <tr><td>Horizontal scaling</td><td>\(f(c \cdot x)\)</td><td>Compress horizontally by factor \(|c|\); if \(c &lt; 0\), also reflect across \(y\)-axis</td></tr>
+        <tr><td>Reflection across \(x\)-axis</td><td>\(-f(x)\)</td><td>Flip vertically</td></tr>
+        <tr><td>Reflection across \(y\)-axis</td><td>\(f(-x)\)</td><td>Flip horizontally</td></tr>
+      </table>
+
+      <p><b>Sign convention warning.</b> Horizontal shifts and scalings appear to have "opposite" effects: \(f(x - h)\) shifts right by \(+h\), not left. Reason: to make \(f(x - h)\) equal \(f\) at its original value, the input \(x\) must be \(h\) larger.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 7.1 — Combined transformation</div>
+        <p>Sketch \(g(x) = -2 f(x - 3) + 1\) given the graph of \(f\).</p>
+        <p>Apply in order (inside out):</p>
+        <div class="step"><span class="step-num">1</span>\(f(x - 3)\): shift right by 3.</div>
+        <div class="step"><span class="step-num">2</span>\(2 f(x - 3)\): stretch vertically by factor 2.</div>
+        <div class="step"><span class="step-num">3</span>\(-2 f(x - 3)\): reflect across \(x\)-axis.</div>
+        <div class="step"><span class="step-num">4</span>\(-2 f(x - 3) + 1\): shift up by 1.</div>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">Finance applications of transformations</div>
+        <ul>
+          <li><b>Shifted log-normal.</b> The Bachelier or "displaced diffusion" model prices options on \(S + \delta\) where \(\delta\) is a shift. This is a horizontal shift of the standard log-normal model, useful when rates can go negative.</li>
+          <li><b>Scaled Brownian motion.</b> \(\sigma W_t\) is a vertical scaling of standard Brownian motion by \(\sigma\); \(W_{ct}\) is a horizontal scaling that, by self-similarity, equals \(\sqrt{c} W_t\) in distribution.</li>
+          <li><b>Translated payoff.</b> A call struck at \(K\) has payoff \((S - K)^+ = \max(S - K, 0)\), a horizontal shift of the standard ramp function \(x^+ = \max(x, 0)\).</li>
+          <li><b>Piecewise reflection.</b> The absolute value payoff \(|S - K|\) is the composition of a horizontal shift and a reflection.</li>
+        </ul>
+      </div>
+
+      <details class="deeper">
+        <summary>Deeper dive — transformations as group actions</summary>
+        <div class="deeper-body">
+          <p>The transformations above are examples of <b>group actions</b> on the space of functions. The group of affine transformations \(x \mapsto cx + h\) (with \(c \neq 0\)) acts on functions by \(f(x) \mapsto f(cx + h)\), and this action respects composition and inverses in predictable ways.</p>
+          <p>In probability, if \(X\) is a random variable with density \(f_X\), then \(Y = aX + b\) has density \(f_Y(y) = \frac{1}{|a|} f_X\left(\frac{y - b}{a}\right)\) — a rescaled, shifted version of \(f_X\). This is a special case of the change of variables formula (Track A5) and underlies why the standard normal is enough: any Gaussian is a transformation of \(N(0, 1)\).</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- SECTION 8: PUTTING IT TOGETHER -->
+    <section id="s8">
+      <h2>8. Putting it together</h2>
+
+      <p>Every concept from §1–§7 shows up in the compound-interest formula.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Case study — future value and present value</div>
+
+        <p>Two formulas:</p>
+        \[ V(t) = P_0 \cdot e^{rt} \quad \text{(future value)} \qquad PV = V \cdot e^{-rt} \quad \text{(present value)} \]
+
+        <p><b>Function family (§3).</b> \(V(t) = P_0 e^{rt}\) is an exponential function of \(t\), scaled by \(P_0\). As a function of \(P_0\) alone (with \(t, r\) fixed) it is linear.</p>
+
+        <p><b>Domain and range (§2).</b> Natural domain \(t \in [0, \infty)\). With \(r &gt; 0\), \(V\) is strictly increasing from \(P_0\) to \(\infty\), so range \([P_0, \infty)\).</p>
+
+        <p><b>Structural properties (§4).</b> \(V\) is strictly monotonic in each of \(t, r, P_0\) (holding others fixed). Not periodic. Not even/odd (defined only for \(t \geq 0\)).</p>
+
+        <p><b>Composition (§5).</b> Write \(V = P_0 \cdot (\exp \circ g)(t)\) with \(g(t) = rt\). The inner function scales time, the outer applies the natural exponential.</p>
+
+        <p><b>Injectivity and inverse (§6).</b> As a function of \(P_0\) with fixed \(t, r\): the map \(P_0 \mapsto P_0 e^{rt}\) is a bijection \(\mathbb{R} \to \mathbb{R}\) with inverse \(V \mapsto V e^{-rt}\). This is the PV formula.</p>
+
+        <p><b>Transformation (§7).</b> Different rates \(r_1, r_2\) give horizontal scalings of the same base exponential \(e^t\): \(e^{r_1 t}\) and \(e^{r_2 t}\) are related by rescaling the time axis by the factor \(r_2/r_1\).</p>
+      </div>
+
+      <details class="deeper">
+        <summary>Deeper dive — recovering the interest rate as an implicit function</summary>
+        <div class="deeper-body">
+          <p>Consider the reverse problem: given face value \(F\), bond price \(P\), and maturity \(T\), find the yield \(r\).</p>
+          <p>The relation \(P = F e^{-rT}\) defines \(r\) implicitly. Solving explicitly:</p>
+          \[ r = \frac{1}{T} \ln(F/P). \]
+          <p>Here \(\ln\) (Section 3, logarithmic family) plays the role of the inverse of the exponential (§6, Theorem 6.3), and the scalar \(1/T\) is a vertical scaling (§7). Every ingredient from the lesson appears in a single one-line derivation.</p>
+          <p>For coupon bonds, the yield-price relation is a polynomial in \(e^{-rT_i}\) and cannot be inverted in closed form; Newton's method (Inverse Function Theorem, deeper dive in §6) is required. This same numerical approach recovers implied volatility from option prices.</p>
+        </div>
+      </details>
+
+      <details class="deeper">
+        <summary>Deeper dive — reading graphs as diagnostic</summary>
+        <div class="deeper-body">
+          <p>A trained reader extracts function properties directly from a graph:</p>
+          <ul>
+            <li><b>Monotonicity.</b> Rising left-to-right ⇒ increasing; falling ⇒ decreasing. Turning points indicate critical points of the derivative.</li>
+            <li><b>Concavity.</b> Cup-shaped (holds water) ⇒ concave up, second derivative positive. Cap-shaped ⇒ concave down.</li>
+            <li><b>Asymptotic behavior.</b> Vertical asymptotes indicate zeros of a denominator or logarithm at boundary. Horizontal asymptotes indicate the limit as \(x \to \pm\infty\).</li>
+            <li><b>Intercepts.</b> \(y\)-intercept is \(f(0)\); \(x\)-intercepts are roots of \(f\).</li>
+            <li><b>Symmetry.</b> Even functions are visually symmetric about the \(y\)-axis; odd functions have half-turn symmetry about the origin.</li>
+          </ul>
+          <p>Every option payoff diagram in derivatives is read this way: kinks indicate strike prices, slopes indicate delta, curvature indicates gamma.</p>
+        </div>
+      </details>
+
+      <details class="deeper">
+        <summary>Code corner — numerical inverse via Newton's method</summary>
+        <div class="deeper-body">
+          <p>The relation \(P = F e^{-rT}\) inverts to \(r = \ln(F/P)/T\), so a closed-form inverse exists. But when the pricing relation is not analytically invertible (coupon bonds, options with implied volatility), we need numerical methods. Newton's method is the workhorse.</p>
+
+          <p><b>The algorithm — pseudocode</b>:</p>
+          <div class="pseudocode-title">Algorithm — Newton's method for the equation \(f(x) = y\)</div>
+          <div class="pseudocode">ALGORITHM Newton(f, f_prime, y, x0, tol, max_iter)
+  Input:  f        — function
+          f_prime  — its derivative
+          y        — target value
+          x0       — initial guess
+          tol      — convergence tolerance
+          max_iter — safety cap on iterations
+  Output: x such that f(x) ≈ y, or FAIL
+
+  x ← x0
+  for i = 1 to max_iter:
+      Δ ← ( f(x) − y ) / f_prime(x)
+      x ← x − Δ
+      if |Δ| &lt; tol:
+          return x
+  FAIL "did not converge"</div>
+
+          <p>Each iteration is a local linear inverse: at the current guess \(x\), replace \(f\) by its tangent line \(y \approx f(x) + f'(x)(x_{\text{new}} - x)\) and solve exactly. The Inverse Function Theorem guarantees this converges (quadratically) when \(f'(x) \neq 0\) near the true root.</p>
+
+          <p><b>Python implementation</b>:</p>
+          <div class="code-py-title">Python — same algorithm applied to bond yield</div>
+          <div class="code-py">import math
+
+def newton_inverse(f, f_prime, y, x0, tol=1e-8, max_iter=100):
+    """Solve f(x) = y using Newton's method starting at x0."""
+    x = x0
+    for _ in range(max_iter):
+        delta = (f(x) - y) / f_prime(x)
+        x -= delta
+        if abs(delta) &lt; tol:
+            return x
+    raise RuntimeError("Newton did not converge")
+
+# Application: implied yield of a zero-coupon bond
+face, price, T = 100.0, 78.66, 5.0
+f       = lambda r: face * math.exp(-r * T)
+f_prime = lambda r: -T * face * math.exp(-r * T)
+
+r_implied = newton_inverse(f, f_prime, price, x0=0.05)
+print(f"Implied yield: {r_implied:.4%}")   # -&gt; 4.8032%
+
+# Sanity check against the closed form
+r_closed = math.log(face / price) / T
+print(f"Closed form:   {r_closed:.4%}")     # -&gt; 4.8032%</div>
+
+          <p><b>Extension.</b> Replace \(f\) with the Black-Scholes call-price function \(C(\sigma)\) and \(f'\) with Vega \(\frac{\partial C}{\partial \sigma}\); the same code computes implied volatility. This is how every option pricing library (QuantLib, py_vollib) inverts BS in practice.</p>
+
+          <p><b>Where to run this.</b> Copy into a Jupyter cell or into your Codex/Python notebook workspace. The Python track (Codex/Python) covers the language features used here (functions, lambdas, exceptions, f-strings) if any line is unclear.</p>
+        </div>
+      </details>
+
+      <p style="margin-top:2rem;" class="muted">Coming up next: <a href="L2-Limits.html">Limits &amp; Continuity</a> — how a function behaves as its input approaches a value. The foundation for the derivative.</p>
+    </section>
+  </div>
+
+  <!-- ========== EXAMPLES ========== -->
+  <div class="tab-content" id="tab-examples">
+    <h2>🔍 Worked Examples</h2>
+    <p class="muted">Five fully worked examples covering the major techniques.</p>
+
+    <div class="example-card">
+      <h3>Example 1 — Domain with multiple failure modes</h3>
+      <p><b>Problem.</b> Find the natural domain of \(f(x) = \dfrac{\sqrt{x - 2}}{\ln(5 - x)}\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Three failure modes:</p>
+        <ul>
+          <li>Numerator root: \(x - 2 \geq 0 \Leftrightarrow x \geq 2\).</li>
+          <li>Denominator log argument: \(5 - x &gt; 0 \Leftrightarrow x &lt; 5\).</li>
+          <li>Denominator zero: \(\ln(5 - x) = 0 \Leftrightarrow 5 - x = 1 \Leftrightarrow x = 4\).</li>
+        </ul>
+        <p>Intersect: \(x \in [2, 5)\) and \(x \neq 4\), giving \(\boxed{[2, 4) \cup (4, 5)}\).</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 2 — Determining bijectivity and finding inverse</h3>
+      <p><b>Problem.</b> Show that \(f: \mathbb{R} \to \mathbb{R}\), \(f(x) = 2x^3 + 1\) is bijective and find \(f^{-1}\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p><b>Bijectivity.</b> \(f\) is strictly increasing (derivative \(6x^2 \geq 0\), zero only at \(x = 0\)), hence injective by Theorem 4.4. As \(x \to \pm\infty\), \(f(x) \to \pm\infty\), and \(f\) is continuous, so it hits every real value (surjective).</p>
+        <p><b>Inverse.</b> Solve \(y = 2x^3 + 1\) for \(x\): \(x = \sqrt[3]{(y - 1)/2}\). Hence \(f^{-1}(x) = \sqrt[3]{(x - 1)/2}\).</p>
+        <p><b>Verification.</b> \(f(f^{-1}(x)) = 2 \left(\sqrt[3]{(x-1)/2}\right)^3 + 1 = 2 \cdot \frac{x - 1}{2} + 1 = x\) ✓.</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 3 — Composition and order</h3>
+      <p><b>Problem.</b> Let \(f(x) = e^x\), \(g(x) = \ln x\), \(h(x) = 2x\). Compute \((f \circ g \circ h)(x)\), \((g \circ f \circ h)(x)\), and \((h \circ g \circ f)(x)\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Apply innermost first.</p>
+        <p><b>(f ∘ g ∘ h)(x)</b>: \(h(x) = 2x\), then \(g(2x) = \ln(2x)\), then \(f(\ln(2x)) = e^{\ln(2x)} = 2x\). So this equals \(2x\) (on \((0, \infty)\)).</p>
+        <p><b>(g ∘ f ∘ h)(x)</b>: \(h(x) = 2x\), then \(f(2x) = e^{2x}\), then \(g(e^{2x}) = \ln(e^{2x}) = 2x\). Equals \(2x\) on all of \(\mathbb{R}\).</p>
+        <p><b>(h ∘ g ∘ f)(x)</b>: \(f(x) = e^x\), then \(g(e^x) = \ln(e^x) = x\), then \(h(x) = 2x\). Equals \(2x\) on all of \(\mathbb{R}\).</p>
+        <p>All three compose to \(2x\) but on different domains, illustrating Theorem 1.3 — the underlying rule is the same but the functions are genuinely different if we track domains carefully.</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 4 — Even/odd decomposition</h3>
+      <p><b>Problem.</b> Decompose \(f(x) = e^x + x^2 - 3x\) into even and odd parts.</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Compute \(f(-x) = e^{-x} + x^2 + 3x\).</p>
+        <p>Even part: \(f_e(x) = \frac{f(x) + f(-x)}{2} = \frac{e^x + e^{-x}}{2} + x^2 = \cosh x + x^2\).</p>
+        <p>Odd part: \(f_o(x) = \frac{f(x) - f(-x)}{2} = \frac{e^x - e^{-x}}{2} - 3x = \sinh x - 3x\).</p>
+        <p>Check: \(f_e + f_o = \cosh x + x^2 + \sinh x - 3x = e^x + x^2 - 3x = f(x)\) ✓.</p>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <h3>Example 5 — Implied yield via inverse (finance)</h3>
+      <p><b>Problem.</b> A zero-coupon bond with face value 100 and maturity 5 years trades at 78.66. Assuming continuous compounding, find the yield.</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Pricing relation: \(P = 100 \, e^{-5r}\).</p>
+        <p>Treating as a function of \(r\): strictly decreasing (composition of scaling and exp), hence bijective onto \((0, 100)\) by Theorems 4.4 and 6.3.</p>
+        <p>Solve: \(78.66 = 100 e^{-5r}\) ⇒ \(e^{-5r} = 0.7866\) ⇒ \(-5r = \ln(0.7866) = -0.2401\) ⇒ \(r = 0.04803\).</p>
+        <p>The implied yield is approximately \(\boxed{4.80\%}\).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== QUIZ ========== -->
+  <div class="tab-content" id="tab-quiz">
+    <h2>✏️ Quiz — 20 self-check questions</h2>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Question 1 · §1</div>
+      <div class="q-question">A function \(f: A \to B\) is defined as:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Any relation between \(A\) and \(B\)</button>
+        <button class="quiz-opt" data-ans="b">B. A rule assigning multiple outputs to some inputs</button>
+        <button class="quiz-opt" data-ans="c">C. A rule assigning each \(x \in A\) exactly one \(y \in B\)</button>
+        <button class="quiz-opt" data-ans="d">D. A one-to-one correspondence between \(A\) and \(B\)</button>
+      </div>
+      <div class="quiz-feedback">C. D is bijection, a stronger property.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Question 2 · §1</div>
+      <div class="q-question">Which of the following is required for injectivity?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Every \(y \in B\) has at least one preimage</button>
+        <button class="quiz-opt" data-ans="b">B. If \(f(x_1) = f(x_2)\) then \(x_1 = x_2\)</button>
+        <button class="quiz-opt" data-ans="c">C. Every \(y \in B\) has exactly one preimage</button>
+        <button class="quiz-opt" data-ans="d">D. \(f\) is strictly increasing</button>
+      </div>
+      <div class="quiz-feedback">B. A is surjectivity, C is bijectivity, D is sufficient but not necessary.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="d">
+      <div class="q-num">Question 3 · §1</div>
+      <div class="q-question">Is \(f: \mathbb{R} \to \mathbb{R}\), \(f(x) = x^2\) equal to \(g: [0, \infty) \to [0, \infty)\), \(g(x) = x^2\)?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Yes, same rule</button>
+        <button class="quiz-opt" data-ans="b">B. Yes, but only on \([0, \infty)\)</button>
+        <button class="quiz-opt" data-ans="c">C. No, \(f\) is a stricter version of \(g\)</button>
+        <button class="quiz-opt" data-ans="d">D. No, different domain and codomain make them different functions</button>
+      </div>
+      <div class="quiz-feedback">D. By Theorem 1.3, equal functions require equal domain and codomain.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Question 4 · §2</div>
+      <div class="q-question">The domain of \(\sqrt{\ln(x)}\) is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \([1, \infty)\)</button>
+        <button class="quiz-opt" data-ans="b">B. \((0, \infty)\)</button>
+        <button class="quiz-opt" data-ans="c">C. \((1, \infty)\)</button>
+        <button class="quiz-opt" data-ans="d">D. \([0, \infty)\)</button>
+      </div>
+      <div class="quiz-feedback">A. Need \(\ln x \geq 0 \Leftrightarrow x \geq 1\), plus \(x &gt; 0\) from log; intersection is \(x \geq 1\).</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Question 5 · §2</div>
+      <div class="q-question">The notation \(f^{-1}(T)\) for the preimage of set \(T\) requires:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f\) has an inverse</button>
+        <button class="quiz-opt" data-ans="b">B. Nothing beyond \(f\) being a function</button>
+        <button class="quiz-opt" data-ans="c">C. \(f\) is injective</button>
+        <button class="quiz-opt" data-ans="d">D. \(T\) is a single element</button>
+      </div>
+      <div class="quiz-feedback">B. Preimage is defined for every function.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Question 6 · §3</div>
+      <div class="q-question">A degree-5 polynomial has at most how many real roots?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. 4</button>
+        <button class="quiz-opt" data-ans="b">B. 6</button>
+        <button class="quiz-opt" data-ans="c">C. 5</button>
+        <button class="quiz-opt" data-ans="d">D. Infinite</button>
+      </div>
+      <div class="quiz-feedback">C. A degree-\(n\) polynomial has at most \(n\) real roots.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Question 7 · §3</div>
+      <div class="q-question">The rational function \(f(x) = \dfrac{x^2 + 1}{x^2 - 4}\) has:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Horizontal asymptote at \(y = 0\)</button>
+        <button class="quiz-opt" data-ans="b">B. Horizontal asymptote at \(y = 1\)</button>
+        <button class="quiz-opt" data-ans="c">C. No horizontal asymptote</button>
+        <button class="quiz-opt" data-ans="d">D. Vertical asymptote at \(y = 0\)</button>
+      </div>
+      <div class="quiz-feedback">B. Equal degrees ⇒ horizontal asymptote at ratio of leading coefficients (1/1 = 1). Vertical asymptotes are at \(x = \pm 2\).</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Question 8 · §3</div>
+      <div class="q-question">Which is the fundamental period of \(\tan x\)?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(\pi\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(2\pi\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(\pi/2\)</button>
+        <button class="quiz-opt" data-ans="d">D. Not periodic</button>
+      </div>
+      <div class="quiz-feedback">A. \(\tan(x + \pi) = \tan x\), and \(\pi\) is the smallest such positive number.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Question 9 · §3</div>
+      <div class="q-question">In ML, log-likelihoods are preferred over likelihoods because:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Logarithm is monotonic</button>
+        <button class="quiz-opt" data-ans="b">B. Products of probabilities are numerically unstable</button>
+        <button class="quiz-opt" data-ans="c">C. Both A and B</button>
+        <button class="quiz-opt" data-ans="d">D. Neither; it is convention</button>
+      </div>
+      <div class="quiz-feedback">C. Monotonicity means argmax is preserved, and log converts unstable products to stable sums.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Question 10 · §4</div>
+      <div class="q-question">Which of these functions is odd?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f(x) = x^3 + \sin x\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(f(x) = x^2 + \cos x\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(f(x) = e^x\)</button>
+        <button class="quiz-opt" data-ans="d">D. \(f(x) = |x|\)</button>
+      </div>
+      <div class="quiz-feedback">A. Sum of two odd functions is odd. B is even. C is neither. D is even.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Question 11 · §4</div>
+      <div class="q-question">Strict monotonicity of \(f\) on \(A\) implies:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f\) is continuous on \(A\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(f\) is injective on \(A\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(f\) is surjective on \(A\)</button>
+        <button class="quiz-opt" data-ans="d">D. \(f\) is differentiable on \(A\)</button>
+      </div>
+      <div class="quiz-feedback">B. Theorem 4.4. Continuity and differentiability are separate properties.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="d">
+      <div class="q-num">Question 12 · §5</div>
+      <div class="q-question">Composition of functions is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Commutative and associative</button>
+        <button class="quiz-opt" data-ans="b">B. Commutative but not associative</button>
+        <button class="quiz-opt" data-ans="c">C. Neither commutative nor associative</button>
+        <button class="quiz-opt" data-ans="d">D. Associative but not commutative</button>
+      </div>
+      <div class="quiz-feedback">D. Theorem 5.2 gives associativity; Example 5.1 shows non-commutativity.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Question 13 · §5</div>
+      <div class="q-question">The identity function \(\text{id}_A\) satisfies:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f \circ \text{id}_A = f\) and \(\text{id}_B \circ f = f\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(\text{id}_A(x) = 1\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(\text{id}_A\) has no inverse</button>
+        <button class="quiz-opt" data-ans="d">D. \(\text{id}_A(x) = 0\)</button>
+      </div>
+      <div class="quiz-feedback">A. \(\text{id}\) is the identity element for composition; its own inverse.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Question 14 · §6</div>
+      <div class="q-question">A function \(f\) has a two-sided inverse iff:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(f\) is injective</button>
+        <button class="quiz-opt" data-ans="b">B. \(f\) is surjective</button>
+        <button class="quiz-opt" data-ans="c">C. \(f\) is bijective</button>
+        <button class="quiz-opt" data-ans="d">D. \(f\) is monotonic</button>
+      </div>
+      <div class="quiz-feedback">C. Theorem 6.3. Injective alone gives left inverse; surjective alone gives right inverse.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Question 15 · §6</div>
+      <div class="q-question">The Inverse Function Theorem gives:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Global existence of an inverse</button>
+        <button class="quiz-opt" data-ans="b">B. Local existence of a differentiable inverse where derivative is nonzero</button>
+        <button class="quiz-opt" data-ans="c">C. A formula for the inverse</button>
+        <button class="quiz-opt" data-ans="d">D. Bijectivity everywhere</button>
+      </div>
+      <div class="quiz-feedback">B. The theorem is local. It also gives \((f^{-1})' = 1/f'\) at corresponding points.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Question 16 · §7</div>
+      <div class="q-question">The graph of \(g(x) = f(x + 3)\) relative to \(f(x)\):</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Shifted right by 3</button>
+        <button class="quiz-opt" data-ans="b">B. Shifted up by 3</button>
+        <button class="quiz-opt" data-ans="c">C. Shifted left by 3</button>
+        <button class="quiz-opt" data-ans="d">D. Reflected across the \(y\)-axis</button>
+      </div>
+      <div class="quiz-feedback">C. \(f(x + 3)\) at \(x = -3\) equals \(f\) at 0, so the graph is at position 3 units to the left.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="a">
+      <div class="q-num">Question 17 · §7</div>
+      <div class="q-question">The graph of \(g(x) = -f(x)\) relative to \(f\):</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Reflected across the \(x\)-axis</button>
+        <button class="quiz-opt" data-ans="b">B. Reflected across the \(y\)-axis</button>
+        <button class="quiz-opt" data-ans="c">C. Reflected across \(y = x\)</button>
+        <button class="quiz-opt" data-ans="d">D. Rotated 90 degrees</button>
+      </div>
+      <div class="quiz-feedback">A. Negating output flips vertically. Reflection across \(y = x\) gives the inverse; \(f(-x)\) reflects across \(y\)-axis.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="b">
+      <div class="q-num">Question 18 · §8</div>
+      <div class="q-question">In \(V(t) = P_0 e^{rt}\) treated as a function of \(P_0\) alone:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. Exponential in \(P_0\)</button>
+        <button class="quiz-opt" data-ans="b">B. Linear in \(P_0\)</button>
+        <button class="quiz-opt" data-ans="c">C. Quadratic in \(P_0\)</button>
+        <button class="quiz-opt" data-ans="d">D. Logarithmic in \(P_0\)</button>
+      </div>
+      <div class="quiz-feedback">B. \(V = k P_0\) with \(k = e^{rt}\) constant. Inverse is division by \(k\), giving PV formula.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="d">
+      <div class="q-num">Question 19 · §6</div>
+      <div class="q-question">Newton's method computes implied volatility using:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. The Fourier transform</button>
+        <button class="quiz-opt" data-ans="b">B. The Fundamental Theorem of Calculus</button>
+        <button class="quiz-opt" data-ans="c">C. Vieta's formulas</button>
+        <button class="quiz-opt" data-ans="d">D. Local invertibility from the Inverse Function Theorem</button>
+      </div>
+      <div class="quiz-feedback">D. Each update step is a local linear inverse using \(1/C'(\sigma)\), the derivative of the inverse at that point.</div>
+    </div>
+
+    <div class="quiz-item" data-correct="c">
+      <div class="q-num">Question 20 · §3</div>
+      <div class="q-question">The hyperbolic identity is:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-ans="a">A. \(\cosh^2 x + \sinh^2 x = 1\)</button>
+        <button class="quiz-opt" data-ans="b">B. \(\sinh^2 x + \cosh^2 x = 0\)</button>
+        <button class="quiz-opt" data-ans="c">C. \(\cosh^2 x - \sinh^2 x = 1\)</button>
+        <button class="quiz-opt" data-ans="d">D. \(\cosh x - \sinh x = 1\)</button>
+      </div>
+      <div class="quiz-feedback">C. Note the minus (vs. plus in the trigonometric Pythagorean identity).</div>
+    </div>
+  </div>
+
+  <!-- ========== FLASHCARDS ========== -->
+  <div class="tab-content" id="tab-flashcards">
+    <h2>📇 Flashcards — 10 core concepts</h2>
+
+    <div class="flash-container">
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Formal definition of a function</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(f: A \to B\) is a rule assigning each \(x \in A\) exactly one \(y \in B\). Set-theoretically: a subset of \(A \times B\) with the single-valuedness property.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Injective, surjective, bijective</div></div><div class="back-content"><div class="side-label back">Back</div><div>Injective: distinct inputs ⇒ distinct outputs. Surjective: every \(y \in B\) is achieved. Bijective: both.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>When does a two-sided inverse exist? (Theorem 6.3)</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(f\) has a two-sided inverse iff \(f\) is bijective iff for each \(y \in B\), \(f(x) = y\) has a unique solution.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Domain finding recipe</div></div><div class="back-content"><div class="side-label back">Back</div><div>Denominator ≠ 0; even root radicand ≥ 0; log argument &gt; 0; intersect all conditions.</div></div></div>
+
+      <div class="flash" onclick="this.classline.toggle?('flipped'):null"><div class="front-content"><div class="side-label">Front</div><div>Seven elementary function families</div></div><div class="back-content"><div class="side-label back">Back</div><div>Polynomial, Rational, Power, Exponential, Logarithmic, Trigonometric (+ Inverse trig), Hyperbolic.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Domain and range of \(e^x\), \(\ln x\)</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(e^x\): domain \(\mathbb{R}\), range \((0, \infty)\). \(\ln x\): domain \((0, \infty)\), range \(\mathbb{R}\). They are inverses.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Composition properties</div></div><div class="back-content"><div class="side-label back">Back</div><div>Associative: \((f \circ g) \circ h = f \circ (g \circ h)\). NOT commutative in general. Identity function acts as identity element.</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Even-odd decomposition</div></div><div class="back-content"><div class="side-label back">Back</div><div>Every \(f\) uniquely decomposes as \(f = f_e + f_o\) with \(f_e(x) = \frac{f(x) + f(-x)}{2}\), \(f_o(x) = \frac{f(x) - f(-x)}{2}\).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Transformation sign convention</div></div><div class="back-content"><div class="side-label back">Back</div><div>\(f(x - h)\) shifts RIGHT by \(h\) (not left). Horizontal scaling \(f(cx)\) compresses by \(|c|\).</div></div></div>
+
+      <div class="flash" onclick="this.classList.toggle('flipped')"><div class="front-content"><div class="side-label">Front</div><div>Strict monotonicity ⇒ ?</div></div><div class="back-content"><div class="side-label back">Back</div><div>Theorem 4.4: strict monotonicity implies injectivity. Standard sufficient condition for invertibility on a restricted domain.</div></div></div>
+    </div>
+  </div>
+
+  <!-- ========== HOMEWORK ========== -->
+  <div class="tab-content" id="tab-homework">
+    <h2>✨ Homework — 5 problems</h2>
+    <p class="muted">Two proof problems, three computational.</p>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 1</div><span class="hw-tag">Domain</span><span class="hw-tag">Composition</span>
+      <h3>Nested composition domain</h3>
+      <p>Let \(f(x) = \sqrt{x}\), \(g(x) = \ln(4 - x)\), \(h(x) = 2x - 1\). Find the domain of \(f \circ g \circ h\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>Compute inside-out. \(h(x) = 2x - 1\), domain \(\mathbb{R}\).</p>
+        <p>Need \(h(x) &lt; 4\) for \(g \circ h\) to be defined: \(2x - 1 &lt; 4 \Rightarrow x &lt; 5/2\).</p>
+        <p>Then \((g \circ h)(x) = \ln(4 - (2x - 1)) = \ln(5 - 2x)\).</p>
+        <p>Need \((g \circ h)(x) \geq 0\) for \(f \circ g \circ h\): \(\ln(5 - 2x) \geq 0 \Leftrightarrow 5 - 2x \geq 1 \Leftrightarrow x \leq 2\).</p>
+        <p>Intersect with \(x &lt; 5/2\): the binding constraint is \(x \leq 2\).</p>
+        <p><b>Domain</b>: \((-\infty, 2]\).</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 2</div><span class="hw-tag">Proof</span><span class="hw-tag">Bijectivity</span>
+      <h3>Prove that composition of bijections is bijective</h3>
+      <p>Let \(f: A \to B\) and \(g: B \to C\) both be bijective. Prove that \(g \circ f: A \to C\) is bijective, and \((g \circ f)^{-1} = f^{-1} \circ g^{-1}\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p><b>Injectivity of \(g \circ f\).</b> Suppose \((g \circ f)(x_1) = (g \circ f)(x_2)\), i.e., \(g(f(x_1)) = g(f(x_2))\). Since \(g\) is injective, \(f(x_1) = f(x_2)\). Since \(f\) is injective, \(x_1 = x_2\).</p>
+        <p><b>Surjectivity of \(g \circ f\).</b> Let \(c \in C\). By surjectivity of \(g\), there exists \(b \in B\) with \(g(b) = c\). By surjectivity of \(f\), there exists \(a \in A\) with \(f(a) = b\). Then \((g \circ f)(a) = g(f(a)) = g(b) = c\).</p>
+        <p><b>Inverse formula.</b> Compute \((f^{-1} \circ g^{-1}) \circ (g \circ f) = f^{-1} \circ g^{-1} \circ g \circ f = f^{-1} \circ \text{id}_B \circ f = f^{-1} \circ f = \text{id}_A\), using associativity throughout. Symmetrically on the other side. By uniqueness of two-sided inverse (Theorem 6.3), \((g \circ f)^{-1} = f^{-1} \circ g^{-1}\). \(\blacksquare\)</p>
+        <p><b>Remark.</b> The order reversal is characteristic of inverses in non-commutative settings; also true for matrix inverses: \((AB)^{-1} = B^{-1} A^{-1}\).</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 3</div><span class="hw-tag">Restricted inverse</span>
+      <h3>Force invertibility by restricting domain</h3>
+      <p>Consider \(f(x) = x^2 - 4x + 3\).</p>
+      <p>(a) Show \(f\) is not injective on \(\mathbb{R}\).</p>
+      <p>(b) Find a maximal subset \(D^* \subseteq \mathbb{R}\) on which \(f\) is injective and the resulting range is as large as possible.</p>
+      <p>(c) Find \(f^{-1}\) on \(D^*\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>(a) \(f(0) = 3 = f(4)\), two distinct inputs giving equal output.</p>
+        <p>(b) Complete the square: \(f(x) = (x - 2)^2 - 1\), vertex at \((2, -1)\). Take \(D^* = [2, \infty)\); on this interval \(f\) is strictly increasing, hence injective (Theorem 4.4). Range is \([-1, \infty)\).</p>
+        <p>(c) Set \(y = (x - 2)^2 - 1\), so \(x - 2 = \sqrt{y + 1}\) (positive root since \(x \geq 2\)), giving \(f^{-1}(y) = 2 + \sqrt{y + 1}\), domain \([-1, \infty)\).</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 4</div><span class="hw-tag">Proof</span><span class="hw-tag">Even-odd</span>
+      <h3>Prove uniqueness of even-odd decomposition</h3>
+      <p>Prove that if \(f = g_1 + h_1 = g_2 + h_2\) with \(g_1, g_2\) even and \(h_1, h_2\) odd, then \(g_1 = g_2\) and \(h_1 = h_2\).</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>From \(g_1 + h_1 = g_2 + h_2\), rearrange: \(g_1 - g_2 = h_2 - h_1\).</p>
+        <p>Left side is even (sum/difference of even functions). Right side is odd. A function that is both even and odd satisfies \(f(-x) = f(x) = -f(x)\), hence \(f(x) = 0\).</p>
+        <p>Therefore \(g_1 - g_2 = 0\) and \(h_2 - h_1 = 0\), proving \(g_1 = g_2\) and \(h_1 = h_2\). \(\blacksquare\)</p>
+      </div>
+    </div>
+
+    <div class="hw-card">
+      <div class="hw-num">Problem 5</div><span class="hw-tag">Finance</span><span class="hw-tag">Implied rate</span>
+      <h3>Yield curve from bond prices</h3>
+      <p>A zero-coupon bond with face 100 maturing in \(T\) years trades at market price \(P\). Continuous compounding.</p>
+      <p>(a) Derive the yield \(r(P, T)\) as an inverse function.</p>
+      <p>(b) Verify that for fixed \(T\), \(r\) is strictly decreasing in \(P\).</p>
+      <p>(c) A 2-year bond trades at 91.39. A 5-year bond trades at 78.66. Compute both yields and comment on the yield curve slope.</p>
+      <button class="reveal-btn" onclick="this.parentElement.classList.toggle('open')">Show solution</button>
+      <div class="solution">
+        <p>(a) From \(P = 100 e^{-rT}\), take log: \(\ln P = \ln 100 - rT\), so \(r = \frac{\ln(100/P)}{T} = \frac{\ln 100 - \ln P}{T}\).</p>
+        <p>(b) As a function of \(P\) with \(T\) fixed, \(r(P) = \frac{\ln 100 - \ln P}{T}\). Differentiate: \(\frac{dr}{dP} = -\frac{1}{TP} &lt; 0\), so \(r\) is strictly decreasing. Consistent with "higher bond price ⇒ lower yield."</p>
+        <p>(c) 2-year: \(r = \ln(100/91.39)/2 = \ln(1.09422)/2 = 0.09008/2 = 4.50\%\). 5-year: \(r = \ln(100/78.66)/5 = 0.2401/5 = 4.80\%\). Yield curve slopes upward: longer maturity commands higher yield (positive term premium).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REFERENCES ========== -->
+  <div class="tab-content" id="tab-references">
+    <h2>📚 References</h2>
+
+    <div class="ref-section">
+      <h3>Undergraduate calculus (standard rigor)</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">Stewart — Calculus: Early Transcendentals</div><div class="ref-detail">Chapter 1 covers functions at exactly this level with abundant exercises.</div></li>
+        <li><div class="ref-title">Spivak — Calculus</div><div class="ref-detail">More rigorous. Every claim proved. Preferred if you want the analysis flavor.</div></li>
+        <li><div class="ref-title">Apostol — Calculus, Vol. I</div><div class="ref-detail">Historically structured (integration before differentiation), careful and complete.</div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Finance-specific books (from your library)</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">Stefanica — A Primer for the Mathematics of Financial Engineering</div><div class="ref-detail">Chapter 0 and 1: calculus refresh with FE motivations.</div></li>
+        <li><div class="ref-title">Capinski & Zastawniak — Mathematics for Finance</div><div class="ref-detail">Ch 1 introduces functions in a market-model context.</div></li>
+        <li><div class="ref-title">Wilmott — Paul Wilmott Introduces Quantitative Finance</div><div class="ref-detail">Intuitive tour of the mathematical machinery across the whole track.</div></li>
+        <li><div class="ref-title">Neftci — Principles of Financial Engineering</div><div class="ref-detail">Ch 1 mathematical preliminaries with derivatives orientation.</div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>MIT OpenCourseWare (free lectures)</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">MIT 18.01SC — Single Variable Calculus (Prof. Jerison)</div><div class="ref-detail">Full course with video, notes, problem sets. First weeks cover this lesson. <a href="https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/" target="_blank">Course page</a></div></li>
+        <li><div class="ref-title">MIT 18.014 — Calculus with Theory</div><div class="ref-detail">Rigorous alternative using Spivak. <a href="https://ocw.mit.edu/courses/18-014-calculus-with-theory-fall-2010/" target="_blank">Course page</a></div></li>
+        <li><div class="ref-title">Highlights of Calculus — Prof. Gilbert Strang</div><div class="ref-detail">Short intuition-focused lectures. <a href="https://ocw.mit.edu/courses/res-18-005-highlights-of-calculus-spring-2010/" target="_blank">Course page</a></div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Video channels</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">3Blue1Brown — Essence of Calculus</div><div class="ref-detail">Visual and intuitive. <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank">Playlist</a></div></li>
+        <li><div class="ref-title">Khan Academy — Precalculus and Calculus 1</div><div class="ref-detail">Patient step-by-step with exercises. <a href="https://www.khanacademy.org/math/calculus-1" target="_blank">Course</a></div></li>
+        <li><div class="ref-title">Professor Leonard</div><div class="ref-detail">Full-length calculus lectures. <a href="https://www.youtube.com/@ProfessorLeonard" target="_blank">Channel</a></div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Interactive references</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">techeese learn-atlas</div><div class="ref-detail">The gamified codex whose format inspired this lesson. <a href="https://techeese.github.io/learn-atlas/#/lesson/calculus/c-functions-and-graphs" target="_blank">Link</a></div></li>
+        <li><div class="ref-title">Paul's Online Math Notes</div><div class="ref-detail">Comprehensive free reference. <a href="https://tutorial.math.lamar.edu/" target="_blank">Site</a></div></li>
+        <li><div class="ref-title">Desmos Graphing Calculator</div><div class="ref-detail">Browser tool for plotting. <a href="https://www.desmos.com/calculator" target="_blank">desmos.com</a></div></li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Graduate / PhD extensions</h3>
+      <ul class="ref-list">
+        <li><div class="ref-title">Rudin — Principles of Mathematical Analysis ("Baby Rudin")</div><div class="ref-detail">Chapters 2, 4, 9: functions on metric spaces, continuity, Inverse Function Theorem in full generality.</div></li>
+        <li><div class="ref-title">Royden & Fitzpatrick — Real Analysis</div><div class="ref-detail">Measurable functions, \(L^p\) spaces. Foundational for probability and stochastic calculus (Track A10).</div></li>
+        <li><div class="ref-title">Mac Lane — Categories for the Working Mathematician</div><div class="ref-detail">Functions as morphisms; composition as the primary operation. A structural lens.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ========== RECALL ========== -->
+  <div class="tab-content" id="tab-recall">
+    <h2>🎨 Recall</h2>
+
+    <div class="recall-item"><b>§1 Function</b>: a rule assigning each \(x \in A\) exactly one \(y \in B\). Set-theoretically a subset of \(A \times B\). Bijective iff both injective and surjective. Equality of functions requires equal domain, codomain, and rule.</div>
+    <div class="recall-item"><b>§2 Domain, range, image, preimage</b>: image \(f(S)\) is the set of outputs; preimage \(f^{-1}(T)\) is defined for any function (not just invertible). Failure modes: division by zero, even root of negative, log of non-positive.</div>
+    <div class="recall-item"><b>§3 Function families</b>: Polynomial, Rational, Power, Exponential, Logarithmic, Trigonometric (and inverse), Hyperbolic. Each with characterizing algebraic property.</div>
+    <div class="recall-item"><b>§4 Structural properties</b>: Even/odd (unique decomposition, Theorem 4.2), periodic. Strict monotonicity implies injectivity (Theorem 4.4).</div>
+    <div class="recall-item"><b>§5 Composition</b>: Associative (Theorem 5.2), not commutative. Identity function is the identity element.</div>
+    <div class="recall-item"><b>§6 Inverses</b>: Two-sided inverse exists iff bijective (Theorem 6.3). Uniqueness follows from associativity. Local invertibility via Inverse Function Theorem (differentiable regime).</div>
+    <div class="recall-item"><b>§7 Transformations</b>: shift, scale, reflect. Watch sign convention on horizontal transformations.</div>
+    <div class="recall-item"><b>§8 Compounding case</b>: \(V(t) = P_0 e^{rt}\) uses every concept — family (exp), domain, composition, inverse (PV), transformation (rescaled time).</div>
+
+    <div class="box box-warning" style="margin-top:2rem;">
+      <div class="box-title">Preparing for Lesson 2</div>
+      <p><b>Limits & Continuity</b> — how a function behaves as its input approaches a value.</p>
+      <p>Ensure comfort with: shapes of \(1/x\), \(e^x\), \(\ln x\); composition (needed for limit-of-composition rules); domain analysis (indeterminate forms live at domain boundaries).</p>
+    </div>
+  </div>
+
+  <div class="lesson-footer">
+    <a href="../Quant-Roadmap.html" class="nav-btn">↑ Back to Atlas</a>
+    <a href="limits.html" class="nav-btn">Next: Limits &amp; Continuity →</a>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+});
+
+document.querySelectorAll('.quiz-item').forEach(item => {
+  const correct = item.dataset.correct;
+  item.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (item.classList.contains('answered')) return;
+      const chosen = opt.dataset.ans;
+      item.querySelectorAll('.quiz-opt').forEach(o => {
+        if (o.dataset.ans === correct) o.classList.add('correct');
+        else if (o.dataset.ans === chosen) o.classList.add('wrong');
+      });
+      item.classList.add('answered');
+    });
+  });
+});
+
+const canvas = document.getElementById('fn-canvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const aSlider = document.getElementById('a-slider');
+  const bSlider = document.getElementById('b-slider');
+  const fnSelect = document.getElementById('fn-select');
+
+  function drawGraph() {
+    const a = +aSlider.value, b = +bSlider.value;
+    document.getElementById('a-val').textContent = a.toFixed(1);
+    document.getElementById('b-val').textContent = b.toFixed(1);
+    const fn = fnSelect.value;
+    ctx.fillStyle = '#1a1510'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#3a2f22'; ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 10; i++) {
+      ctx.beginPath(); ctx.moveTo(i * W/10, 0); ctx.lineTo(i * W/10, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i * H/8); ctx.lineTo(W, i * H/8); ctx.stroke();
+    }
+    ctx.strokeStyle = '#6b6152'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+    ctx.strokeStyle = '#e5a54e'; ctx.lineWidth = 2.5; ctx.beginPath();
+    const xMin = -5, xMax = 5, yScale = H/8;
+    let first = true;
+    for (let px = 0; px <= W; px++) {
+      const x = xMin + (px / W) * (xMax - xMin);
+      let y;
+      if (fn === 'polynomial') y = a * x * x + b * x;
+      else if (fn === 'rational') { if (Math.abs(x - b) < 0.01) { first = true; continue; } y = a / (x - b); }
+      else if (fn === 'power') { if (x <= 0 && b !== Math.floor(b)) { first = true; continue; } y = a * Math.pow(x >= 0 ? x : -Math.pow(-x, b), 1); if (x < 0) y = a * Math.sign(x) * Math.pow(Math.abs(x), b); }
+      else if (fn === 'exp') y = a * Math.exp(b * x);
+      else if (fn === 'log') { if (x <= 0) { first = true; continue; } y = a * Math.log(x) + b; }
+      else if (fn === 'trig') y = a * Math.sin(b * x);
+      else if (fn === 'hyperbolic') y = a * Math.tanh(b * x);
+      else y = 0;
+      const py = H/2 - y * yScale;
+      if (py < -100 || py > H + 100 || !isFinite(py)) { first = true; continue; }
+      if (first) { ctx.moveTo(px, py); first = false; }
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  aSlider.addEventListener('input', drawGraph);
+  bSlider.addEventListener('input', drawGraph);
+  fnSelect.addEventListener('change', drawGraph);
+  drawGraph();
+}
+</script>
+</body>
+</html>
