@@ -49,8 +49,10 @@
     --border: #3a2f22;
   }
   * { box-sizing: border-box; }
-  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.7; }
-  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.7; font-size: 17px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2.5rem; }
+  @media (max-width: 1200px) { .container { padding: 2rem 1.5rem; } }
+  @media (max-width: 640px) { .container { padding: 1.25rem 1rem; } body { font-size: 16px; } }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .breadcrumb { font-size: 0.9rem; color: var(--accent); margin-bottom: 1.5rem; }

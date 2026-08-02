@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Proof Techniques — Foundations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  var ASSET_ROOT = '../assets/';
+  var CDN = {
+    mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js',
+    fonts: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap'
+  };
+  window.MathJax = {
+    tex: {inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']]},
+    svg: {fontCache: 'global', scale: 1, minScale: 0.5},
+    chtml: {scale: 1, minScale: 0.5},
+    options: {enableMenu: false}
+  };
+  function loadWithFallback(tagName, attrs, cdnUrl) {
+    var el = document.createElement(tagName);
+    Object.keys(attrs).forEach(function(k) { el.setAttribute(k, attrs[k]); });
+    el.onerror = function() {
+      var fb = document.createElement(tagName);
+      Object.keys(attrs).forEach(function(k) {
+        if (k === 'src' || k === 'href') fb.setAttribute(k, cdnUrl);
+        else fb.setAttribute(k, attrs[k]);
+      });
+      document.head.appendChild(fb);
+    };
+    document.head.appendChild(el);
+  }
+  loadWithFallback('link', {rel: 'stylesheet', href: ASSET_ROOT + 'fonts/fonts.css'}, CDN.fonts);
+  loadWithFallback('script', {src: ASSET_ROOT + 'mathjax/tex-mml-svg.js'}, CDN.mathjax);
+</script>
+<style>
+  :root {
+    --bg: #1a1510; --bg-soft: #221c15; --bg-card: #2a2218;
+    --text: #ede4d3; --text-muted: #a89e8b; --text-dim: #6b6152;
+    --accent: #e5a54e; --accent-soft: #b8823d;
+    --green: #86c084; --purple: #b8a4de; --blue: #8fb5e0; --pink: #e0a4c4;
+    --border: #3a2f22;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.7; font-size: 17px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2.5rem; }
+  @media (max-width: 1200px) { .container { padding: 2rem 1.5rem; } }
+  @media (max-width: 640px) { .container { padding: 1.25rem 1rem; } body { font-size: 16px; } }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .breadcrumb { font-size: 0.9rem; color: var(--accent); margin-bottom: 1.5rem; }
+  .breadcrumb .sep { color: var(--text-dim); margin: 0 0.4rem; }
+  .breadcrumb .current { color: var(--text-muted); }
+  .meta { font-size: 0.75rem; color: var(--green); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; font-weight: 500; }
+  .meta .dot { color: var(--text-dim); margin: 0 0.5rem; }
+  .meta .status { color: var(--text-dim); }
+  h1.lesson-title { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 3.5rem; line-height: 1.1; margin: 0 0 0.75rem; color: var(--text); }
+  @media (max-width: 640px) { h1.lesson-title { font-size: 2.25rem; } }
+  .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .progress-dots { display: inline-flex; gap: 6px; margin-left: 0.5rem; vertical-align: middle; }
+  .progress-dots .dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text-dim); }
+  .progress-dots .dot.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(229, 165, 78, 0.15); }
+  .progress-dots .dot.done { background: var(--green); border-color: var(--green); }
+  .tabs { display: flex; gap: 0; margin: 2.5rem 0 1.5rem; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 1rem 1.25rem; font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 400; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-btn .count { background: var(--bg-card); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tab-btn.active .count { background: var(--accent); color: var(--bg); }
+  .features { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
+  .features .label { color: var(--text-dim); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; margin-right: 0.5rem; }
+  .feature-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.85rem; color: var(--text-muted); }
+  .outline-box { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
+  .outline-box .outline-title { color: var(--accent); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; font-weight: 500; }
+  .outline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 2rem; }
+  @media (max-width: 640px) { .outline-grid { grid-template-columns: 1fr; } }
+  .outline-item { display: flex; gap: 12px; padding: 6px 10px; border-radius: 6px; color: var(--text); text-decoration: none; align-items: baseline; font-size: 0.95rem; }
+  .outline-item:hover { background: var(--bg-card); text-decoration: none; }
+  .outline-item .num { color: var(--text-dim); font-family: 'Playfair Display', serif; font-size: 1rem; min-width: 14px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  section { margin: 3rem 0; scroll-margin-top: 20px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--text); margin: 2rem 0 1rem; }
+  h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 0.75rem; }
+  h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 1.25rem 0 0.5rem; }
+  p { margin: 0.85rem 0; }
+  ul, ol { padding-left: 1.5rem; }
+  li { margin: 0.4rem 0; }
+  .box { padding: 1.2rem 1.4rem; margin: 1.25rem 0; border-radius: 8px; border-left: 3px solid; }
+  .box-thm { background: rgba(184, 164, 222, 0.06); border-color: var(--purple); }
+  .box-def { background: rgba(143, 181, 224, 0.06); border-color: var(--blue); }
+  .box-proof { background: rgba(224, 164, 196, 0.06); border-color: var(--pink); }
+  .box-example { background: rgba(134, 192, 132, 0.06); border-color: var(--green); }
+  .box-warning { background: rgba(229, 165, 78, 0.08); border-color: var(--accent); }
+  .box .box-title { font-family: 'Playfair Display', serif; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; }
+  .box-thm .box-title { color: var(--purple); }
+  .box-def .box-title { color: var(--blue); }
+  .box-proof .box-title { color: var(--pink); }
+  .box-example .box-title { color: var(--green); }
+  .box-warning .box-title { color: var(--accent); }
+  .box-lo { background: rgba(229, 165, 78, 0.06); border-color: var(--accent); }
+  .box-lo .box-title { color: var(--accent); }
+  .lo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 2rem; margin-top: 0.75rem; }
+  @media (max-width: 640px) { .lo-grid { grid-template-columns: 1fr; } }
+  .lo-grid h4 { font-family: 'Playfair Display', serif; font-size: 0.8rem; color: var(--accent); margin: 0 0 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  .lo-grid ul { padding-left: 1.25rem; margin: 0; font-size: 0.88rem; line-height: 1.55; }
+  .lo-grid li { margin: 4px 0; }
+  .step { padding: 8px 14px; margin: 6px 0; background: var(--bg-card); border-radius: 6px; border-left: 2px solid var(--text-dim); }
+  .step .step-num { display: inline-block; width: 22px; height: 22px; background: var(--pink); color: var(--bg); text-align: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; margin-right: 8px; line-height: 22px; }
+  table.st { border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; width: 100%; }
+  table.st th, table.st td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.st th { color: var(--accent); font-weight: 600; letter-spacing: 0.05em; font-size: 0.8rem; text-transform: uppercase; }
+  code { background: var(--bg-card); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.9em; color: var(--accent); }
+  details { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1.25rem; margin: 1.25rem 0; }
+  details[open] { padding-bottom: 1rem; }
+  details summary { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--accent); font-weight: 600; padding: 4px 0; }
+  details summary::marker { color: var(--accent); }
+  details[open] summary { margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .exercise-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+  .exercise-num { display: inline-block; background: var(--accent); color: var(--bg); width: 26px; height: 26px; border-radius: 50%; text-align: center; line-height: 26px; font-weight: 700; font-size: 0.85rem; margin-right: 8px; }
+  .exercise-item .exercise-body { margin: 0.5rem 0; }
+  .ref-section { margin: 1.5rem 0; }
+  .ref-section h3 { font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; }
+  .ref-list { list-style: none; padding: 0; margin: 0; }
+  .ref-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ref-title { color: var(--text); font-weight: 500; margin-bottom: 2px; }
+  .ref-detail { color: var(--text-muted); font-size: 0.85rem; }
+  .proof-end { color: var(--pink); font-weight: 700; }
+  .qed { float: right; color: var(--pink); font-weight: 700; }
+  .callout { background: var(--bg-card); border-left: 2px solid var(--accent); padding: 0.75rem 1.25rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-muted); font-style: italic; }
+  .placeholder { color: var(--text-dim); font-style: italic; padding: 1rem; text-align: center; background: var(--bg-soft); border: 1px dashed var(--border); border-radius: 8px; margin: 1rem 0; }
+  /* Why-must-learn box (motivation before content) */
+  .box-why { background: rgba(134, 192, 132, 0.08); border-color: var(--green); }
+  .box-why .box-title { color: var(--green); }
+  .box-why .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; margin-top: 0.5rem; }
+  @media (max-width: 640px) { .box-why .why-grid { grid-template-columns: 1fr; } }
+  .box-why .why-grid h4 { font-family: 'Playfair Display', serif; font-size: 0.78rem; color: var(--green); margin: 0 0 0.3rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  .box-why .why-grid p { margin: 0.25rem 0; font-size: 0.9rem; line-height: 1.55; }
+  /* Section navigation footer */
+  .sec-nav { display: flex; justify-content: space-between; margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+  .sec-nav a { color: var(--text-muted); }
+  .sec-nav a:hover { color: var(--accent); }
+  .sec-nav .prev::before { content: '← '; }
+  .sec-nav .next::after { content: ' →'; }
+  .sec-nav .spacer { flex: 1; }
+  /* Cross-reference link style */
+  a.xref { color: var(--accent); border-bottom: 1px dotted var(--accent-soft); text-decoration: none; }
+  a.xref:hover { border-bottom-style: solid; text-decoration: none; }
+  /* Backlink note in target sections */
+  .backlink-note { font-size: 0.82rem; color: var(--text-dim); font-style: italic; padding: 6px 12px; background: var(--bg-card); border-left: 2px solid var(--accent-soft); border-radius: 4px; margin: 0.75rem 0; }
+  .backlink-note a { color: var(--accent-soft); }
+  /* MathJax containment */
+  mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+  mjx-container[display="true"] { display: block; text-align: center; margin: 1em 0; line-height: normal; }
+  mjx-container > svg { max-width: 100%; height: auto; display: inline-block; vertical-align: middle; }
+  mjx-container[display="true"] > svg { display: block; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="breadcrumb">
+    <a href="../Quant-Roadmap.html">Atlas</a><span class="sep">›</span>
+    <span class="current">Proof Techniques</span>
+  </div>
+
+  <div class="meta">FOUNDATIONS <span class="dot">·</span> 240 MIN LECTURE <span class="dot">·</span> ~12H COMPLETE <span class="dot">·</span> <span class="status">v1.0 · ALL SECTIONS FILLED</span></div>
+
+  <h1 class="lesson-title">Proof Techniques</h1>
+  <div class="subtitle">Foundations: L0 · The bridge from computation to proof · Source: Hammack, <i>Book of Proof</i> (3rd ed.)</div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="lecture">📖 Lecture</button>
+    <button class="tab-btn" data-tab="examples">🔍 Examples</button>
+    <button class="tab-btn" data-tab="exercises">✏️ Exercises</button>
+    <button class="tab-btn" data-tab="references">📚 References</button>
+  </nav>
+
+  <div class="features">
+    <span class="label">In this lesson</span>
+    <span class="feature-badge">🎯 learning outcomes</span>
+    <span class="feature-badge">📐 12 sections</span>
+    <span class="feature-badge">🧩 25+ theorems with full proofs</span>
+    <span class="feature-badge">📝 40+ worked examples</span>
+    <span class="feature-badge">🔗 bridges to L1, L2</span>
+  </div>
+
+  <!-- ========== LECTURE ========== -->
+  <div class="tab-content active" id="tab-lecture">
+
+    <div class="box box-lo">
+      <div class="box-title">🎯 Learning Outcomes</div>
+      <p>After completing this lesson, you will be able to:</p>
+      <div class="lo-grid">
+        <div>
+          <h4>Recall &amp; Understand</h4>
+          <ul>
+            <li>State the vocabulary of proof: theorem, proposition, lemma, corollary, axiom, definition, conjecture</li>
+            <li>Distinguish direct proof, contrapositive proof, and proof by contradiction — and when each applies</li>
+            <li>State the well-ordering principle and its relation to induction</li>
+            <li>Explain the difference between countable and uncountable infinity</li>
+            <li>Read the notation \(\mathbb{N}, \mathbb{Z}, \mathbb{Q}, \mathbb{R}, \emptyset, \subseteq, \in, \forall, \exists, \implies, \iff\) fluently</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Apply</h4>
+          <ul>
+            <li>Translate an English math statement into formal quantifier form (\(\forall\), \(\exists\))</li>
+            <li>Construct and read truth tables for compound propositions</li>
+            <li>Negate quantified statements using De Morgan's laws</li>
+            <li>Recognize which proof technique is easiest for a given problem shape</li>
+            <li>Compute set operations, Cartesian products, power sets, and image/preimage under functions</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Prove &amp; Analyze</h4>
+          <ul>
+            <li>Write a complete direct proof of a conditional \(P \implies Q\)</li>
+            <li>Prove \(A \subseteq B\), \(A = B\), and \(x \in A\) for sets</li>
+            <li>Prove an existence statement (constructive) and a uniqueness statement</li>
+            <li>Prove an iff statement in both directions</li>
+            <li>Perform proof by weak induction, strong induction, well-ordering, and smallest counterexample</li>
+            <li>Disprove a false statement using a well-chosen counterexample</li>
+            <li>Prove a set is countable by exhibiting a bijection with \(\mathbb{N}\)</li>
+            <li>Prove Cantor's theorem: \(|\mathbb{R}| &gt; |\mathbb{N}|\)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Connect to Quant</h4>
+          <ul>
+            <li>Read proofs in Shreve, Karatzas, Björk without notational confusion</li>
+            <li>Recognize when a "well-known result" is being invoked and locate its statement</li>
+            <li>Understand why measure theory requires uncountability of \(\mathbb{R}\)</li>
+            <li>Write your own solutions to interview brainteasers using structured proof</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-why">
+      <div class="box-title">🧭 Why must you learn this?</div>
+      <p>Proof techniques are the <b>alphabet</b> of every advanced math and quant text. Without them, you can compute but not reason — you can plug into Black-Scholes but not defend why the hedging argument works, or extend it when reality departs from the model.</p>
+      <div class="why-grid">
+        <div>
+          <h4>Immediate use in this atlas</h4>
+          <p>Every subsequent L lesson (L1-L12) uses these techniques. L2 proves the ε-δ definition of limits with <b>direct + contrapositive</b> proofs. L4 proves the Fundamental Theorem of Calculus by <b>induction on a partition</b>. L8 proves series convergence by <b>contradiction</b> (Cauchy). L10 proves linear-algebra theorems (eigenvalues, orthogonality) using <b>iff and existence-uniqueness</b> patterns.</p>
+        </div>
+        <div>
+          <h4>Use in quant work</h4>
+          <p>Reading Shreve <i>Stochastic Calculus for Finance II</i>: nearly every page invokes "suppose", "conversely", "by contradiction", "we now show existence and uniqueness". Reading Björk on arbitrage theory: iff proofs of no-arbitrage conditions everywhere. Reading Karatzas-Shreve <i>Brownian Motion and Stochastic Calculus</i>: measure theory needs cardinality (§12) to justify why you can't just define a uniform distribution on all subsets of \([0,1]\).</p>
+        </div>
+        <div>
+          <h4>Use in interviews</h4>
+          <p>Quant interview brainteasers ("prove that in a group of 23 people, two share a birthday with probability &gt; 50%" — pigeonhole + counting) require structured proof, not intuition. Interviewers grade on clarity of reasoning, not just correct answer.</p>
+        </div>
+        <div>
+          <h4>Long-run payoff</h4>
+          <p>Once fluent, you read a research paper's "Proposition 3.1" and immediately map it to <i>direct / contrapositive / contradiction / induction</i> in your head. You spot the structure before parsing the details. This compounds — the 10 hours invested here saves 50-100 hours across your quant career.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="outline-box">
+      <div class="outline-title">📄 On this page · 12 sections</div>
+      <div class="outline-grid">
+        <a href="#s1" class="outline-item"><span class="num">1</span>Sets &amp; set operations</a>
+        <a href="#s7" class="outline-item"><span class="num">7</span>Non-conditional proofs (iff, existence, uniqueness)</a>
+        <a href="#s2" class="outline-item"><span class="num">2</span>Logic, quantifiers, truth tables</a>
+        <a href="#s8" class="outline-item"><span class="num">8</span>Proofs involving sets</a>
+        <a href="#s3" class="outline-item"><span class="num">3</span>Counting principles</a>
+        <a href="#s9" class="outline-item"><span class="num">9</span>Disproof &amp; counterexamples</a>
+        <a href="#s4" class="outline-item"><span class="num">4</span>Direct proof</a>
+        <a href="#s10" class="outline-item"><span class="num">10</span>Mathematical induction (4 variants)</a>
+        <a href="#s5" class="outline-item"><span class="num">5</span>Contrapositive proof</a>
+        <a href="#s11" class="outline-item"><span class="num">11</span>Relations &amp; equivalence classes</a>
+        <a href="#s6" class="outline-item"><span class="num">6</span>Proof by contradiction</a>
+        <a href="#s12" class="outline-item"><span class="num">12</span>Cardinality: countable vs uncountable</a>
+      </div>
+    </div>
+
+
+    <!-- ========== SECTION 1 (PLACEHOLDER) ========== -->
+    <section id="s1">
+      <h2>1. Sets &amp; set operations</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §1?</div>
+        <p><b>What you'll learn:</b> the language every subsequent lesson speaks. Sets are the atoms; all mathematical objects (functions, matrices, groups, probability spaces) are sets with structure.</p>
+        <p><b>Used later:</b> <a href="#s8" class="xref">§8</a> proves set identities. <a href="#s11" class="xref">§11</a> and <a href="#s12" class="xref">§12</a> use sets extensively. L1 Functions defines a function as a special subset of a Cartesian product.</p>
+        <p><b>Used in quant:</b> probability spaces \((\Omega, \mathcal{F}, \mathbb{P})\) are triples of sets. \(\sigma\)-algebras are sets of sets. Every measure-theoretic construct rests on set-theoretic bedrock.</p>
+      </div>
+
+      <h3>1.1 What is a set?</h3>
+
+      <p>A <b>set</b> is an unordered collection of distinct objects. The objects are called <b>elements</b> or <b>members</b>. If \(x\) is an element of a set \(A\), we write \(x \in A\); if not, \(x \notin A\).</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.1 — Set (informal)</div>
+        <p>A set is a collection of objects, called its elements. Order doesn't matter; duplicates don't count twice. Two sets are equal iff they have exactly the same elements.</p>
+      </div>
+
+      <p><b>Two ways to describe a set:</b></p>
+      <ul>
+        <li><b>Listing (roster) notation:</b> \(\{1, 2, 3, 4\}\), \(\{\text{red}, \text{green}, \text{blue}\}\), \(\{1, 2, 3, \ldots, 100\}\).</li>
+        <li><b>Set-builder notation:</b> \(\{ x \in \mathbb{Z} : x^2 &lt; 10 \}\) reads "the set of integers \(x\) such that \(x^2 &lt; 10\)". This equals \(\{-3, -2, -1, 0, 1, 2, 3\}\).</li>
+      </ul>
+
+      <div class="box box-warning">
+        <div class="box-title">Standard number sets — memorize these symbols</div>
+        <ul>
+          <li>\(\mathbb{N} = \{1, 2, 3, \ldots\}\) — natural numbers (some authors include 0; Hammack does not)</li>
+          <li>\(\mathbb{Z} = \{\ldots, -2, -1, 0, 1, 2, \ldots\}\) — integers (from German <i>Zahlen</i>)</li>
+          <li>\(\mathbb{Q} = \{a/b : a, b \in \mathbb{Z}, b \ne 0\}\) — rationals (from <i>quotient</i>)</li>
+          <li>\(\mathbb{R}\) — real numbers</li>
+          <li>\(\mathbb{C} = \{a + bi : a, b \in \mathbb{R}\}\) — complex numbers</li>
+          <li>\(\emptyset\) or \(\{\}\) — the <b>empty set</b>, no elements at all</li>
+        </ul>
+        <p>Chain of inclusions: \(\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R} \subset \mathbb{C}\).</p>
+      </div>
+
+      <h3>1.2 Subsets and equality</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.2 — Subset</div>
+        <p>\(A\) is a <b>subset</b> of \(B\), written \(A \subseteq B\), if every element of \(A\) is also in \(B\). Formally: \(A \subseteq B\) iff \((\forall x)(x \in A \implies x \in B)\).</p>
+        <p>If \(A \subseteq B\) but \(A \ne B\), we say \(A\) is a <b>proper subset</b>, written \(A \subsetneq B\) (or \(A \subset B\) — notation varies).</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.3 — Set equality</div>
+        <p>\(A = B\) iff \(A \subseteq B\) <b>and</b> \(B \subseteq A\).</p>
+      </div>
+
+      <p>Two-way inclusion is the standard proof template for set equality — you'll see it constantly in <a href="#s8" class="xref">§8</a>.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 1.1</div>
+        <p>Let \(A = \{1, 2, 3\}\), \(B = \{1, 2, 3, 4, 5\}\), \(C = \{3, 1, 2\}\).</p>
+        <p>\(A \subseteq B\) ✓ &nbsp;&nbsp; \(A = C\) ✓ (order doesn't matter) &nbsp;&nbsp; \(A \subsetneq B\) ✓ (proper) &nbsp;&nbsp; \(B \not\subseteq A\) ✓</p>
+        <p>Special: \(\emptyset \subseteq A\) for every set \(A\) (vacuously true — no elements of \(\emptyset\) to check).</p>
+      </div>
+
+      <h3>1.3 Set operations</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.4 — Union, intersection, difference, complement</div>
+        <ul>
+          <li><b>Union:</b> \(A \cup B = \{x : x \in A \text{ or } x \in B\}\)</li>
+          <li><b>Intersection:</b> \(A \cap B = \{x : x \in A \text{ and } x \in B\}\)</li>
+          <li><b>Difference:</b> \(A \setminus B = \{x : x \in A \text{ and } x \notin B\}\) (also written \(A - B\))</li>
+          <li><b>Complement</b> (relative to a universe \(U\)): \(A^c = U \setminus A\)</li>
+        </ul>
+        <p>Two sets are <b>disjoint</b> if \(A \cap B = \emptyset\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 1.2</div>
+        <p>\(A = \{1, 2, 3, 4\}\), \(B = \{3, 4, 5, 6\}\), universe \(U = \{1, \ldots, 10\}\).</p>
+        <p>\(A \cup B = \{1, 2, 3, 4, 5, 6\}\) &nbsp;&nbsp; \(A \cap B = \{3, 4\}\) &nbsp;&nbsp; \(A \setminus B = \{1, 2\}\) &nbsp;&nbsp; \(A^c = \{5, 6, 7, 8, 9, 10\}\)</p>
+      </div>
+
+      <h3>1.4 Cartesian product</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.5 — Cartesian product</div>
+        <p>\(A \times B = \{(a, b) : a \in A, b \in B\}\) — the set of all <b>ordered pairs</b> with first component from \(A\) and second from \(B\). Unlike sets, order in pairs matters: \((1, 2) \ne (2, 1)\).</p>
+        <p>Generalizes to \(A_1 \times A_2 \times \cdots \times A_n\) (\(n\)-tuples). We write \(A^n\) for \(\underbrace{A \times A \times \cdots \times A}_{n \text{ times}}\).</p>
+      </div>
+
+      <p><b>Familiar example:</b> \(\mathbb{R}^2 = \mathbb{R} \times \mathbb{R}\) is the Cartesian plane. \(\mathbb{R}^n\) is \(n\)-dimensional Euclidean space — the setting for all of multivariable calculus and linear algebra.</p>
+
+      <h3>1.5 Power set</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 1.6 — Power set</div>
+        <p>\(\mathcal{P}(A) = \{S : S \subseteq A\}\) — the set of ALL subsets of \(A\) (including \(\emptyset\) and \(A\) itself).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 1.3</div>
+        <p>\(A = \{a, b\}\). Then \(\mathcal{P}(A) = \{\emptyset, \{a\}, \{b\}, \{a, b\}\}\). Note \(|\mathcal{P}(A)| = 4 = 2^2\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 1.1 — Size of power set</div>
+        <p>If \(|A| = n\), then \(|\mathcal{P}(A)| = 2^n\).</p>
+        <p><i>Proof sketch:</i> each element of \(A\) is independently either in a subset or not — 2 choices per element, \(n\) elements, so \(2^n\) total subsets. (Formal proof by induction — see <a href="#s10" class="xref">§10</a>.)</p>
+      </div>
+
+      <p>Power sets grow fast: \(|\mathcal{P}(\mathbb{N})| = 2^{\aleph_0}\), which we'll see in <a href="#s12" class="xref">§12</a> is <b>uncountable</b> — in fact, has the same cardinality as \(\mathbb{R}\).</p>
+
+      <details>
+        <summary>Deeper dive: Russell's paradox (why we can't have a "set of all sets")</summary>
+        <p>Consider \(R = \{S : S \notin S\}\) — the set of all sets that don't contain themselves. Is \(R \in R\)?</p>
+        <p>If \(R \in R\), then by definition of \(R\), we need \(R \notin R\). Contradiction.</p>
+        <p>If \(R \notin R\), then \(R\) satisfies the membership condition, so \(R \in R\). Contradiction.</p>
+        <p>This paradox (Bertrand Russell, 1901) demolished the "naive" view that any collection is a set. Modern set theory (Zermelo-Fraenkel + Axiom of Choice, "ZFC") restricts set-formation to prevent this. For quant purposes, naive set theory is safe — we never build pathological sets.</p>
+      </details>
+
+      <div class="sec-nav">
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s2" class="next">§2 Logic, quantifiers, truth tables</a>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 2 (PLACEHOLDER) ========== -->
+    <section id="s2">
+      <h2>2. Logic, quantifiers, truth tables</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §2?</div>
+        <p><b>What you'll learn:</b> the syntax of mathematical statements. Without it you can't tell whether "for all \(\varepsilon\) there exists \(\delta\)" differs from "there exists \(\delta\) for all \(\varepsilon\)" — the difference between continuity and uniform continuity.</p>
+        <p><b>Used later:</b> <a href="#s5" class="xref">§5</a> depends on logical equivalence \((P \implies Q) \iff (\neg Q \implies \neg P)\). <a href="#s6" class="xref">§6</a> needs negation (De Morgan). L2's ε-δ definition is a nested \(\forall\exists\forall\).</p>
+        <p><b>Used in quant:</b> reading option-pricing theorems ("there exists a unique martingale measure such that for all payoffs..."). Confusion about quantifier order = wrong pricing formula.</p>
+      </div>
+
+      <h3>2.1 Propositions</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 2.1 — Proposition</div>
+        <p>A <b>proposition</b> (or <b>statement</b>) is a declarative sentence that is either true or false, not both.</p>
+      </div>
+
+      <p><b>Examples:</b> "2 + 2 = 4" (T), "\(\pi\) is rational" (F), "\(7 \mid 21\)" (T). <b>Not propositions:</b> "\(x + 1 = 5\)" (depends on \(x\) — this is a <b>predicate</b>), "Is 2 prime?" (question).</p>
+
+      <h3>2.2 Logical connectives</h3>
+
+      <table class="st">
+        <tr><th>Symbol</th><th>Name</th><th>Read as</th><th>Meaning</th></tr>
+        <tr><td>\(\neg P\), \(\sim P\)</td><td>Negation</td><td>"not \(P\)"</td><td>True iff \(P\) is false</td></tr>
+        <tr><td>\(P \land Q\)</td><td>Conjunction</td><td>"\(P\) and \(Q\)"</td><td>True iff both true</td></tr>
+        <tr><td>\(P \lor Q\)</td><td>Disjunction</td><td>"\(P\) or \(Q\)"</td><td>True iff at least one true (<b>inclusive</b> or)</td></tr>
+        <tr><td>\(P \implies Q\)</td><td>Conditional</td><td>"if \(P\), then \(Q\)"</td><td>False only when \(P\) true and \(Q\) false</td></tr>
+        <tr><td>\(P \iff Q\)</td><td>Biconditional</td><td>"\(P\) iff \(Q\)"</td><td>True iff both same truth value</td></tr>
+      </table>
+
+      <h3>2.3 Truth tables</h3>
+
+      <p>A <b>truth table</b> lists the truth value of a compound proposition for every combination of its atomic components. \(n\) components → \(2^n\) rows.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 2.1 — truth table for \(P \implies Q\)</div>
+        <table class="st" style="max-width: 300px;">
+          <tr><th>\(P\)</th><th>\(Q\)</th><th>\(P \implies Q\)</th></tr>
+          <tr><td>T</td><td>T</td><td>T</td></tr>
+          <tr><td>T</td><td>F</td><td>F</td></tr>
+          <tr><td>F</td><td>T</td><td>T</td></tr>
+          <tr><td>F</td><td>F</td><td>T</td></tr>
+        </table>
+        <p>Note the "vacuous truth" on lines 3 and 4: if \(P\) is false, \(P \implies Q\) is automatically true, regardless of \(Q\). "If pigs fly, then \(1 = 2\)" is a true statement.</p>
+      </div>
+
+      <h3>2.4 Tautology, contradiction, equivalence</h3>
+
+      <ul>
+        <li>A <b>tautology</b> is a proposition true under every assignment. Example: \(P \lor \neg P\).</li>
+        <li>A <b>contradiction</b> is false under every assignment. Example: \(P \land \neg P\).</li>
+        <li>\(P\) and \(Q\) are <b>logically equivalent</b>, written \(P \equiv Q\), if \(P \iff Q\) is a tautology.</li>
+      </ul>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 2.1 — Fundamental equivalences</div>
+        <p>The following are logically equivalent (verified by truth table):</p>
+        <ul>
+          <li>\((P \implies Q) \equiv (\neg P \lor Q)\) &nbsp;— the "material implication" rewrite</li>
+          <li>\((P \implies Q) \equiv (\neg Q \implies \neg P)\) &nbsp;— the <b>contrapositive</b> (basis of <a href="#s5" class="xref">§5</a>)</li>
+          <li>\(\neg(P \land Q) \equiv (\neg P) \lor (\neg Q)\) &nbsp;— <b>De Morgan #1</b></li>
+          <li>\(\neg(P \lor Q) \equiv (\neg P) \land (\neg Q)\) &nbsp;— <b>De Morgan #2</b></li>
+          <li>\((P \iff Q) \equiv (P \implies Q) \land (Q \implies P)\)</li>
+        </ul>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">⚠️ Contrapositive vs converse</div>
+        <p><b>Converse</b> of \(P \implies Q\) is \(Q \implies P\) — NOT logically equivalent. "If it rains, the ground is wet" does NOT mean "if the ground is wet, it rained" (could be a sprinkler). Contrapositive IS equivalent; converse is NOT.</p>
+      </div>
+
+      <h3>2.5 Quantifiers</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 2.2 — Universal and existential quantifiers</div>
+        <ul>
+          <li>\((\forall x \in A)\, P(x)\) — "<b>for all</b> \(x\) in \(A\), \(P(x)\) holds"</li>
+          <li>\((\exists x \in A)\, P(x)\) — "<b>there exists</b> \(x\) in \(A\) such that \(P(x)\) holds"</li>
+        </ul>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 2.2 — Order of quantifiers matters</div>
+        <p>Compare these two statements about a function \(f: \mathbb{R} \to \mathbb{R}\):</p>
+        <ul>
+          <li><b>A:</b> \((\forall \varepsilon &gt; 0)(\exists \delta &gt; 0)(\forall x)\; |x - a| &lt; \delta \implies |f(x) - f(a)| &lt; \varepsilon\) &nbsp;— <b>continuity at \(a\)</b> (\(\delta\) may depend on \(\varepsilon\) and \(a\))</li>
+          <li><b>B:</b> \((\forall \varepsilon &gt; 0)(\exists \delta &gt; 0)(\forall a)(\forall x)\; |x - a| &lt; \delta \implies |f(x) - f(a)| &lt; \varepsilon\) &nbsp;— <b>uniform continuity</b> (\(\delta\) works for ALL \(a\) simultaneously)</li>
+        </ul>
+        <p>B is strictly stronger than A. Every uniformly continuous function is continuous; not conversely (\(f(x) = x^2\) on \(\mathbb{R}\) is continuous but not uniformly). We'll formalize this in L2.</p>
+      </div>
+
+      <h3>2.6 Negating quantifiers (De Morgan for \(\forall, \exists\))</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 2.2 — Negation of quantified statements</div>
+        <ul>
+          <li>\(\neg(\forall x)\, P(x) \equiv (\exists x)\, \neg P(x)\)</li>
+          <li>\(\neg(\exists x)\, P(x) \equiv (\forall x)\, \neg P(x)\)</li>
+        </ul>
+        <p>Rule of thumb: <b>push \(\neg\) inside, flip \(\forall \leftrightarrow \exists\)</b>.</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 2.3 — Negating "\(f\) is continuous at \(a\)"</div>
+        <p>\(f\) is continuous at \(a\) iff \((\forall \varepsilon &gt; 0)(\exists \delta &gt; 0)(\forall x)\; |x - a| &lt; \delta \implies |f(x) - f(a)| &lt; \varepsilon\).</p>
+        <p>Negation (\(f\) is NOT continuous at \(a\)):</p>
+        <p>\((\exists \varepsilon &gt; 0)(\forall \delta &gt; 0)(\exists x)\; |x - a| &lt; \delta \land |f(x) - f(a)| \ge \varepsilon\).</p>
+        <p>In words: "there is some \(\varepsilon\) such that no matter how small we choose \(\delta\), we can find an \(x\) within \(\delta\) of \(a\) whose image is at least \(\varepsilon\) away from \(f(a)\)."</p>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s1" class="prev">§1 Sets</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s3" class="next">§3 Counting principles</a>
+      </div>
+    </section>
+
+    <!-- ========== SECTION 3 (PLACEHOLDER) ========== -->
+    <section id="s3">
+      <h2>3. Counting principles</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §3?</div>
+        <p><b>What you'll learn:</b> how to count without listing — foundational for probability, combinatorial identities, complexity analysis.</p>
+        <p><b>Used later:</b> <a href="#s10" class="xref">§10</a> uses binomial coefficients (Pascal's identity); Probability pillar builds on counting for discrete distributions.</p>
+        <p><b>Used in quant:</b> combinatorial arguments in binomial option-pricing tree (\(\binom{n}{k}\) paths of \(n\) steps with \(k\) ups); Monte Carlo variance-reduction via stratified sampling.</p>
+      </div>
+
+      <h3>3.1 Addition and multiplication principles</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.1 — Multiplication principle</div>
+        <p>If a process consists of \(k\) independent steps with \(n_1, n_2, \ldots, n_k\) choices respectively, the total number of outcomes is \(n_1 \cdot n_2 \cdots n_k\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.2 — Addition principle</div>
+        <p>If \(A_1, A_2, \ldots, A_k\) are pairwise disjoint sets, \(|A_1 \cup \cdots \cup A_k| = |A_1| + \cdots + |A_k|\).</p>
+      </div>
+
+      <h3>3.2 Permutations and combinations</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 3.1 — Permutation</div>
+        <p>The number of ordered arrangements of \(k\) items chosen from \(n\) distinct items is \(P(n, k) = \dfrac{n!}{(n-k)!}\). In particular, \(P(n, n) = n!\).</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 3.2 — Combination (binomial coefficient)</div>
+        <p>The number of unordered \(k\)-subsets of an \(n\)-set is \(\binom{n}{k} = \dfrac{n!}{k! (n-k)!}\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.3 — Pascal's identity</div>
+        <p>\(\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k}\) for \(1 \le k \le n-1\).</p>
+        <p><i>Combinatorial proof:</i> to choose \(k\) from \(n\), fix element \(x\). Either \(x\) is chosen (need \(k-1\) more from remaining \(n-1\)) or not chosen (need all \(k\) from remaining \(n-1\)). Sum gives Pascal's identity.</p>
+      </div>
+
+      <h3>3.3 Binomial theorem</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.4 — Binomial theorem</div>
+        <p>\((x + y)^n = \displaystyle\sum_{k=0}^{n} \binom{n}{k} x^{n-k} y^k\) for \(n \in \mathbb{N}\).</p>
+      </div>
+
+      <h3>3.4 Pigeonhole principle</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.5 — Pigeonhole principle</div>
+        <p>If \(n + 1\) objects are placed into \(n\) boxes, at least one box contains \(\ge 2\) objects.</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 3.1 — Classic interview problem</div>
+        <p><b>Claim:</b> In any group of 366 people, at least two share a birthday.</p>
+        <p><b>Proof:</b> 365 possible birthdays (ignoring leap year); 366 people. By pigeonhole, some birthday is shared. <span class="qed">∎</span></p>
+      </div>
+
+      <h3>3.5 Inclusion-exclusion</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 3.6 — Inclusion-exclusion for 2 and 3 sets</div>
+        <p>\(|A \cup B| = |A| + |B| - |A \cap B|\)</p>
+        <p>\(|A \cup B \cup C| = |A| + |B| + |C| - |A \cap B| - |A \cap C| - |B \cap C| + |A \cap B \cap C|\)</p>
+        <p>General form (\(n\) sets) uses alternating signs; will formalize in Probability pillar.</p>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s2" class="prev">§2 Logic</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s4" class="next">§4 Direct proof</a>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- ========== SECTION 4 — FULLY BUILT SAMPLE ================ -->
+    <!-- ========================================================== -->
+    <section id="s4">
+      <h2>4. Direct proof</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §4?</div>
+        <p><b>What you'll learn:</b> how to prove any statement of the form "If \(P\), then \(Q\)" using the direct assumption-then-deduction template. This is the technique every proof reflex should start with.</p>
+        <p><b>Used later in this atlas:</b> almost every proof in <a href="limits.html" class="xref">L2 Limits</a> (limit laws, continuity theorems), <a href="../Quant-Roadmap.html" class="xref">L4 Integrals</a> (linearity, additivity of integrals), all of L10 Linear Algebra.</p>
+        <p><b>Used in quant:</b> proving pricing-formula identities (put-call parity via direct arbitrage argument), showing hedging strategies replicate payoffs, deriving Greeks from Black-Scholes.</p>
+      </div>
+
+      <p>Time to prove something. The most straightforward proof technique — the one every mathematician reaches for first — is <b>direct proof</b>. Before we can use it, we must nail down three words whose meanings you probably feel you know but haven't seen defined precisely: <i>theorem</i>, <i>proof</i>, and <i>definition</i>. These are the tools we will handle for the rest of your mathematical life.</p>
+
+      <h3>4.1 What is a theorem?</h3>
+
+      <p>A <b>theorem</b> is a mathematical statement that is true and has been verified as true. A <b>proof</b> of a theorem is a written verification convincing to any reader with the requisite background. A <b>definition</b> is an exact, unambiguous explanation of the meaning of a mathematical word or phrase.</p>
+
+      <p>Almost every theorem you have met in calculus has the shape "If \(P\), then \(Q\)" — a <b>conditional statement</b>. Some examples you will recognize:</p>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorems from your calculus courses (conditional shape)</div>
+        <p><b>Fermat's stationary-point theorem.</b> If \(f\) is differentiable on an open interval \(I\), \(c \in I\), and \(f(c)\) is the maximum or minimum of \(f\) on \(I\), then \(f'(c) = 0\).</p>
+        <p><b>Divergence test.</b> If \(\sum_{k=1}^{\infty} a_k\) converges, then \(\lim_{k \to \infty} a_k = 0\).</p>
+        <p><b>Continuity implies integrability.</b> If \(f\) is continuous on \([a,b]\), then \(f\) is Riemann-integrable on \([a,b]\).</p>
+        <p><b>Absolute convergence.</b> If a series is absolutely convergent, then it is convergent.</p>
+      </div>
+
+      <p>Not every theorem is conditional. Some state a plain fact — for instance, "The harmonic series \(1 + \frac{1}{2} + \frac{1}{3} + \cdots\) diverges." But conditional theorems are dominant, so most of our proof techniques target them.</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Vocabulary of the trade</div>
+        <ul>
+          <li><b>Theorem</b> — an important true statement.</li>
+          <li><b>Proposition</b> — a true statement, less consequential than a theorem.</li>
+          <li><b>Lemma</b> — a helper theorem used to prove another theorem.</li>
+          <li><b>Corollary</b> — a result that follows quickly from a theorem just proved.</li>
+          <li><b>Axiom</b> — a statement accepted without proof (usually because it defines the game).</li>
+          <li><b>Conjecture</b> — a statement believed to be true but not yet proved.</li>
+        </ul>
+        <p>These distinctions are informal — they express the author's judgment of importance, not a technical difference. A "theorem" in one book is a "proposition" in another.</p>
+      </div>
+
+      <h3>4.2 Definitions we will need</h3>
+
+      <p>Before we can prove anything, we need shared vocabulary. Every proof rests on definitions the writer and reader agree on. Below are the definitions used throughout §4. All concern integers — the simplest playground for practicing proofs.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.1 — Even integer</div>
+        <p>An integer \(n\) is <b>even</b> if \(n = 2a\) for some integer \(a \in \mathbb{Z}\).</p>
+        <p><i>Example.</i> \(10\) is even because \(10 = 2 \cdot 5\). \(-6\) is even because \(-6 = 2 \cdot (-3)\). \(7\) is not even: there is no integer \(a\) with \(7 = 2a\).</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.2 — Odd integer</div>
+        <p>An integer \(n\) is <b>odd</b> if \(n = 2a + 1\) for some integer \(a \in \mathbb{Z}\).</p>
+        <p><i>Example.</i> \(7\) is odd because \(7 = 2 \cdot 3 + 1\). \(-3\) is odd because \(-3 = 2 \cdot (-2) + 1\).</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.3 — Same parity</div>
+        <p>Two integers have the <b>same parity</b> if they are both even or both odd. Otherwise they have <b>opposite parity</b>.</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.4 — Divides</div>
+        <p>Suppose \(a, b \in \mathbb{Z}\). We say \(a\) <b>divides</b> \(b\), written \(a \mid b\), if \(b = ac\) for some \(c \in \mathbb{Z}\). We also say \(a\) is a <b>divisor</b> of \(b\), and \(b\) is a <b>multiple</b> of \(a\). If \(a\) does not divide \(b\), write \(a \nmid b\).</p>
+        <p><i>Example.</i> \(5 \mid 15\) because \(15 = 5 \cdot 3\). \(8 \mid 32\) because \(32 = 8 \cdot 4\). \(6 \nmid 9\) because no integer \(c\) satisfies \(9 = 6c\).</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">⚠️ \(a \mid b\) vs \(a / b\)</div>
+        <p>\(a \mid b\) is a <b>statement</b> (true or false). \(a / b\) is a <b>number</b> (a fraction). Do not confuse them. \(8 \mid 16\) is true. \(8 / 16 = 0.5\) is a number.</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.5 — Prime and composite</div>
+        <p>A number \(n \in \mathbb{N}\) is <b>prime</b> if it has exactly two positive divisors, \(1\) and \(n\). If \(n\) has more than two positive divisors, it is <b>composite</b>. (Equivalently, \(n\) is composite iff \(n = ab\) for some \(1 &lt; a, b &lt; n\).)</p>
+        <p>\(1\) is neither prime nor composite — it has only one positive divisor.</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 4.6 — gcd and lcm</div>
+        <p>The <b>greatest common divisor</b> \(\gcd(a, b)\) of integers \(a\) and \(b\) is the largest integer dividing both.</p>
+        <p>The <b>least common multiple</b> \(\operatorname{lcm}(a, b)\) of non-zero integers \(a\) and \(b\) is the smallest positive integer that is a multiple of both.</p>
+      </div>
+
+      <h4>Facts we accept without proof</h4>
+
+      <p>To prevent infinite regress, we must accept some elementary facts. These are our starting axioms for §4:</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Fact 4.1 — Closure of integers under +, −, ·</div>
+        <p>If \(a, b \in \mathbb{Z}\), then \(a + b, a - b, ab \in \mathbb{Z}\). Any integer combination of integers via \(+, -, \cdot\) is an integer.</p>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">Fact 4.2 — Division algorithm</div>
+        <p>Given \(a \in \mathbb{Z}\) and \(b \in \mathbb{N}\), there exist unique \(q, r \in \mathbb{Z}\) with \(a = qb + r\) and \(0 \le r &lt; b\).</p>
+      </div>
+
+      <p>The natural ordering of \(\mathbb{N}, \mathbb{Z}, \mathbb{Q}, \mathbb{R}\) is also accepted — inequalities like \(5 &lt; 7\) or \(x &lt; y \implies -x &gt; -y\) need no justification.</p>
+
+      <h3>4.3 The technique of direct proof</h3>
+
+      <p>Suppose we want to prove a conditional proposition:</p>
+
+      <div class="box box-thm">
+        <div class="box-title">Proposition (generic form)</div>
+        <p>If \(P\), then \(Q\).</p>
+      </div>
+
+      <p>Look at the truth table of \(P \implies Q\):</p>
+
+      <table class="st" style="max-width: 320px;">
+        <tr><th>\(P\)</th><th>\(Q\)</th><th>\(P \implies Q\)</th></tr>
+        <tr><td>T</td><td>T</td><td>T</td></tr>
+        <tr><td>T</td><td>F</td><td>F</td></tr>
+        <tr><td>F</td><td>T</td><td>T</td></tr>
+        <tr><td>F</td><td>F</td><td>T</td></tr>
+      </table>
+
+      <p>Read the table carefully: whenever \(P\) is false, \(P \implies Q\) is automatically true. So we don't have to worry about the cases where \(P\) fails. We only need to rule out the second line — the case where \(P\) is true but \(Q\) is false. If we can show that <b>whenever \(P\) holds, \(Q\) also holds</b>, we are done.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Outline for direct proof</div>
+        <p><b>Proposition.</b> If \(P\), then \(Q\).</p>
+        <p><b>Proof.</b> Suppose \(P\).<br>
+        \(\vdots\)<br>
+        Therefore \(Q\). <span class="qed">∎</span></p>
+      </div>
+
+      <p>The first line assumes \(P\). The last line concludes \(Q\). The middle uses definitions, algebra, and previously-proved facts to transport us from \(P\) to \(Q\). The symbol \(\blacksquare\) (or \(\Box\), \(\text{Q.E.D.}\)) marks the end of a proof.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 4.1 — building a proof step by step</div>
+        <p><b>Proposition.</b> If \(x\) is odd, then \(x^2\) is odd.</p>
+        <p>We build this proof in four stages so you see the reasoning happen. In practice, once you're fluent, you write the final version directly.</p>
+
+        <p><b>Stage 1</b> — set up the outline.</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) is odd.<br>
+          \(\vdots\)<br>
+          Therefore \(x^2\) is odd. <span class="qed">∎</span></p>
+        </div>
+
+        <p><b>Stage 2</b> — unpack the hypothesis using Definition 4.2.</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) is odd. Then \(x = 2a + 1\) for some \(a \in \mathbb{Z}\), by definition of an odd number.<br>
+          \(\vdots\)<br>
+          Therefore \(x^2\) is odd. <span class="qed">∎</span></p>
+        </div>
+
+        <p><b>Stage 3</b> — figure out what the second-to-last line should say. To conclude "\(x^2\) is odd" by Definition 4.2, we need \(x^2 = 2b + 1\) for some integer \(b\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) is odd. Then \(x = 2a + 1\) for some \(a \in \mathbb{Z}\).<br>
+          \(\vdots\)<br>
+          Thus \(x^2 = 2b + 1\) for some integer \(b\).<br>
+          Therefore \(x^2\) is odd. <span class="qed">∎</span></p>
+        </div>
+
+        <p><b>Stage 4</b> — bridge the gap with algebra.</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) is odd. Then \(x = 2a + 1\) for some \(a \in \mathbb{Z}\), by definition of an odd number. Squaring,
+          \[ x^2 = (2a+1)^2 = 4a^2 + 4a + 1 = 2(2a^2 + 2a) + 1. \]
+          Let \(b = 2a^2 + 2a\); by Fact 4.1, \(b \in \mathbb{Z}\). Then \(x^2 = 2b + 1\). Therefore \(x^2\) is odd, by definition of an odd number. <span class="qed">∎</span></p>
+        </div>
+
+        <p>That is the finished proof — clean, complete, unambiguous. Every step invokes either a definition, a fact, or standard algebra.</p>
+      </div>
+
+      <div class="callout">
+        <b>Working style.</b> Write the first and last lines first. Then work forward from the assumption and backward from the goal, meeting in the middle. This "sandwich" technique is how nearly every mathematician sketches proofs — even if the published version reads top-to-bottom.
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 4.2 — transitivity of divides</div>
+        <p><b>Proposition.</b> Let \(a, b, c \in \mathbb{Z}\). If \(a \mid b\) and \(b \mid c\), then \(a \mid c\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(a \mid b\) and \(b \mid c\). By Definition 4.4, \(a \mid b\) means \(b = ad\) for some \(d \in \mathbb{Z}\). Likewise, \(b \mid c\) means \(c = be\) for some \(e \in \mathbb{Z}\). Substituting,
+          \[ c = be = (ad)e = a(de). \]
+          Let \(x = de\); by Fact 4.1, \(x \in \mathbb{Z}\). Then \(c = ax\), which means \(a \mid c\) by Definition 4.4. <span class="qed">∎</span></p>
+        </div>
+        <p>This proves that divisibility is a <b>transitive relation</b> — a term we will formalize in <a href="#s11" class="xref">§11 Relations</a>.</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 4.3 — parity and a quadratic</div>
+        <p><b>Proposition.</b> If \(x\) is an even integer, then \(x^2 - 6x + 5\) is odd.</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) is even. Then \(x = 2a\) for some \(a \in \mathbb{Z}\), by Definition 4.1. Compute:
+          \[ x^2 - 6x + 5 = (2a)^2 - 6(2a) + 5 = 4a^2 - 12a + 5 = 4a^2 - 12a + 4 + 1 = 2(2a^2 - 6a + 2) + 1. \]
+          Let \(b = 2a^2 - 6a + 2 \in \mathbb{Z}\). Then \(x^2 - 6x + 5 = 2b + 1\), which is odd by Definition 4.2. <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 4.4 — an AM-GM style inequality</div>
+        <p><b>Proposition.</b> If \(x\) and \(y\) are positive real numbers, then \(2\sqrt{xy} \le x + y\).</p>
+
+        <p><i>Strategy first.</i> Squaring the desired inequality gives \(4xy \le (x+y)^2 = x^2 + 2xy + y^2\), which rearranges to \(0 \le x^2 - 2xy + y^2 = (x-y)^2\). That last statement is obviously true. To write the proof, reverse the direction.</p>
+
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) and \(y\) are positive real numbers. Since squares of real numbers are non-negative,
+          \[ 0 \le (x - y)^2 = x^2 - 2xy + y^2. \]
+          Adding \(4xy\) to both sides,
+          \[ 4xy \le x^2 + 2xy + y^2 = (x + y)^2. \]
+          Taking the positive square root of both sides (permissible because both sides are non-negative and the square-root function is monotonic on \([0, \infty)\); see the auxiliary Lemma 4.4a below),
+          \[ 2\sqrt{xy} \le x + y. \qquad \blacksquare \]</p>
+        </div>
+
+        <details>
+          <summary>Deeper dive: why we needed the square-root monotonicity lemma</summary>
+          <div class="box box-thm">
+            <div class="box-title">Lemma 4.4a — Square root preserves order on non-negatives</div>
+            <p>If \(0 \le u \le v\), then \(\sqrt{u} \le \sqrt{v}\).</p>
+          </div>
+          <div class="box box-proof">
+            <p><b>Proof.</b> Suppose \(0 \le u \le v\). Then \(v - u \ge 0\). Factor:
+            \[ v - u = (\sqrt{v} - \sqrt{u})(\sqrt{v} + \sqrt{u}). \]
+            Both \(\sqrt{u}, \sqrt{v} \ge 0\), so \(\sqrt{v} + \sqrt{u} \ge 0\). If \(\sqrt{v} + \sqrt{u} = 0\), then \(u = v = 0\) and the conclusion \(\sqrt{u} \le \sqrt{v}\) is trivially true. Otherwise \(\sqrt{v} + \sqrt{u} &gt; 0\), so dividing both sides of \(v - u \ge 0\) by this positive quantity gives \(\sqrt{v} - \sqrt{u} \ge 0\), i.e. \(\sqrt{u} \le \sqrt{v}\). <span class="qed">∎</span></p>
+          </div>
+          <p>This is a small lemma used inside Example 4.4. Notice how proofs compose: bigger results lean on smaller established ones.</p>
+        </details>
+      </div>
+
+      <h3>4.4 Using cases</h3>
+
+      <p>Sometimes the hypothesis \(P\) admits distinct sub-scenarios, and we prove \(Q\) in each separately. This is <b>proof by cases</b>. The cases must cover all possibilities.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 4.5 — a multiple-of-4 identity</div>
+        <p><b>Proposition.</b> If \(n \in \mathbb{N}\), then \(1 + (-1)^n(2n - 1)\) is a multiple of \(4\).</p>
+
+        <p>The expression \((-1)^n\) equals \(+1\) when \(n\) is even and \(-1\) when \(n\) is odd — two distinct behaviors, so two cases.</p>
+
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(n \in \mathbb{N}\). Then \(n\) is even or odd; consider each case.</p>
+          <p><b>Case 1.</b> Suppose \(n\) is even. Then \(n = 2k\) for some \(k \in \mathbb{Z}\), and \((-1)^n = 1\). Thus
+          \[ 1 + (-1)^n(2n - 1) = 1 + (1)(2 \cdot 2k - 1) = 4k, \]
+          which is a multiple of \(4\).</p>
+          <p><b>Case 2.</b> Suppose \(n\) is odd. Then \(n = 2k + 1\) for some \(k \in \mathbb{Z}\), and \((-1)^n = -1\). Thus
+          \[ 1 + (-1)^n(2n - 1) = 1 - \bigl(2(2k+1) - 1\bigr) = 1 - (4k + 1) = -4k, \]
+          which is a multiple of \(4\).</p>
+          <p>In either case, \(1 + (-1)^n(2n - 1)\) is a multiple of \(4\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>4.5 Treating similar cases: "without loss of generality"</h3>
+
+      <p>Sometimes multiple cases have identical proofs after a superficial renaming of variables. Rather than duplicate work, we handle one case and note that the others are similar. This is signaled by the phrase <b>"without loss of generality"</b> (abbreviated WLOG in casual writing — but write it out fully in your own proofs until you're experienced).</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 4.6 — sum of integers of opposite parity is odd</div>
+        <p><b>Proposition.</b> If two integers have opposite parity, then their sum is odd.</p>
+
+        <p><i>Long-form (two cases).</i></p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(m\) and \(n\) are integers with opposite parity.</p>
+          <p><b>Case 1.</b> \(m\) even, \(n\) odd. Write \(m = 2a\) and \(n = 2b + 1\) for integers \(a, b\). Then
+          \[ m + n = 2a + 2b + 1 = 2(a + b) + 1, \]
+          which is odd by Definition 4.2.</p>
+          <p><b>Case 2.</b> \(m\) odd, \(n\) even. Write \(m = 2a + 1\) and \(n = 2b\). Then
+          \[ m + n = 2a + 1 + 2b = 2(a + b) + 1, \]
+          which is odd. <span class="qed">∎</span></p>
+        </div>
+
+        <p><i>Compact form (WLOG).</i></p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(m\) and \(n\) are integers with opposite parity. Without loss of generality, assume \(m\) is even and \(n\) is odd (the other case is identical after swapping names). Write \(m = 2a\), \(n = 2b + 1\). Then \(m + n = 2(a + b) + 1\), which is odd by Definition 4.2. <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">When WLOG is legitimate — and when it is not</div>
+        <p>WLOG is only valid when the omitted case is genuinely a mirror of the one you did — same steps, same algebra. If the second case requires a fundamentally different argument, DO NOT use WLOG. Beginners over-apply it and hide real gaps in reasoning. Rule of thumb: if you can't state "swap variable names to get the other case" in one sentence, write both cases out.</p>
+      </div>
+
+      <h3>4.6 Summary — a checklist for direct proof</h3>
+
+      <div class="box box-warning">
+        <div class="box-title">Direct-proof checklist</div>
+        <ol>
+          <li>Identify \(P\) (the hypothesis) and \(Q\) (the conclusion).</li>
+          <li>Write "Suppose \(P\)." as the first line.</li>
+          <li>Write "Therefore \(Q\)." as the last line.</li>
+          <li>Unpack \(P\) using its definition — get concrete quantities to work with.</li>
+          <li>Look at \(Q\) and work backward — what would the line above it have to say?</li>
+          <li>Bridge the gap with algebra, previous theorems, and cited facts.</li>
+          <li>End with \(\blacksquare\) or \(\Box\).</li>
+          <li>Read your proof aloud. Every sentence should be clearly true from the previous.</li>
+        </ol>
+      </div>
+
+      <p>Direct proof is the workhorse — try it first. If it stalls (Example 4.4 shows how easily it can), reach for <a href="#s5" class="xref">§5 Contrapositive proof</a> or <a href="#s6" class="xref">§6 Proof by contradiction</a>. We will build both next.</p>
+
+      <details>
+        <summary>Deeper dive: why "suppose \(P\)" is not the same as "assume \(P\) is true"</summary>
+        <p>Beginners sometimes worry: "If I 'suppose \(P\)', am I claiming \(P\) is actually true?" No. In a proof of \(P \implies Q\), we are showing a <b>conditional</b> — the shape of the deduction, not the truth of \(P\). We're saying "in the possible world where \(P\) holds, \(Q\) also holds." Whether \(P\) is true in our particular case is a separate question. When you later apply the theorem, you first check \(P\), and only then do you get to conclude \(Q\).</p>
+        <p>This is why one theorem can be used to derive many concrete results: it packages a conditional deduction that stays true no matter what world you're in, as long as \(P\) holds there.</p>
+      </details>
+
+      <details>
+        <summary>Style rules for mathematical writing (Hammack §5.3, condensed)</summary>
+        <ol>
+          <li>Begin each sentence with a word, not a symbol. Bad: "\(x\) is an integer, so \(2x+5\) is an integer." Good: "Because \(x\) is an integer, \(2x + 5\) is an integer."</li>
+          <li>End each sentence with a period, even if the sentence ends with an equation.</li>
+          <li>Introduce every variable before using it. Bad: "Then \(2b + 1\) is odd." Good: "Let \(b = 2a^2 + 2a \in \mathbb{Z}\). Then \(2b + 1\) is odd."</li>
+          <li>Use \(=\) only between things that are literally equal, not to mean "implies" or "leads to."</li>
+          <li>Avoid \(\therefore\), \(\because\), and other symbolic shorthand in formal writing. Use words: "therefore," "because."</li>
+          <li>Do not use \(\forall\) or \(\exists\) as English words. Write "for all" and "there exists" in prose.</li>
+        </ol>
+      </details>
+
+      <div class="sec-nav">
+        <a href="#s3" class="prev">§3 Counting principles</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s5" class="next">§5 Contrapositive proof</a>
+      </div>
+
+    </section>
+    <!-- ========== END OF SAMPLE SECTION §4 ====================== -->
+
+    <!-- ========== SECTIONS §5-§12 (PLACEHOLDERS) ================ -->
+    <section id="s5">
+      <h2>5. Contrapositive proof</h2>
+
+      <div class="backlink-note">
+        Referenced from: <a href="#s4">§4 Direct proof</a> (when direct approach stalls, contrapositive is the next tool)
+      </div>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §5?</div>
+        <p><b>What you'll learn:</b> when a conditional \(P \implies Q\) is easier to prove by showing \(\neg Q \implies \neg P\) instead (logically equivalent, often algebraically simpler).</p>
+        <p><b>Used later:</b> <a href="limits.html" class="xref">L2 Limits</a> proves "if not-continuous then not-differentiable" (contrapositive of "diff ⇒ cont"); L8 series convergence tests often invoke contrapositive.</p>
+        <p><b>Used in quant:</b> proving no-arbitrage conditions ("if pricing formula X doesn't hold, then arbitrage exists" — contrapositive of standard martingale argument).</p>
+      </div>
+
+      <h3>5.1 The technique</h3>
+
+      <p>Recall from <a href="#s2" class="xref">§2 Theorem 2.1</a>: \(P \implies Q\) is logically equivalent to its <b>contrapositive</b> \(\neg Q \implies \neg P\). So instead of proving \(P \implies Q\) directly, we can prove the contrapositive.</p>
+
+      <div class="box box-def">
+        <div class="box-title">Outline for contrapositive proof</div>
+        <p><b>Proposition.</b> If \(P\), then \(Q\).</p>
+        <p><b>Proof.</b> Suppose \(\neg Q\) (i.e., "suppose \(Q\) is false").<br>
+        \(\vdots\)<br>
+        Therefore \(\neg P\). <span class="qed">∎</span></p>
+      </div>
+
+      <h3>5.2 When contrapositive beats direct</h3>
+
+      <div class="box box-example">
+        <div class="box-title">Example 5.1 — direct is hard, contrapositive is easy</div>
+        <p><b>Proposition.</b> Suppose \(x \in \mathbb{Z}\). If \(x^2 - 6x + 5\) is even, then \(x\) is odd.</p>
+
+        <p><b>Direct attempt:</b> assume \(x^2 - 6x + 5 = 2a\) for some integer \(a\). We must extract \(x = 2b + 1\) from this quadratic. Awkward — we'd need to solve or manipulate implicitly.</p>
+
+        <p><b>Contrapositive:</b> assume \(x\) is not odd, i.e., \(x\) is even. Show \(x^2 - 6x + 5\) is not even, i.e., odd.</p>
+
+        <div class="box box-proof">
+          <p><b>Proof (contrapositive).</b> Suppose \(x\) is even, so \(x = 2a\) for some \(a \in \mathbb{Z}\). Compute:
+          \[ x^2 - 6x + 5 = 4a^2 - 12a + 5 = 2(2a^2 - 6a + 2) + 1. \]
+          Let \(b = 2a^2 - 6a + 2 \in \mathbb{Z}\). Then \(x^2 - 6x + 5 = 2b + 1\), which is odd. Hence not even. <span class="qed">∎</span></p>
+        </div>
+
+        <p>Contrapositive turned an implicit-equation problem into a direct algebra problem. This pattern — "when direct requires <b>extracting</b> the hypothesis from a formula, try contrapositive" — is worth internalizing.</p>
+      </div>
+
+      <h3>5.3 Congruence modulo \(n\)</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 5.1 — Congruence modulo \(n\)</div>
+        <p>Given \(a, b \in \mathbb{Z}\) and \(n \in \mathbb{N}\), we say \(a\) is <b>congruent to \(b\) modulo \(n\)</b>, written \(a \equiv b \pmod{n}\), if \(n \mid (a - b)\).</p>
+        <p>Equivalently: \(a\) and \(b\) leave the same remainder when divided by \(n\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 5.2 — Congruence squares</div>
+        <p><b>Proposition.</b> Let \(a, b \in \mathbb{Z}\) and \(n \in \mathbb{N}\). If \(a \equiv b \pmod{n}\), then \(a^2 \equiv b^2 \pmod{n}\).</p>
+        <div class="box box-proof">
+          <p><b>Proof (direct).</b> Suppose \(a \equiv b \pmod n\). By Def 5.1, \(n \mid (a - b)\), so \(a - b = nc\) for some \(c \in \mathbb{Z}\). Multiply both sides by \((a + b)\):
+          \[ (a - b)(a + b) = nc(a + b), \quad \text{i.e.,} \quad a^2 - b^2 = n \cdot c(a + b). \]
+          Since \(c(a + b) \in \mathbb{Z}\), \(n \mid (a^2 - b^2)\), so \(a^2 \equiv b^2 \pmod n\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 5.3 — When \(\nmid\) and \(\not\equiv\) appear, contrapositive shines</div>
+        <p><b>Proposition.</b> Suppose \(a, b \in \mathbb{Z}\) and \(n \in \mathbb{N}\). If \(12a \not\equiv 12b \pmod{n}\), then \(n \nmid 12\).</p>
+        <div class="box box-proof">
+          <p><b>Proof (contrapositive).</b> Suppose \(n \mid 12\), so \(12 = nc\) for some \(c \in \mathbb{Z}\). Then \(12(a - b) = nc(a - b)\), i.e., \(12a - 12b = n \cdot c(a-b)\). Since \(c(a - b) \in \mathbb{Z}\), \(n \mid (12a - 12b)\), i.e., \(12a \equiv 12b \pmod n\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>5.4 Case work in contrapositive</h3>
+
+      <div class="box box-example">
+        <div class="box-title">Example 5.4 — De Morgan meets contrapositive</div>
+        <p><b>Proposition.</b> Suppose \(x, y \in \mathbb{Z}\). If \(5 \nmid xy\), then \(5 \nmid x\) and \(5 \nmid y\).</p>
+        <div class="box box-proof">
+          <p><b>Proof (contrapositive).</b> Suppose it is <b>not</b> the case that \(5 \nmid x\) and \(5 \nmid y\). By De Morgan (§2 Thm 2.1), this means \(5 \mid x\) or \(5 \mid y\). Case-split.</p>
+          <p><b>Case 1.</b> \(5 \mid x\). Then \(x = 5k\), so \(xy = 5(ky)\), so \(5 \mid xy\).</p>
+          <p><b>Case 2.</b> \(5 \mid y\). Symmetric: \(y = 5k\), \(xy = 5(kx)\), so \(5 \mid xy\).</p>
+          <p>Either way, \(5 \mid xy\), which is the negation of \(5 \nmid xy\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>5.5 When to reach for contrapositive</h3>
+
+      <div class="box box-warning">
+        <div class="box-title">Rules of thumb</div>
+        <ol>
+          <li>Conclusion \(Q\) is a negative statement ("\(x\) is not divisible by \(p\)") — contrapositive makes it positive.</li>
+          <li>Hypothesis \(P\) is easier to negate than to unpack ("\(f\) is not injective" → "there exist \(x \ne y\) with \(f(x) = f(y)\)").</li>
+          <li>The conditional's direct form requires extracting a variable from inside a complicated expression (Ex 5.1).</li>
+          <li>Both sides involve \(\nmid\), \(\not\equiv\), \(\notin\) — contrapositive removes the negations.</li>
+        </ol>
+      </div>
+
+      <details>
+        <summary>Deeper dive: contrapositive vs converse — the mistake nobody outgrows</summary>
+        <p>The <b>converse</b> of \(P \implies Q\) is \(Q \implies P\). The <b>contrapositive</b> is \(\neg Q \implies \neg P\). Only the contrapositive is logically equivalent to the original.</p>
+        <p>Famous mistake pattern: "\(f\) differentiable at \(a\) \(\implies\) \(f\) continuous at \(a\)" is a true theorem. Its converse "continuous \(\implies\) differentiable" is FALSE (\(|x|\) at \(x = 0\)). Its contrapositive "not continuous \(\implies\) not differentiable" is TRUE (equivalent to original).</p>
+        <p>In quant: "no arbitrage \(\implies\) equivalent martingale measure exists" (FTAP). Contrapositive is true. But confusion with converse leads people to wrongly claim "martingale measure exists \(\implies\) no arbitrage" without invoking the full FTAP result.</p>
+      </details>
+
+      <div class="sec-nav">
+        <a href="#s4" class="prev">§4 Direct proof</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s6" class="next">§6 Proof by contradiction</a>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>6. Proof by contradiction</h2>
+
+      <div class="backlink-note">Referenced from: <a href="#s4">§4 Direct proof</a>, <a href="#s5">§5 Contrapositive</a> (the third and most powerful technique when the first two fail).</div>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §6?</div>
+        <p><b>What you'll learn:</b> assume the negation, derive a contradiction, conclude the original. Handles non-conditional statements that direct/contrapositive can't.</p>
+        <p><b>Used later:</b> L2 proves uniqueness of limits by contradiction; L8 proves \(\sqrt{2}\) irrational, harmonic series diverges; L10 shows non-singular matrix is unique.</p>
+        <p><b>Used in quant:</b> "no arbitrage" arguments are contradictions (assume portfolio has cost 0 but sure positive payoff → contradiction with market equilibrium).</p>
+      </div>
+
+      <h3>6.1 The technique</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Outline for proof by contradiction</div>
+        <p><b>Proposition.</b> \(P\). &nbsp; (Any statement, not just conditional.)</p>
+        <p><b>Proof.</b> Suppose for contradiction that \(\neg P\).<br>
+        \(\vdots\) derive some statement \(C \land \neg C\) or other absurdity \(\vdots\)<br>
+        This is a contradiction. Therefore \(P\). <span class="qed">∎</span></p>
+      </div>
+
+      <p>Logical basis: if assuming \(\neg P\) leads to a contradiction, \(\neg P\) must be false, so \(P\) is true. This uses the <b>law of excluded middle</b> (\(P \lor \neg P\) is always true).</p>
+
+      <h3>6.2 Classic examples</h3>
+
+      <div class="box box-example">
+        <div class="box-title">Example 6.1 — \(\sqrt{2}\) is irrational</div>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose for contradiction that \(\sqrt{2}\) is rational. Then \(\sqrt{2} = a/b\) for some \(a, b \in \mathbb{Z}\) with \(b \ne 0\). WLOG assume \(\gcd(a, b) = 1\) (else reduce).</p>
+          <p>Squaring: \(2 = a^2/b^2\), so \(a^2 = 2 b^2\). Thus \(2 \mid a^2\), which forces \(2 \mid a\) (see exercise). Write \(a = 2k\). Then \(a^2 = 4k^2 = 2b^2\), so \(b^2 = 2k^2\), so \(2 \mid b^2\), so \(2 \mid b\).</p>
+          <p>But then \(2 \mid \gcd(a, b) = 1\), a contradiction. Therefore \(\sqrt{2}\) is irrational. <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 6.2 — Euclid's theorem: infinitely many primes</div>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose for contradiction that there are only finitely many primes, say \(p_1, p_2, \ldots, p_n\). Consider \(N = p_1 p_2 \cdots p_n + 1\).</p>
+          <p>\(N &gt; 1\) so \(N\) has a prime factor \(q\). Since our list is complete, \(q = p_i\) for some \(i\). But \(p_i \mid p_1 p_2 \cdots p_n\) and \(p_i \mid N\), so \(p_i \mid (N - p_1 \cdots p_n) = 1\). No prime divides \(1\), contradiction. <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>6.3 Contradiction on conditional statements</h3>
+
+      <p>To prove \(P \implies Q\) by contradiction: assume \(P \land \neg Q\), derive a contradiction.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 6.3</div>
+        <p><b>Proposition.</b> If \(a, b \in \mathbb{R}\) and \(a^2 + b^2 = 0\), then \(a = 0\) and \(b = 0\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(a^2 + b^2 = 0\) but NOT (\(a = 0\) and \(b = 0\)) — i.e., \(a \ne 0\) or \(b \ne 0\). WLOG \(a \ne 0\). Then \(a^2 &gt; 0\). Since \(b^2 \ge 0\), \(a^2 + b^2 &gt; 0\), contradicting \(a^2 + b^2 = 0\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-title">When NOT to use contradiction</div>
+        <p>Hammack's advice: don't use contradiction when a direct or contrapositive proof will work. Contradiction can hide the structure of the argument and produce longer, less illuminating proofs. Reserve it for statements that are genuinely negative (non-existence, irrationality, infinitude of primes) or where direct/contrapositive both stall.</p>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s5" class="prev">§5 Contrapositive</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s7" class="next">§7 Non-conditional proofs</a>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>7. Non-conditional proofs (iff, existence, uniqueness)</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §7?</div>
+        <p><b>What you'll learn:</b> handle theorems whose shape isn't "If \(P\) then \(Q\)" — biconditionals, existence claims, uniqueness claims.</p>
+        <p><b>Used later:</b> nearly every "if and only if" theorem in L2, L4, L10. ODE existence-uniqueness (Picard theorem) uses this exact template.</p>
+        <p><b>Used in quant:</b> Fundamental Theorem of Asset Pricing is an iff: no arbitrage ⟺ equivalent martingale measure exists. Black-Scholes has unique solution — proven via existence + uniqueness.</p>
+      </div>
+
+      <h3>7.1 If-and-only-if proofs</h3>
+
+      <p>To prove \(P \iff Q\), prove BOTH \(P \implies Q\) and \(Q \implies P\). Each direction may use different techniques (one direct, other contrapositive, etc.).</p>
+
+      <div class="box box-def">
+        <div class="box-title">Standard iff template</div>
+        <p><b>Proof.</b> (\(\Rightarrow\)) Suppose \(P\). ... Therefore \(Q\).<br>
+        (\(\Leftarrow\)) Suppose \(Q\). ... Therefore \(P\). <span class="qed">∎</span></p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 7.1</div>
+        <p><b>Proposition.</b> Integer \(n\) is odd iff \(n^2\) is odd.</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b></p>
+          <p>(\(\Rightarrow\)) Suppose \(n\) is odd. By <a href="#s4" class="xref">Example 4.1</a>, \(n^2\) is odd.</p>
+          <p>(\(\Leftarrow\)) Suppose \(n^2\) is odd. Prove by contrapositive: if \(n\) is even, \(n = 2k\), then \(n^2 = 4k^2 = 2(2k^2)\), even. Contradiction. Hence \(n\) odd. <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>7.2 Chain of equivalences</h3>
+
+      <p>For \(P_1 \iff P_2 \iff P_3\), prove \(P_1 \implies P_2 \implies P_3 \implies P_1\) (a cycle). This is often shorter than proving each pair separately.</p>
+
+      <h3>7.3 Existence proofs</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Constructive vs non-constructive existence</div>
+        <ul>
+          <li><b>Constructive:</b> exhibit an explicit example. "There exists an even prime" — proof: 2.</li>
+          <li><b>Non-constructive:</b> prove existence without producing an example. Often via contradiction or intermediate value theorem.</li>
+        </ul>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 7.2 — Non-constructive existence</div>
+        <p><b>Proposition.</b> There exist irrational \(a, b\) such that \(a^b\) is rational.</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Consider \(x = \sqrt{2}^{\sqrt{2}}\).</p>
+          <p><b>Case 1:</b> \(x\) is rational. Then \(a = b = \sqrt{2}\) works.</p>
+          <p><b>Case 2:</b> \(x\) is irrational. Then \(a = \sqrt{2}^{\sqrt{2}}\), \(b = \sqrt{2}\), and \(a^b = (\sqrt{2}^{\sqrt{2}})^{\sqrt{2}} = \sqrt{2}^2 = 2\), rational.</p>
+          <p>Either way, such \(a, b\) exist. Note: we don't know WHICH case is true! (Actually Case 2 — Gelfond-Schneider theorem — but the proof doesn't require this.) <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>7.4 Uniqueness proofs</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Standard uniqueness template</div>
+        <p>To prove "there exists a unique \(x\) such that \(P(x)\)":</p>
+        <ol>
+          <li><b>Existence:</b> exhibit or prove existence of some \(x_0\) with \(P(x_0)\).</li>
+          <li><b>Uniqueness:</b> suppose \(x_1, x_2\) both satisfy \(P\). Show \(x_1 = x_2\).</li>
+        </ol>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 7.3 — Unique solution to linear equation</div>
+        <p><b>Proposition.</b> If \(a, b \in \mathbb{R}\) and \(a \ne 0\), there exists a unique \(x \in \mathbb{R}\) with \(ax + b = 0\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> <b>Existence:</b> let \(x_0 = -b/a\). Then \(a x_0 + b = a(-b/a) + b = -b + b = 0\) ✓.</p>
+          <p><b>Uniqueness:</b> suppose \(x_1, x_2\) both satisfy \(a x + b = 0\). Then \(a x_1 + b = a x_2 + b\), so \(a x_1 = a x_2\), and since \(a \ne 0\), \(x_1 = x_2\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s6" class="prev">§6 Contradiction</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s8" class="next">§8 Proofs involving sets</a>
+      </div>
+    </section>
+
+    <section id="s8">
+      <h2>8. Proofs involving sets</h2>
+
+      <div class="backlink-note">Referenced from: <a href="#s1">§1 Sets</a> (formal proof templates for set claims introduced informally there).</div>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §8?</div>
+        <p><b>What you'll learn:</b> three fundamental set-proof templates — proving membership, proving subset, proving equality.</p>
+        <p><b>Used later:</b> L2 defines open sets and proves set-theoretic properties of continuity. Measure theory (Prob pillar) requires constant manipulation of \(\sigma\)-algebras via these templates.</p>
+        <p><b>Used in quant:</b> filtration arguments (\(\mathcal{F}_s \subseteq \mathcal{F}_t\) for \(s \le t\)); event equalities in probability.</p>
+      </div>
+
+      <h3>8.1 How to prove \(a \in A\)</h3>
+
+      <p>To show \(a \in A\) where \(A = \{x : P(x)\}\), verify that \(P(a)\) is true.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 8.1</div>
+        <p><b>Claim:</b> \(3 \in \{n \in \mathbb{Z} : n^2 &lt; 10\}\).</p>
+        <p><b>Proof:</b> \(3 \in \mathbb{Z}\) ✓ and \(3^2 = 9 &lt; 10\) ✓. Hence \(3\) is in the set. <span class="qed">∎</span></p>
+      </div>
+
+      <h3>8.2 How to prove \(A \subseteq B\)</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Standard subset template</div>
+        <p>Pick arbitrary \(x \in A\). Show \(x \in B\). Since \(x\) was arbitrary, conclude \(A \subseteq B\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 8.2</div>
+        <p><b>Proposition.</b> If \(A \subseteq B\) and \(B \subseteq C\), then \(A \subseteq C\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(A \subseteq B\) and \(B \subseteq C\). Let \(x \in A\) be arbitrary. Since \(A \subseteq B\), \(x \in B\). Since \(B \subseteq C\), \(x \in C\). Since \(x\) was arbitrary, \(A \subseteq C\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>8.3 How to prove \(A = B\) — two-way inclusion</h3>
+
+      <div class="box box-example">
+        <div class="box-title">Example 8.3 — De Morgan for sets</div>
+        <p><b>Proposition.</b> \((A \cup B)^c = A^c \cap B^c\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> We show both inclusions.</p>
+          <p>(\(\subseteq\)) Let \(x \in (A \cup B)^c\). Then \(x \notin A \cup B\), so \(x \notin A\) and \(x \notin B\), hence \(x \in A^c\) and \(x \in B^c\), so \(x \in A^c \cap B^c\).</p>
+          <p>(\(\supseteq\)) Let \(x \in A^c \cap B^c\). Then \(x \in A^c\) and \(x \in B^c\), so \(x \notin A\) and \(x \notin B\), so \(x \notin A \cup B\), so \(x \in (A \cup B)^c\).</p>
+          <p>Both inclusions hold, so \((A \cup B)^c = A^c \cap B^c\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>8.4 Alternative technique — algebra of set identities</h3>
+
+      <p>Once you know basic identities (De Morgan, distributivity, associativity), you can prove set equalities purely algebraically without unpacking to element-level. Analogous to algebraic manipulation of numbers.</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Basic set identities to memorize</div>
+        <ul>
+          <li><b>Commutativity:</b> \(A \cup B = B \cup A\), \(A \cap B = B \cap A\)</li>
+          <li><b>Associativity:</b> \(A \cup (B \cup C) = (A \cup B) \cup C\), etc.</li>
+          <li><b>Distributivity:</b> \(A \cap (B \cup C) = (A \cap B) \cup (A \cap C)\)</li>
+          <li><b>De Morgan:</b> \((A \cup B)^c = A^c \cap B^c\), \((A \cap B)^c = A^c \cup B^c\)</li>
+          <li><b>Identity:</b> \(A \cup \emptyset = A\), \(A \cap U = A\)</li>
+          <li><b>Complement:</b> \(A \cup A^c = U\), \(A \cap A^c = \emptyset\), \((A^c)^c = A\)</li>
+        </ul>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s7" class="prev">§7 Non-conditional</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s9" class="next">§9 Disproof</a>
+      </div>
+    </section>
+
+    <section id="s9">
+      <h2>9. Disproof &amp; counterexamples</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §9?</div>
+        <p><b>What you'll learn:</b> when a claim is false, prove it false — usually with a single well-chosen counterexample.</p>
+        <p><b>Used later:</b> throughout — showing hypotheses cannot be weakened (e.g., "continuity does NOT imply differentiability" via \(|x|\) at 0). Every "not every" claim is a disproof.</p>
+        <p><b>Used in quant:</b> "not every arbitrage-free market is complete" — Fundamental Theorem of Asset Pricing has counterexamples; understand them to see WHY completeness is a separate assumption.</p>
+      </div>
+
+      <h3>9.1 Disproving universal statements</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Counterexample template</div>
+        <p>To disprove \((\forall x \in A)\, P(x)\), exhibit a single \(x_0 \in A\) with \(\neg P(x_0)\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 9.1 — Failed conjecture</div>
+        <p><b>Conjecture:</b> For every prime \(p\), \(2^p - 1\) is prime (a "Mersenne prime").</p>
+        <p><b>Disproof:</b> \(p = 11\) gives \(2^{11} - 1 = 2047 = 23 \times 89\), not prime. <span class="qed">∎</span></p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 9.2 — Continuity does not imply differentiability</div>
+        <p><b>Claim:</b> Every continuous function \(f: \mathbb{R} \to \mathbb{R}\) is differentiable.</p>
+        <p><b>Disproof:</b> \(f(x) = |x|\) is continuous everywhere but not differentiable at \(x = 0\). <span class="qed">∎</span></p>
+        <p>Stronger: Weierstrass constructed a function that is continuous everywhere but differentiable nowhere. See L2 references.</p>
+      </div>
+
+      <h3>9.2 Disproving existence statements</h3>
+
+      <p>To disprove "\((\exists x)\, P(x)\)", prove "\((\forall x)\, \neg P(x)\)" — often by contradiction.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 9.3</div>
+        <p><b>Disprove:</b> "There exist \(a, b \in \mathbb{N}\) with \(a^2 = 2b^2\)."</p>
+        <p><b>Proof (of negation):</b> Same argument as \(\sqrt{2}\) irrational (Ex 6.1). If such \(a, b\) existed, \(\sqrt{2} = a/b\) would be rational. Contradiction. <span class="qed">∎</span></p>
+      </div>
+
+      <h3>9.3 Crafting minimal counterexamples</h3>
+
+      <p>A good counterexample is <b>simple</b> — the simpler, the more clearly it shows the flaw. Rule: try small integers, boundary cases, or the "obvious" candidates first.</p>
+
+      <div class="box box-warning">
+        <div class="box-title">Common counterexample patterns</div>
+        <ul>
+          <li>Try \(0\), \(1\), \(-1\), or the empty set for identity/edge cases.</li>
+          <li>Try functions like \(|x|\), \(\sin(1/x)\), or the Dirichlet function for continuity/differentiability edge cases.</li>
+          <li>For matrix claims, try \(2 \times 2\) with a zero row or a symmetric case.</li>
+          <li>For probability claims, try Bernoulli with \(p = 1/2\) or independent uniforms.</li>
+        </ul>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s8" class="prev">§8 Set proofs</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s10" class="next">§10 Induction</a>
+      </div>
+    </section>
+
+    <section id="s10">
+      <h2>10. Mathematical induction (4 variants)</h2>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §10?</div>
+        <p><b>What you'll learn:</b> the workhorse technique for proving statements indexed by \(\mathbb{N}\). Four flavors — weak, strong, well-ordering, smallest counterexample — each suited to different problem shapes.</p>
+        <p><b>Used later:</b> L4 proves properties of \(n\)-fold sums and integrals; L8 proves convergence of many series recursively; L10 proves determinant properties.</p>
+        <p><b>Used in quant:</b> binomial tree pricing (\(n\)-step model priced via induction on tree depth); Bellman recursion for optimal stopping; recursive Monte Carlo estimators.</p>
+      </div>
+
+      <h3>10.1 Weak induction</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Principle of weak induction</div>
+        <p>To prove \(P(n)\) for all \(n \ge n_0\):</p>
+        <ol>
+          <li><b>Base case:</b> prove \(P(n_0)\).</li>
+          <li><b>Inductive step:</b> assume \(P(k)\) (the "inductive hypothesis"), prove \(P(k+1)\).</li>
+        </ol>
+        <p>By this, \(P(n)\) holds for all \(n \ge n_0\).</p>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 10.1 — Sum of first \(n\) integers</div>
+        <p><b>Proposition.</b> For all \(n \ge 1\), \(\displaystyle\sum_{k=1}^n k = \frac{n(n+1)}{2}\).</p>
+        <div class="box box-proof">
+          <p><b>Proof (weak induction).</b> <b>Base:</b> \(n = 1\). LHS \(= 1\); RHS \(= 1(2)/2 = 1\) ✓.</p>
+          <p><b>Inductive step:</b> assume \(\sum_{k=1}^n k = n(n+1)/2\). Then
+          \[ \sum_{k=1}^{n+1} k = \underbrace{\sum_{k=1}^n k}_{\text{IH}} + (n+1) = \frac{n(n+1)}{2} + (n+1) = \frac{n(n+1) + 2(n+1)}{2} = \frac{(n+1)(n+2)}{2}, \]
+          which is the RHS at \(n+1\). By induction, formula holds for all \(n \ge 1\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>10.2 Strong induction</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Principle of strong induction</div>
+        <p>To prove \(P(n)\) for all \(n \ge n_0\):</p>
+        <ol>
+          <li><b>Base case:</b> prove \(P(n_0)\).</li>
+          <li><b>Inductive step:</b> assume \(P(n_0), P(n_0+1), \ldots, P(k)\) all hold. Prove \(P(k+1)\).</li>
+        </ol>
+      </div>
+
+      <p>Strong induction is logically equivalent to weak but often more convenient — when the step \(k \to k+1\) requires an earlier case, not just \(k\).</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 10.2 — Every \(n \ge 2\) is a product of primes</div>
+        <div class="box box-proof">
+          <p><b>Proof (strong induction).</b> <b>Base:</b> \(n = 2\), which is prime (trivially a product of one prime).</p>
+          <p><b>Step:</b> assume every integer \(2, 3, \ldots, k\) is a product of primes. Consider \(k+1\).</p>
+          <p>Case: \(k+1\) prime. Done (single-prime product).</p>
+          <p>Case: \(k+1\) composite. Then \(k+1 = ab\) with \(2 \le a, b \le k\). By IH, both \(a\) and \(b\) are products of primes, so \(k+1 = ab\) is a product of primes. <span class="qed">∎</span></p>
+        </div>
+        <p>Weak induction wouldn't work — we don't know how \(k+1\) relates to \(k\) specifically, we need earlier cases.</p>
+      </div>
+
+      <h3>10.3 Well-ordering principle</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Well-ordering principle (WOP)</div>
+        <p>Every non-empty subset \(S \subseteq \mathbb{N}\) has a least element.</p>
+      </div>
+
+      <p>WOP is logically equivalent to induction — you can prove one from the other. Useful for existence arguments where you want a "minimal" counterexample.</p>
+
+      <div class="box box-example">
+        <div class="box-title">Example 10.3 — Division algorithm from WOP</div>
+        <p><b>Proposition.</b> For any \(a \in \mathbb{Z}\), \(b \in \mathbb{N}\), there exist \(q, r \in \mathbb{Z}\) with \(a = qb + r\) and \(0 \le r &lt; b\).</p>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Let \(S = \{a - qb : q \in \mathbb{Z}, a - qb \ge 0\} \subseteq \mathbb{N} \cup \{0\}\). \(S\) is non-empty (pick \(q\) very negative). By WOP, \(S\) has a least element \(r = a - q_0 b\).</p>
+          <p>Claim \(r &lt; b\). If not, \(r \ge b\), so \(r - b \ge 0\), and \(r - b = a - (q_0 + 1) b \in S\), contradicting minimality of \(r\). <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <h3>10.4 Proof by smallest counterexample</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Smallest-counterexample template</div>
+        <p>To prove \(P(n)\) for all \(n \ge n_0\):</p>
+        <ol>
+          <li>Suppose (for contradiction) some \(n \ge n_0\) violates \(P\). Let \(m\) be the smallest such (by WOP).</li>
+          <li>\(m &gt; n_0\) (since \(P(n_0)\) holds; verify).</li>
+          <li>Then \(P(m - 1)\) holds (by minimality of \(m\)).</li>
+          <li>Derive a contradiction, usually by showing \(P(m-1) \implies P(m)\).</li>
+        </ol>
+      </div>
+
+      <p>This is essentially weak induction wrapped as contradiction. Useful stylistically when the direct inductive step feels awkward.</p>
+
+      <details>
+        <summary>Deeper dive: transfinite induction and Zorn's lemma</summary>
+        <p>Induction on \(\mathbb{N}\) generalizes to <b>transfinite induction</b> on any well-ordered set (including uncountable ordinals). Zorn's lemma is an equivalent form of the Axiom of Choice used to prove existence of maximal elements — e.g., every vector space has a Hamel basis. Beyond L0 scope but you'll meet it in advanced functional analysis.</p>
+      </details>
+
+      <div class="sec-nav">
+        <a href="#s9" class="prev">§9 Disproof</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s11" class="next">§11 Relations</a>
+      </div>
+    </section>
+
+    <section id="s11">
+      <h2>11. Relations &amp; equivalence classes</h2>
+
+      <div class="backlink-note">Referenced from: <a href="#s4">§4 Example 4.2</a> (divisibility as transitive relation).</div>
+
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §11?</div>
+        <p><b>What you'll learn:</b> formalize "relatedness" between elements. Equivalence relations partition a set into "sameness classes" — a construction that reappears everywhere.</p>
+        <p><b>Used later:</b> L10 quotient spaces (\(\mathbb{R}^n / V\)). Measure theory partitions \(\Omega\) into equivalence classes for conditional expectation.</p>
+        <p><b>Used in quant:</b> filtrations partition \(\Omega\) into information sets; conditional expectation \(\mathbb{E}[X \mid \mathcal{F}]\) is constant on each \(\mathcal{F}\)-equivalence class.</p>
+      </div>
+
+      <h3>11.1 Binary relations</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 11.1 — Binary relation</div>
+        <p>A <b>binary relation</b> \(R\) on a set \(A\) is a subset \(R \subseteq A \times A\). We write \(a R b\) (or \(a \sim b\)) to mean \((a, b) \in R\).</p>
+      </div>
+
+      <p><b>Examples:</b> "\(\le\)" on \(\mathbb{R}\), "\(\mid\)" on \(\mathbb{Z}\), "\(\subseteq\)" on \(\mathcal{P}(X)\), "same birthday" on people.</p>
+
+      <h3>11.2 Properties of relations</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 11.2 — Reflexive, symmetric, transitive</div>
+        <p>Let \(R\) be a relation on \(A\). Then \(R\) is:</p>
+        <ul>
+          <li><b>Reflexive</b> if \(\forall a \in A,\ a R a\).</li>
+          <li><b>Symmetric</b> if \(\forall a, b \in A,\ a R b \implies b R a\).</li>
+          <li><b>Transitive</b> if \(\forall a, b, c \in A,\ (a R b \land b R c) \implies a R c\).</li>
+        </ul>
+      </div>
+
+      <h3>11.3 Equivalence relations and classes</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 11.3 — Equivalence relation</div>
+        <p>A relation is an <b>equivalence relation</b> if it is reflexive, symmetric, AND transitive.</p>
+      </div>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 11.4 — Equivalence class</div>
+        <p>If \(\sim\) is an equivalence relation on \(A\), the <b>equivalence class</b> of \(a \in A\) is \([a] = \{x \in A : x \sim a\}\).</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 11.1 — Equivalence classes partition</div>
+        <p>Let \(\sim\) be an equivalence relation on \(A\). Then:</p>
+        <ol>
+          <li>Every \(a \in A\) is in exactly one equivalence class.</li>
+          <li>Equivalence classes are either equal or disjoint.</li>
+          <li>The classes partition \(A\).</li>
+        </ol>
+      </div>
+
+      <div class="box box-example">
+        <div class="box-title">Example 11.1 — Integers modulo \(n\)</div>
+        <p>Define \(a \sim b\) on \(\mathbb{Z}\) iff \(n \mid (a - b)\). This is an equivalence relation (verify all three properties). Its equivalence classes are \([0], [1], \ldots, [n-1]\), the \(n\) "residue classes" mod \(n\). The set of these classes is \(\mathbb{Z}/n\mathbb{Z}\), the integers mod \(n\) — a fundamental algebraic structure.</p>
+      </div>
+
+      <div class="sec-nav">
+        <a href="#s10" class="prev">§10 Induction</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="#s12" class="next">§12 Cardinality</a>
+      </div>
+    </section>
+
+    <section id="s12">
+      <h2>12. Cardinality: countable vs uncountable</h2>
+      <div class="box box-why">
+        <div class="box-title">🧭 Why §12?</div>
+        <p><b>What you'll learn:</b> two infinities are not always the same. \(\mathbb{N}\) and \(\mathbb{R}\) are both infinite but \(|\mathbb{R}| &gt; |\mathbb{N}|\) strictly.</p>
+        <p><b>Used later:</b> L2 uses countability discussing sequences; Probability pillar's measure theory HINGES on this — you can't put a uniform distribution on all subsets of \([0,1]\) because there are too many subsets.</p>
+        <p><b>Used in quant:</b> justifies why stochastic calculus needs \(\sigma\)-algebras (not power sets); why we can only measure "nice" events. Without §12, Ito calculus is unmotivated.</p>
+      </div>
+
+      <h3>12.1 Sets with equal cardinality</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 12.1 — Equinumerous</div>
+        <p>Sets \(A\) and \(B\) have the <b>same cardinality</b>, written \(|A| = |B|\), if there exists a <b>bijection</b> \(f: A \to B\).</p>
+      </div>
+
+      <h3>12.2 Countable sets</h3>
+
+      <div class="box box-def">
+        <div class="box-title">Definition 12.2 — Countable</div>
+        <p>\(A\) is <b>countable</b> if finite OR \(|A| = |\mathbb{N}|\). Otherwise <b>uncountable</b>.</p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 12.1 — \(\mathbb{Z}\) is countable</div>
+        <p>Bijection \(f: \mathbb{N} \to \mathbb{Z}\): \(f(n) = n/2\) if \(n\) even, \(-(n-1)/2\) if \(n\) odd. Enumerates \(0, -1, 1, -2, 2, \ldots\). <span class="qed">∎</span></p>
+      </div>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 12.2 — \(\mathbb{Q}\) is countable (Cantor's zig-zag)</div>
+        <p>Arrange positive rationals in 2D grid indexed by numerator/denominator. Traverse anti-diagonals to enumerate. Include negatives. Countable union of countable is countable. <span class="qed">∎</span></p>
+      </div>
+
+      <h3>12.3 Uncountable sets — Cantor's diagonal</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 12.3 — Cantor: \(\mathbb{R}\) is uncountable</div>
+        <div class="box box-proof">
+          <p><b>Proof (contradiction).</b> Suffices to show \([0, 1)\) uncountable. Suppose \([0, 1)\) countable; list its elements as decimals \(x_1, x_2, \ldots\) where \(x_k = 0.d_{k1} d_{k2} d_{k3} \ldots\). Construct \(y = 0.e_1 e_2 e_3 \ldots\) with \(e_k \ne d_{kk}\) (e.g., \(e_k = 5\) if \(d_{kk} \ne 5\), else \(6\)). Then \(y \in [0, 1)\) but \(y \ne x_k\) for any \(k\). Contradiction. <span class="qed">∎</span></p>
+        </div>
+      </div>
+
+      <p>One of the most influential proofs in mathematics — DIFFERENT sizes of infinity exist.</p>
+
+      <h3>12.4 Cantor-Bernstein-Schröder</h3>
+
+      <div class="box box-thm">
+        <div class="box-title">Theorem 12.4 — CBS</div>
+        <p>If injections \(f: A \to B\) and \(g: B \to A\) exist, then \(|A| = |B|\). Practical: find 2 injections instead of 1 bijection.</p>
+      </div>
+
+      <details>
+        <summary>Deeper dive: why measure theory needs σ-algebras</summary>
+        <p>You'd hope to define a "uniform" measure on \([0, 1]\) that assigns each subset its "length". Under Axiom of Choice, Vitali sets have no consistent length. Resolution: restrict to a smaller collection of "measurable" sets — a \(\sigma\)-algebra. This is why Kolmogorov's axioms define probability on \((\Omega, \mathcal{F}, \mathbb{P})\).</p>
+      </details>
+
+      <div class="sec-nav">
+        <a href="#s11" class="prev">§11 Relations</a>
+        <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Top of page</a>
+        <a href="../Quant-Roadmap.html" class="next">Return to Atlas</a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========== EXAMPLES TAB (placeholder) ========== -->
+  <div class="tab-content" id="tab-examples">
+    <h2>Worked examples</h2>
+    <p class="placeholder">This tab will collect all worked examples across §1-§12 into one scannable list (~40 examples). Each links back to its source section. Populated after skeleton approval.</p>
+  </div>
+
+  <!-- ========== EXERCISES TAB (placeholder) ========== -->
+  <div class="tab-content" id="tab-exercises">
+    <h2>Exercises with full solutions</h2>
+    <p class="placeholder">This tab will hold ~30 exercises (adapted from Hammack Ch 1-11, 14) each with a complete solution. Grouped by section. Populated after skeleton approval.</p>
+    <p><b>Preview — Exercises from §4 Direct Proof</b> (from Hammack Ch 4 exercises):</p>
+    <div class="exercise-item">
+      <p><span class="exercise-num">1</span><b>Prove.</b> If \(x\) is an even integer, then \(x^2\) is even.</p>
+      <details>
+        <summary>Solution</summary>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(x\) is even. Then \(x = 2a\) for some \(a \in \mathbb{Z}\). Squaring, \(x^2 = 4a^2 = 2(2a^2)\). Let \(b = 2a^2 \in \mathbb{Z}\). Then \(x^2 = 2b\), which is even by Definition 4.1. <span class="qed">∎</span></p>
+        </div>
+      </details>
+    </div>
+    <div class="exercise-item">
+      <p><span class="exercise-num">2</span><b>Prove.</b> If \(a\) is an odd integer, then \(a^2 + 3a + 5\) is odd.</p>
+      <details>
+        <summary>Solution</summary>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(a\) is odd; write \(a = 2k + 1\) for some \(k \in \mathbb{Z}\). Compute:
+          \[ a^2 + 3a + 5 = (2k+1)^2 + 3(2k+1) + 5 = 4k^2 + 4k + 1 + 6k + 3 + 5 = 4k^2 + 10k + 9 = 2(2k^2 + 5k + 4) + 1. \]
+          Let \(b = 2k^2 + 5k + 4 \in \mathbb{Z}\). Then \(a^2 + 3a + 5 = 2b + 1\), which is odd by Definition 4.2. <span class="qed">∎</span></p>
+        </div>
+      </details>
+    </div>
+    <div class="exercise-item">
+      <p><span class="exercise-num">3</span><b>Prove.</b> Suppose \(a, b, c \in \mathbb{Z}\). If \(a \mid b\) and \(a \mid c\), then \(a \mid (b + c)\).</p>
+      <details>
+        <summary>Solution</summary>
+        <div class="box box-proof">
+          <p><b>Proof.</b> Suppose \(a \mid b\) and \(a \mid c\). By Definition 4.4, \(b = ax\) and \(c = ay\) for some \(x, y \in \mathbb{Z}\). Add: \(b + c = ax + ay = a(x + y)\). Since \(x + y \in \mathbb{Z}\), by Definition 4.4 \(a \mid (b + c)\). <span class="qed">∎</span></p>
+        </div>
+      </details>
+    </div>
+    <p><i>~7 more §4 exercises will follow the same format. Then exercises for §1-3, §5-12.</i></p>
+  </div>
+
+  <!-- ========== REFERENCES TAB ========== -->
+  <div class="tab-content" id="tab-references">
+    <h2>📚 References</h2>
+
+    <div class="ref-section">
+      <h3>Primary source</h3>
+      <ul class="ref-list">
+        <li>
+          <div class="ref-title">Richard Hammack — Book of Proof (3rd edition, 2018)</div>
+          <div class="ref-detail">Chapters used: 1 (Sets), 2 (Logic), 3 (Counting), 4 (Direct Proof), 5 (Contrapositive), 6 (Contradiction), 7 (Non-Conditional), 8 (Set Proofs), 9 (Disproof), 10 (Induction), 11 (Relations), 14 (Cardinality). Chapters 12 (Functions) and 13 (Proofs in Calculus) are covered in L1 and L2 respectively. Free PDF: <a href="https://www.people.vcu.edu/~rhammack/BookOfProof/" target="_blank">people.vcu.edu/~rhammack/BookOfProof/</a></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Alternative proof-writing textbooks</h3>
+      <ul class="ref-list">
+        <li>
+          <div class="ref-title">Daniel Velleman — How to Prove It: A Structured Approach</div>
+          <div class="ref-detail">More formal treatment. Uses "structured proof" outlines. Excellent chapter on strong induction.</div>
+        </li>
+        <li>
+          <div class="ref-title">Chartrand, Polimeni, Zhang — Mathematical Proofs: A Transition to Advanced Mathematics</div>
+          <div class="ref-detail">Very readable. Standard text at many US universities for the "transition to proof" course.</div>
+        </li>
+        <li>
+          <div class="ref-title">Polya — How to Solve It</div>
+          <div class="ref-detail">Classical short book on mathematical problem-solving heuristics. Not a proof-writing manual per se but essential companion reading.</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Free online courses</h3>
+      <ul class="ref-list">
+        <li>
+          <div class="ref-title">Coursera — Introduction to Mathematical Thinking (Keith Devlin, Stanford)</div>
+          <div class="ref-detail">Free 10-week course covering roughly the material of §1-§10. Devlin's lectures pair very well with Hammack. <a href="https://www.coursera.org/learn/mathematical-thinking" target="_blank">Course page</a></div>
+        </li>
+        <li>
+          <div class="ref-title">MIT 6.042J — Mathematics for Computer Science</div>
+          <div class="ref-detail">Covers proofs, induction, sets, functions from a discrete-math angle. Free video + notes: <a href="https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/" target="_blank">OCW</a></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Video channels</h3>
+      <ul class="ref-list">
+        <li>
+          <div class="ref-title">3Blue1Brown — Essence of series (Linear Algebra, Calculus)</div>
+          <div class="ref-detail">Not directly on proofs, but the visual intuition builds mathematical maturity.</div>
+        </li>
+        <li>
+          <div class="ref-title">The Bright Side of Mathematics — Real Analysis playlist</div>
+          <div class="ref-detail">Careful ε-δ proofs at student pace.</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <h3>Why this lesson exists</h3>
+      <div class="callout">
+        Most MFE curricula assume proof literacy without teaching it. Vietnamese undergraduate mathematics typically emphasizes computation over proof-writing. This lesson closes that gap so that later lessons in this atlas (limits proofs in L2, Shreve-style stochastic calculus arguments, measure-theoretic probability) can be read without confusion. Every subsequent math lesson assumes fluency with the vocabulary and techniques introduced here.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = this.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      this.classList.add('active');
+      document.getElementById('tab-' + target).classList.add('active');
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+</script>
+
+</body>
+</html>
